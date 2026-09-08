@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="TDxUnity3D.csproj" />
+  <Project Path="TDx.TDxUnity3D.Runtime.csproj" />
+  <Project Path="TDxController.csproj" />
+</Solution>
