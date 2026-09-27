@@ -9,6 +9,12 @@ public class MoveShell : MonoBehaviour {
 
     void Update() {
 
+        if(PauseManager.Instance.IsPaused)
+        {
+            transform.Translate(Vector3.zero);
+            return;
+        }
+
         transform.Translate(0.0f, 0.0f, Time.deltaTime * speed);
     }
 }

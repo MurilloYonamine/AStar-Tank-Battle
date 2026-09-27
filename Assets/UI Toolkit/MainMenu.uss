@@ -1,0 +1,324 @@
+:root {
+    --color-background: rgb(16, 26, 46);
+    --color-panel: rgb(24, 36, 61);
+    --color-border: rgb(45, 65, 104);
+    --color-primary: rgb(242, 201, 76);
+    --color-secondary: rgb(36, 59, 100);
+    --color-text: rgb(245, 245, 245);
+    --color-danger: rgb(180, 48, 48);
+    --color-danger-border: rgb(230, 96, 96);
+    --color-danger-hover: rgb(220, 72, 72);
+    --color-danger-hover-border: rgb(255, 150, 150);
+    --color-danger-active: rgb(130, 32, 32);
+    --spacing-small: 10px;
+    --spacing-medium: 20px;
+    --spacing-large: 40px;
+    -unity-font-definition: url("project://database/Assets/Fonts/Roboto-Regular.ttf?fileID=12800000&guid=e65daedc943aa864f8e731332c8d9027&type=3#Roboto-Regular");
+}
+
+#Background,
+#ScoreScreen,
+#PlayScreen {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#Background,
+#ScoreScreen,
+#PlayScreen {
+    background-color: var(--color-background);
+}
+
+#GameTitle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 8%;
+    color: var(--color-primary);
+    font-size: 100px;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: var(--color-background);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.menu-button {
+    background-color: var(--color-panel);
+    border-color: var(--color-border);
+    width: 42%;
+    max-width: 450px;
+    min-width: 260px;
+    height: 100px;
+    margin: var(--spacing-medium) 0;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.menu-button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    scale: 1.05 1.05;
+}
+
+.menu-button:active {
+    scale: 0.95 0.95;
+}
+
+.menu-button-text {
+    font-size: 56px;
+    color: var(--color-primary);
+    -unity-font-style: bold;
+}
+
+#ButtonContainer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 27%;
+    bottom: 5%;
+    align-items: center;
+    justify-content: center;
+}
+
+#ScoreTitle,
+#PlayTitle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 8%;
+    -unity-text-align: middle-center;
+    color: var(--color-primary);
+    -unity-font-style: bold;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: var(--color-background);
+}
+
+#ScoreTitle {
+    font-size: 42px;
+}
+
+#PlayTitle {
+    font-size: 128px;
+}
+
+#ScoreList {
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: 20%;
+    bottom: 14%;
+    min-height: 300px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 2px;
+    border-color: var(--color-primary);
+}
+
+#ScoreList Label {
+    color: var(--color-text);
+    font-size: 22px;
+    -unity-text-align: middle-center;
+}
+
+#ScoreList .unity-multi-column-row {
+    min-height: 60px;
+    background-color: var(--color-secondary);
+}
+
+#ScoreList .unity-multi-column-row:hover,
+#ScoreList .unity-list-view__item:hover,
+#ScoreList .unity-multi-column-list-view__item:hover,
+#ScoreList .unity-list-view__item--selected {
+    background-color: rgba(242, 201, 76, 0.22);
+}
+
+#ScoreList .unity-multi-column-header,
+#ScoreList .unity-multi-column-header-container,
+#ScoreList .unity-multi-column-header__column {
+    background-color: var(--color-panel);
+}
+
+#ScoreList .unity-multi-column-header__column {
+    justify-content: center;
+    align-items: center;
+}
+
+#ScoreList .unity-multi-column-header__column__header-content {
+    justify-content: center;
+    align-items: center;
+}
+
+#ScoreList .unity-multi-column-header {
+    color: var(--color-primary);
+    font-size: 24px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    min-height: 70px;
+}
+
+#BackButton {
+    position: absolute;
+    width: 22%;
+    max-width: 250px;
+    min-width: 180px;
+    height: 75px;
+    left: 50%;
+    bottom: 4%;
+    translate: -50% 0;
+    background-color: var(--color-panel);
+    color: var(--color-primary);
+    border-width: 2px;
+    border-color: var(--color-border);
+    -unity-font-style: bold;
+    font-size: 32px;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+#BackButton:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    scale: 1.05 1.05;
+}
+
+#BackButton:active {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+    scale: 0.95 0.95;
+}
+
+#PlayerNameField {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: 48%;
+    width: 70%;
+    max-width: 800px;
+    min-width: 300px;
+    height: 130px;
+    translate: -50% -50%;
+    flex-direction: column;
+    align-items: center;
+    --unity-cursor-color: var(--color-primary);
+}
+
+#PlayerNameField .unity-base-field__label {
+    width: 100%;
+    margin-bottom: 8px;
+    color: var(--color-text);
+    font-size: 24px;
+    -unity-text-align: middle-left;
+}
+
+#PlayerNameField .unity-base-field__input {
+    width: 100%;
+    min-height: 84px;
+    padding-left: 18px;
+    padding-right: 18px;
+    background-color: var(--color-panel);
+    color: var(--color-primary);
+    --unity-cursor-color: var(--color-primary);
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 6px;
+    border-left-width: 3px;
+    border-top-color: var(--color-primary);
+    border-right-color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    font-size: 64px;
+}
+
+#PlayerNameField:hover .unity-base-field__input,
+#PlayerNameField:focus .unity-base-field__input {
+    border-color: var(--color-primary);
+}
+
+.input-error {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    width: 70%;
+    max-width: 800px;
+    translate: -50% 0;
+    color: rgb(255, 100, 100);
+    font-size: 26px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+#PlayButtonContainer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 68%;
+    bottom: 8%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.play-screen-button {
+    width: 28%;
+    max-width: 320px;
+    min-width: 180px;
+    height: 100px;
+    margin-left: var(--spacing-small);
+    margin-right: var(--spacing-small);
+    background-color: var(--color-panel);
+    color: var(--color-primary);
+    border-width: 2px;
+    border-color: var(--color-border);
+    -unity-font-style: bold;
+    font-size: 32px;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.play-screen-button:hover {
+    scale: 1.05 1.05;
+}
+
+.play-screen-button:active {
+    scale: 0.95 0.95;
+}
+
+#StartButton {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+#StartButton:hover {
+    background-color: rgb(255, 220, 110);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+#StartButton:active {
+    background-color: rgb(210, 170, 40);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+#PlayBackButton {
+    background-color: var(--color-danger);
+    color: var(--color-text);
+    border-color: var(--color-danger-border);
+}
+
+#PlayBackButton:hover {
+    background-color: var(--color-danger-hover);
+    color: var(--color-text);
+    border-color: var(--color-danger-hover-border);
+}
+
+#PlayBackButton:active {
+    background-color: var(--color-danger-active);
+    color: var(--color-text);
+    border-color: var(--color-danger-border);
+}

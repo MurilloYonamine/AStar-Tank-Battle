@@ -1,0 +1,33 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/MainMenu.uss?fileID=7433441132597879392&amp;guid=2ded0d3295da8694c8b600d87531103c&amp;type=3#MainMenu"/>
+    <ui:VisualElement name="MainMenu" style="flex-grow: 1; display: flex;">
+        <ui:VisualElement name="Background"/>
+        <ui:Label text="BATALHA DE TANQUES" name="GameTitle"/>
+        <ui:VisualElement name="ButtonContainer">
+            <ui:Button text="JOGAR" name="PlayButton" class="menu-button menu-button-text"/>
+            <ui:Button text="SCORE" name="ScoreButton" class="menu-button menu-button-text"/>
+            <ui:Button text="OPÇÕES" name="SettingsButton" class="menu-button menu-button-text"/>
+            <ui:Button text="EXIT&#10;" name="ExitButton" class="menu-button menu-button-text"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="ScoreScreen" style="display: none;">
+        <ui:Label text="PLACAR GLOBAL" name="ScoreTitle" class="title"/>
+        <ui:MultiColumnListView columns="" sort-column-descriptions="" name="ScoreList">
+            <ui:Columns>
+                <ui:Column name="Jogador" title="Jogador" width="200px" min-width="25%"/>
+                <ui:Column name="Pontos" title="Pontos" width="25%"/>
+                <ui:Column name="Data" title="Data" width="50%"/>
+            </ui:Columns>
+        </ui:MultiColumnListView>
+        <ui:Button text="VOLTAR" name="BackButton"/>
+    </ui:VisualElement>
+    <ui:VisualElement name="PlayScreen" style="flex-grow: 1; display: none;">
+        <ui:Label text="DIGITE O SEU NOME" name="PlayTitle" class="title"/>
+        <ui:TextField label="" placeholder-text="" name="PlayerNameField"/>
+        <ui:Label text="" name="PlayerNameError" class="input-error"/>
+        <ui:VisualElement name="PlayButtonContainer" style="flex-grow: 1;">
+            <ui:Button text="VOLTAR" name="PlayBackButton" class="play-screen-button"/>
+            <ui:Button text="COMEÇAR" name="StartButton" class="play-screen-button"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

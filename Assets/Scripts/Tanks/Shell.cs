@@ -30,6 +30,12 @@ public class Shell : MonoBehaviour {
 
     void Update() 
     {
+        if(PauseManager.Instance.IsPaused)
+        {
+            transform.Translate(Vector3.zero);
+            return;
+        }
+
         speed *= (1 - Time.deltaTime * drag);
         ySpeed += gravityAcceleration * Time.deltaTime * 0.01f;
         transform.Translate(0, ySpeed, speed * Time.deltaTime);
