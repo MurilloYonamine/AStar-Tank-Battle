@@ -1,4 +1,4 @@
-// Autor: Murillo Gomes Yonamine
+// Autor: Murillo Gomes Yonamine | Professor Eduardo
 // Data: 27/09/2026
 
 using UnityEngine.Networking;
