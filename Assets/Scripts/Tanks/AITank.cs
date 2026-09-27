@@ -19,6 +19,11 @@ public class AITank : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(PauseManager.Instance.IsPaused)
+        {
+            return;
+        }
+
         Vector3 direction = (enemy.transform.position - transform.position).normalized;        
         direction.y = 0f; // para não rotacionar em x
         Quaternion lookRotation = Quaternion.LookRotation(direction);

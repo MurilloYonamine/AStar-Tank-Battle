@@ -25,6 +25,13 @@ public class Drive : MonoBehaviour {
     }
 
     void Update() {
+        if(PauseManager.Instance.IsPaused)
+        {
+            transform.Translate(Vector3.zero);
+            transform.Rotate(Vector3.zero);
+            cannon.RotateAround(cannon.position, cannon.right, 0);
+            return;
+        }
         if (moveAction == null) return;
 
         Vector2 moveInput = moveAction.action.ReadValue<Vector2>();

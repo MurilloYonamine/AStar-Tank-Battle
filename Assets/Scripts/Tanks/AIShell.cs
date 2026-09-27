@@ -22,6 +22,11 @@ public class AIShell : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(PauseManager.Instance.IsPaused)
+        {
+            body.linearVelocity = Vector3.zero;
+            return;
+        }
         transform.forward = body.linearVelocity;
     }
 }

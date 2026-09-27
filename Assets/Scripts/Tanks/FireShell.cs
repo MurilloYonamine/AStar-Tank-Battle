@@ -14,7 +14,10 @@ public class FireShell : MonoBehaviour {
     }
 
     void Update() {
-
+        if (PauseManager.Instance.IsPaused)
+        {
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
 
