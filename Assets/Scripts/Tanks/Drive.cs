@@ -1,43 +1,66 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Drive : MonoBehaviour {
+public class Drive : MonoBehaviour
+{
     public float speed = 5.0f;           // 5 metros por segundo
     public float rotationSpeed = 100.0f; // 100 graus por segundo
     public bool invertRotationWhenBackwards = true;
-    [SerializeField] InputActionReference moveAction;
-    [SerializeField] InputActionReference rotateUp;
-    [SerializeField] InputActionReference rotateDown;
 
+    [Header("Input")]
+    [SerializeField] private InputActionReference moveAction;
+    [SerializeField] private InputActionReference rotateUp;
+    [SerializeField] private InputActionReference rotateDown;
+
+    [Header("Combat")]
     public Transform cannon;
     public Transform bulletSpawn;
     public GameObject bulletPrefab;
 
-    private void OnEnable() { 
-        if (moveAction != null) moveAction.action.Enable(); 
-        if (rotateUp != null) rotateUp.action.Enable();
-        if (rotateDown != null) rotateDown.action.Enable();
-    }
-    private void OnDisable() { 
-        if (moveAction != null) moveAction.action.Disable();
-        if (rotateUp != null) rotateUp.action.Disable();
-        if (rotateDown != null) rotateDown.action.Disable();
+    private InputAction fireAction;
+
+    private void Awake()
+    {
+        if (moveAction != null && moveAction.action != null)
+        {
+            fireAction = moveAction.action.actionMap.FindAction("Attack");
+        }
     }
 
-    void Update() {
-        if(PauseManager.Instance.IsPaused)
+    private void OnEnable()
+    {
+        EnableAction(moveAction);
+        EnableAction(rotateUp);
+        EnableAction(rotateDown);
+        fireAction?.Enable();
+    }
+
+    private void OnDisable()
+    {
+        DisableAction(moveAction);
+        DisableAction(rotateUp);
+        DisableAction(rotateDown);
+        fireAction?.Disable();
+    }
+
+    private void Update()
+    {
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
-            transform.Translate(Vector3.zero);
-            transform.Rotate(Vector3.zero);
-            cannon.RotateAround(cannon.position, cannon.right, 0);
             return;
         }
-        if (moveAction == null) return;
+
+        if (moveAction == null || moveAction.action == null)
+        {
+            return;
+        }
 
         Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
 
         if (invertRotationWhenBackwards)
+        {
             moveInput.x = moveInput.y < 0 ? -moveInput.x : moveInput.x;
+        }
 
         Vector3 newDirection = new Vector3(0f, 0f, moveInput.y).normalized;
         Vector3 newRotation = new Vector3(0f, moveInput.x, 0f).normalized;
@@ -45,18 +68,41 @@ public class Drive : MonoBehaviour {
         transform.Translate(newDirection * speed * Time.deltaTime);
         transform.Rotate(newRotation * rotationSpeed * Time.deltaTime);
 
-        if (rotateUp.action.IsPressed())
+        if (IsPressed(rotateUp))
         {
             cannon.RotateAround(cannon.position, cannon.right, -30 * Time.deltaTime);
         }
-        else if (rotateDown.action.IsPressed()) 
-        { 
+        else if (IsPressed(rotateDown))
+        {
             cannon.RotateAround(cannon.position, cannon.right, 30 * Time.deltaTime);
         }
 
-        if(Mouse.current.leftButton.wasPressedThisFrame)
+        if (fireAction != null && fireAction.WasPressedThisFrame())
         {
             Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+        }
+    }
+
+    private static bool IsPressed(InputActionReference actionReference)
+    {
+        return actionReference != null &&
+               actionReference.action != null &&
+               actionReference.action.IsPressed();
+    }
+
+    private static void EnableAction(InputActionReference actionReference)
+    {
+        if (actionReference != null && actionReference.action != null)
+        {
+            actionReference.action.Enable();
+        }
+    }
+
+    private static void DisableAction(InputActionReference actionReference)
+    {
+        if (actionReference != null && actionReference.action != null)
+        {
+            actionReference.action.Disable();
         }
     }
 }

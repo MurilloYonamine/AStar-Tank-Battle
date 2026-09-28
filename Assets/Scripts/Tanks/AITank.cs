@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class AITank : MonoBehaviour
 {
@@ -7,88 +6,102 @@ public class AITank : MonoBehaviour
     public GameObject bulletSpawn;
     public GameObject enemy;
     public Transform cannon;
-    public float rotationSpeed = 2.0f;
-    float speed = 15.0f;
-    float moveSpeed = 3.0f;
 
-    void Start()
+    [Min(1f)] public float rotationSpeed = 120f;
+    [Min(0.1f)] public float fireInterval = 1.5f;
+    [SerializeField, Min(0.1f)] private float projectileSpeed = 15f;
+
+    private const float AimToleranceDegrees = 2f;
+    private EnemyTankMovement movement;
+    private Collider targetCollider;
+    private float fireCooldownRemaining;
+
+    private void Start()
     {
-        
+        movement = GetComponent<EnemyTankMovement>();
+
+        if (movement == null)
+        {
+            movement = gameObject.AddComponent<EnemyTankMovement>();
+        }
+
+        if (enemy != null)
+        {
+            targetCollider = enemy.GetComponent<Collider>();
+
+            // The chase state will update this path as the player moves.
+            movement.SetDestination(enemy.transform.position);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if(PauseManager.Instance.IsPaused)
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
             return;
         }
 
-        Vector3 direction = (enemy.transform.position - transform.position).normalized;        
-        direction.y = 0f; // para não rotacionar em x
-        Quaternion lookRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
+        if (enemy == null || cannon == null || bulletSpawn == null || bulletPrefab == null)
+        {
+            return;
+        }
 
-        if (Mouse.current.rightButton.wasPressedThisFrame)
+        fireCooldownRemaining = Mathf.Max(0f, fireCooldownRemaining - Time.deltaTime);
+
+        if (TryAimAtTarget() && fireCooldownRemaining <= 0f)
         {
             CreateBullet();
-        }
-        float? angle = RotateCannon();
-
-        if(angle != null)
-        {
-            CreateBullet();
-        }
-        else
-        {
-            transform.Translate(0, 0, Time.deltaTime * moveSpeed);
+            fireCooldownRemaining = Mathf.Max(0.1f, fireInterval);
         }
     }
 
-    void CreateBullet()
+    private bool TryAimAtTarget()
     {
-        GameObject shell = Instantiate(bulletPrefab, bulletSpawn.transform.position, bulletSpawn.transform.rotation);
-        shell.GetComponent<Rigidbody>().linearVelocity = speed * cannon.forward;
+        Vector3 targetPosition = targetCollider != null && targetCollider.enabled
+            ? targetCollider.bounds.center
+            : enemy.transform.position;
+        Vector3 toTarget = targetPosition - bulletSpawn.transform.position;
+        Vector3 horizontal = Vector3.ProjectOnPlane(toTarget, Vector3.up);
+        float distance = horizontal.magnitude;
+
+        if (distance < 0.01f)
+        {
+            return false;
+        }
+
+        float gravity = -Physics.gravity.y;
+        float speedSquared = projectileSpeed * projectileSpeed;
+        float discriminant = speedSquared * speedSquared -
+            gravity * (gravity * distance * distance + 2f * toTarget.y * speedSquared);
+        bool canFire = gravity > 0f && discriminant >= 0f;
+        Vector3 launchDirection = horizontal.normalized;
+
+        if (canFire)
+        {
+            float pitch = Mathf.Atan2(speedSquared - Mathf.Sqrt(discriminant), gravity * distance);
+            launchDirection =
+                horizontal.normalized * Mathf.Cos(pitch) + Vector3.up * Mathf.Sin(pitch);
+        }
+
+        Quaternion targetRotation = Quaternion.LookRotation(launchDirection);
+
+        cannon.rotation = Quaternion.RotateTowards(
+            cannon.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+        return canFire && Quaternion.Angle(cannon.rotation, targetRotation) <= AimToleranceDegrees;
     }
 
-    float? RotateCannon()
+    private void CreateBullet()
     {
-        float? angle = CalculateAngle(true);
-        if(angle != null)
-        {
-            cannon.localEulerAngles = new Vector3(360f - (float)angle, 0f, 0f);
-        }
-        return angle;
-    }
+        Vector3 direction = cannon.forward;
+        GameObject shell = Instantiate(
+            bulletPrefab,
+            bulletSpawn.transform.position,
+            Quaternion.LookRotation(direction));
 
-    float? CalculateAngle(bool low)
-    {
-        float angle = 0.0f;
-        Vector3 targetDir = enemy.transform.position - transform.position;
-        float y = targetDir.y;
-        targetDir.y = 0;
-        float x = targetDir.magnitude - 1;
-        float gravity = 9.81f;
-        float sSqr = speed * speed;
-        float underTheRoot = sSqr * sSqr - gravity * (gravity * x * x + 2 * y * sSqr);
-
-        if(underTheRoot >= 0)
+        if (shell.TryGetComponent(out Rigidbody body))
         {
-            float root = Mathf.Sqrt(underTheRoot);
-            float highAngle = sSqr + root;
-            float lowAngle = sSqr - root;
-            if (low)
-            {
-                angle = Mathf.Atan2(lowAngle, gravity * x) * Mathf.Rad2Deg;
-                return angle;
-            }
-            else
-            {
-                angle = Mathf.Atan2(highAngle, gravity * x) * Mathf.Rad2Deg;
-                return angle;
-            }
+            body.linearVelocity = projectileSpeed * direction;
         }
-        else
-            return null;
     }
 }

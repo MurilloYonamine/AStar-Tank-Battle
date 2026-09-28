@@ -157,14 +157,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 059945cf431e8fb4d99f81d3c18d49f2, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::AITank
   bulletPrefab: {fileID: 9162047389006064978, guid: da3e1ca691c300746939bd873db6571d,
     type: 3}
   bulletSpawn: {fileID: 1571149760}
   enemy: {fileID: 620903246}
   cannon: {fileID: 1912526122}
-  rotationSpeed: 2
+  rotationSpeed: 120
+  fireInterval: 1.5
+  projectileSpeed: 15
 --- !u!1 &102909916
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,9 +602,10 @@ GameObject:
   - component: {fileID: 729810333}
   - component: {fileID: 729810332}
   - component: {fileID: 729810331}
+  - component: {fileID: 729810335}
   m_Layer: 0
   m_Name: Ground
-  m_TagString: tank
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -700,6 +703,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &729810335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 729810330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e0c7d31af6142e09011d0e2f8ec8b72, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TankGrid
+  width: 20
+  depth: 20
+  cellSize: 5
+  gridCenter: {x: 0, y: 0.51, z: 0}
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 64
+  obstacleCheckHeight: 3
+  obstacleCheckScale: 0.9
+  drawGrid: 1
+  drawOnlyWhenSelected: 0
+  walkableColor: {r: 0.2, g: 0.8, b: 0.3, a: 0.18}
+  blockedColor: {r: 0.9, g: 0.15, b: 0.15, a: 0.45}
+  pathColor: {r: 1, g: 0.85, b: 0.1, a: 0.75}
 --- !u!1 &831853990
 GameObject:
   m_ObjectHideFlags: 0
