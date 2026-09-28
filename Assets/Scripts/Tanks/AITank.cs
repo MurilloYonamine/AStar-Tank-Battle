@@ -12,25 +12,29 @@ public class AITank : MonoBehaviour
     [SerializeField, Min(0.1f)] private float projectileSpeed = 15f;
 
     private const float AimToleranceDegrees = 2f;
-    private EnemyTankMovement movement;
+    private EnemyTankPerception perception;
+    private EnemyTankStateMachine stateMachine;
     private Collider targetCollider;
     private float fireCooldownRemaining;
 
     private void Start()
     {
-        movement = GetComponent<EnemyTankMovement>();
+        perception = GetComponent<EnemyTankPerception>();
+        stateMachine = GetComponent<EnemyTankStateMachine>();
 
-        if (movement == null)
+        if (perception == null)
         {
-            movement = gameObject.AddComponent<EnemyTankMovement>();
+            perception = gameObject.AddComponent<EnemyTankPerception>();
+        }
+
+        if (stateMachine == null)
+        {
+            stateMachine = gameObject.AddComponent<EnemyTankStateMachine>();
         }
 
         if (enemy != null)
         {
             targetCollider = enemy.GetComponent<Collider>();
-
-            // The chase state will update this path as the player moves.
-            movement.SetDestination(enemy.transform.position);
         }
     }
 
@@ -48,7 +52,19 @@ public class AITank : MonoBehaviour
 
         fireCooldownRemaining = Mathf.Max(0f, fireCooldownRemaining - Time.deltaTime);
 
-        if (TryAimAtTarget() && fireCooldownRemaining <= 0f)
+        if (stateMachine.CurrentState != EnemyTankState.Attack)
+        {
+            return;
+        }
+
+        if (!perception.CanSeeTarget(enemy.transform, targetCollider))
+        {
+            return;
+        }
+
+        if (TryAimAtTarget() &&
+            perception.IsWithinAttackRange(enemy.transform, targetCollider) &&
+            fireCooldownRemaining <= 0f)
         {
             CreateBullet();
             fireCooldownRemaining = Mathf.Max(0.1f, fireInterval);
