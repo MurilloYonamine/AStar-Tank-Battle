@@ -16,6 +16,7 @@ public class AITank : MonoBehaviour
     private EnemyTankStateMachine stateMachine;
     private Collider targetCollider;
     private float fireCooldownRemaining;
+    private Quaternion restingCannonRotation;
 
     private void Start()
     {
@@ -36,6 +37,11 @@ public class AITank : MonoBehaviour
         {
             targetCollider = enemy.GetComponent<Collider>();
         }
+
+        if (cannon != null)
+        {
+            restingCannonRotation = cannon.localRotation;
+        }
     }
 
     private void Update()
@@ -45,20 +51,18 @@ public class AITank : MonoBehaviour
             return;
         }
 
-        if (enemy == null || cannon == null || bulletSpawn == null || bulletPrefab == null)
+        if (cannon == null)
         {
             return;
         }
 
         fireCooldownRemaining = Mathf.Max(0f, fireCooldownRemaining - Time.deltaTime);
 
-        if (stateMachine.CurrentState != EnemyTankState.Attack)
+        if (stateMachine.CurrentState != EnemyTankState.Attack ||
+            enemy == null || bulletSpawn == null || bulletPrefab == null ||
+            !perception.CanSeeTarget(enemy.transform, targetCollider))
         {
-            return;
-        }
-
-        if (!perception.CanSeeTarget(enemy.transform, targetCollider))
-        {
+            ReturnCannonToRest();
             return;
         }
 
@@ -68,6 +72,23 @@ public class AITank : MonoBehaviour
         {
             CreateBullet();
             fireCooldownRemaining = Mathf.Max(0.1f, fireInterval);
+        }
+    }
+
+    private void ReturnCannonToRest()
+    {
+        cannon.localRotation = Quaternion.RotateTowards(
+            cannon.localRotation,
+            restingCannonRotation,
+            rotationSpeed * Time.deltaTime);
+    }
+
+    public void ResetForNewRound()
+    {
+        fireCooldownRemaining = 0f;
+        if (cannon != null)
+        {
+            cannon.localRotation = restingCannonRotation;
         }
     }
 
@@ -114,6 +135,11 @@ public class AITank : MonoBehaviour
             bulletPrefab,
             bulletSpawn.transform.position,
             Quaternion.LookRotation(direction));
+
+        if (shell.TryGetComponent(out AIShell projectile))
+        {
+            projectile.SetOwner(gameObject);
+        }
 
         if (shell.TryGetComponent(out Rigidbody body))
         {

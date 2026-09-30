@@ -5,6 +5,7 @@ using UnityEngine;
 /// Rotates and moves an enemy tank through the sequence of nodes returned by A*.
 /// Decision making and path recalculation intentionally remain outside this class.
 /// </summary>
+[RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public sealed class EnemyTankMovement : MonoBehaviour
 {
     [Header("References")]
@@ -14,20 +15,28 @@ public sealed class EnemyTankMovement : MonoBehaviour
     [SerializeField, Min(0.1f)] private float moveSpeed = 3f;
     [SerializeField, Min(1f)] private float rotationSpeed = 180f;
     [SerializeField, Min(0.01f)] private float nodeReachDistance = 0.2f;
+    [SerializeField, Min(0f)] private float collisionSkin = 0.05f;
+    [SerializeField] private LayerMask obstacleMask = 1 << 6;
 
     private readonly AStarPathfinder pathfinder = new();
     private readonly List<GridNode> currentPath = new();
     private int currentNodeIndex;
+    private Rigidbody body;
+    private BoxCollider hull;
 
     public bool IsMoving => currentNodeIndex < currentPath.Count;
     public IReadOnlyList<GridNode> CurrentPath => currentPath;
 
     private void Awake()
     {
+        body = GetComponent<Rigidbody>();
+        hull = GetComponent<BoxCollider>();
+        body.isKinematic = true;
+        body.useGravity = false;
         ResolveGrid();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
@@ -84,30 +93,62 @@ public sealed class EnemyTankMovement : MonoBehaviour
 
         GridNode targetNode = currentPath[currentNodeIndex];
         Vector3 targetPosition = targetNode.WorldPosition;
-        targetPosition.y = transform.position.y;
+        targetPosition.y = body.position.y;
 
-        Vector3 direction = targetPosition - transform.position;
+        Vector3 direction = targetPosition - body.position;
         direction.y = 0f;
 
-        if (direction.sqrMagnitude > 0.0001f)
+        float distance = direction.magnitude;
+        if (distance <= nodeReachDistance)
+        {
+            currentNodeIndex++;
+            return;
+        }
+
+        Quaternion nextRotation = body.rotation;
+        if (distance > 0.0001f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.RotateTowards(
-                transform.rotation,
+            nextRotation = Quaternion.RotateTowards(
+                body.rotation,
                 targetRotation,
-                rotationSpeed * Time.deltaTime);
+                rotationSpeed * Time.fixedDeltaTime);
+            if (TankCollisionGuard.CanOccupy(hull, body.position, nextRotation, obstacleMask))
+            {
+                body.MoveRotation(nextRotation);
+            }
+            else
+            {
+                nextRotation = body.rotation;
+            }
         }
 
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetPosition,
-            moveSpeed * Time.deltaTime);
+        float step = Mathf.Min(moveSpeed * Time.fixedDeltaTime, distance);
+        Vector3 travelDirection = direction / distance;
+        float allowedStep = step;
 
-        if (Vector3.Distance(transform.position, targetPosition) <= nodeReachDistance)
+        // A* chooses the route; a sweep keeps the tank's physical hull out of walls and other tanks.
+        foreach (RaycastHit hit in body.SweepTestAll(
+                     travelDirection, step + collisionSkin, QueryTriggerInteraction.Ignore))
         {
-            transform.position = targetPosition;
-            currentNodeIndex++;
+            if (TankCollisionGuard.IsBlocking(hit.collider, transform, obstacleMask))
+            {
+                allowedStep = Mathf.Min(allowedStep, Mathf.Max(0f, hit.distance - collisionSkin));
+            }
         }
+
+        Vector3 nextPosition = body.position + travelDirection * allowedStep;
+        if (allowedStep > 0f &&
+            TankCollisionGuard.CanOccupy(hull, nextPosition, nextRotation, obstacleMask))
+        {
+            body.MovePosition(nextPosition);
+        }
+        else
+        {
+            nextPosition = body.position;
+        }
+
+        TankCollisionGuard.ReservePose(hull, nextPosition, nextRotation);
     }
 
     private void ResolveGrid()

@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public class Drive : MonoBehaviour
 {
-    public float speed = 5.0f;           // 5 metros por segundo
-    public float rotationSpeed = 100.0f; // 100 graus por segundo
+    public float speed = 5.0f;           // World units per second.
+    public float rotationSpeed = 100.0f; // Degrees per second.
     public bool invertRotationWhenBackwards = true;
 
     [Header("Input")]
@@ -18,9 +19,21 @@ public class Drive : MonoBehaviour
     public GameObject bulletPrefab;
 
     private InputAction fireAction;
+    private Rigidbody body;
+    private BoxCollider hull;
+    private Vector2 moveInput;
+    private readonly LayerMask obstacleMask = 1 << 6;
+    private const float CollisionSkin = 0.05f;
 
     private void Awake()
     {
+        body = GetComponent<Rigidbody>();
+        hull = GetComponent<BoxCollider>();
+        body.isKinematic = false;
+        body.useGravity = false;
+        body.constraints = RigidbodyConstraints.FreezePositionY |
+            RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
         if (moveAction != null && moveAction.action != null)
         {
             fireAction = moveAction.action.actionMap.FindAction("Attack");
@@ -41,32 +54,30 @@ public class Drive : MonoBehaviour
         DisableAction(rotateUp);
         DisableAction(rotateDown);
         fireAction?.Disable();
+        moveInput = Vector2.zero;
+
+        if (body != null)
+        {
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+        }
     }
 
     private void Update()
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
+            moveInput = Vector2.zero;
             return;
         }
 
         if (moveAction == null || moveAction.action == null)
         {
+            moveInput = Vector2.zero;
             return;
         }
 
-        Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
-
-        if (invertRotationWhenBackwards)
-        {
-            moveInput.x = moveInput.y < 0 ? -moveInput.x : moveInput.x;
-        }
-
-        Vector3 newDirection = new Vector3(0f, 0f, moveInput.y).normalized;
-        Vector3 newRotation = new Vector3(0f, moveInput.x, 0f).normalized;
-
-        transform.Translate(newDirection * speed * Time.deltaTime);
-        transform.Rotate(newRotation * rotationSpeed * Time.deltaTime);
+        moveInput = moveAction.action.ReadValue<Vector2>();
 
         if (IsPressed(rotateUp))
         {
@@ -79,8 +90,66 @@ public class Drive : MonoBehaviour
 
         if (fireAction != null && fireAction.WasPressedThisFrame())
         {
-            Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+            GameObject projectile = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+            if (projectile.TryGetComponent(out Shell shell))
+            {
+                shell.SetOwner(gameObject);
+            }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
+        {
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            return;
+        }
+
+        float turnInput = invertRotationWhenBackwards && moveInput.y < 0f
+            ? -moveInput.x
+            : moveInput.x;
+        Quaternion nextRotation = body.rotation *
+            Quaternion.Euler(0f, turnInput * rotationSpeed * Time.fixedDeltaTime, 0f);
+
+        if (TankCollisionGuard.CanOccupy(hull, body.position, nextRotation, obstacleMask))
+        {
+            body.MoveRotation(nextRotation);
+        }
+        else
+        {
+            nextRotation = body.rotation;
+        }
+
+        float requestedSpeed = moveInput.y * speed;
+        if (Mathf.Abs(requestedSpeed) < 0.001f)
+        {
+            body.linearVelocity = Vector3.zero;
+            TankCollisionGuard.ReservePose(hull, body.position, nextRotation);
+            return;
+        }
+
+        Vector3 direction = nextRotation * Vector3.forward * Mathf.Sign(requestedSpeed);
+        float allowedStep = Mathf.Abs(requestedSpeed) * Time.fixedDeltaTime;
+        foreach (RaycastHit hit in body.SweepTestAll(
+                     direction, allowedStep + CollisionSkin, QueryTriggerInteraction.Ignore))
+        {
+            if (TankCollisionGuard.IsBlocking(hit.collider, transform, obstacleMask))
+            {
+                allowedStep = Mathf.Min(allowedStep, Mathf.Max(0f, hit.distance - CollisionSkin));
+            }
+        }
+
+        Vector3 nextPosition = body.position + direction * allowedStep;
+        if (!TankCollisionGuard.CanOccupy(hull, nextPosition, nextRotation, obstacleMask))
+        {
+            allowedStep = 0f;
+            nextPosition = body.position;
+        }
+
+        body.linearVelocity = direction * (allowedStep / Time.fixedDeltaTime);
+        TankCollisionGuard.ReservePose(hull, nextPosition, nextRotation);
     }
 
     private static bool IsPressed(InputActionReference actionReference)

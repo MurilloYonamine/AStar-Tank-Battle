@@ -18,14 +18,14 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
 
     [Header("Pursuit")]
     [SerializeField, Min(0.1f)] private float repathInterval = 0.75f;
-    [SerializeField, Min(0.1f)] private float targetMemoryDuration = 4f;
+    [SerializeField, Min(0.1f)] private float targetMemoryDuration = 12f;
 
     private EnemyTankMovement movement;
     private EnemyTankPerception perception;
     private TankGrid grid;
     private Collider targetCollider;
     private GridNode plannedTargetNode;
-    private Vector3 lastKnownTargetPosition;
+    private Vector3 trackedTargetPosition;
     private float targetMemoryRemaining;
     private float repathCooldownRemaining;
     private int nextWaypointIndex;
@@ -69,6 +69,15 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         EnterPatrol();
     }
 
+    public void ResetForNewRound()
+    {
+        targetMemoryRemaining = 0f;
+        repathCooldownRemaining = 0f;
+        trackedTargetPosition = Vector3.zero;
+        plannedTargetNode = null;
+        EnterPatrol();
+    }
+
     private void Update()
     {
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
@@ -84,8 +93,14 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
 
         if (targetVisible)
         {
-            lastKnownTargetPosition = target.transform.position;
+            trackedTargetPosition = target.transform.position;
             targetMemoryRemaining = targetMemoryDuration;
+        }
+        else if (target != null && targetMemoryRemaining > 0f &&
+                 CurrentState != EnemyTankState.Patrol)
+        {
+            // Keep pursuing the target's grid cell briefly while a wall hides it.
+            trackedTargetPosition = target.transform.position;
         }
 
         switch (CurrentState)
@@ -93,10 +108,13 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
             case EnemyTankState.Patrol:
                 if (targetVisible)
                 {
-                    EnterChase();
                     if (perception.IsWithinAttackRange(target.transform, targetCollider))
                     {
                         EnterAttack();
+                    }
+                    else
+                    {
+                        EnterChase();
                     }
                 }
                 else if (!patrolRouteUnavailable && !movement.IsMoving)
@@ -116,7 +134,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
                 }
                 else
                 {
-                    RepathToLastKnownCell();
+                    RepathToTrackedCell();
                 }
                 break;
 
@@ -148,11 +166,17 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
 
     private void EnterChase()
     {
+        bool wasPatrolling = CurrentState == EnemyTankState.Patrol;
         CurrentState = EnemyTankState.Chase;
         movement.Stop();
         plannedTargetNode = null;
-        repathCooldownRemaining = 0f;
-        RepathToLastKnownCell();
+
+        if (wasPatrolling)
+        {
+            repathCooldownRemaining = 0f;
+        }
+
+        RepathToTrackedCell();
     }
 
     private void EnterAttack()
@@ -161,14 +185,14 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         movement.Stop();
     }
 
-    private void RepathToLastKnownCell()
+    private void RepathToTrackedCell()
     {
         if (grid == null || !grid.IsBuilt || repathCooldownRemaining > 0f)
         {
             return;
         }
 
-        GridNode targetNode = grid.GetNodeFromWorldPosition(lastKnownTargetPosition);
+        GridNode targetNode = grid.GetNodeFromWorldPosition(trackedTargetPosition);
         if (targetNode == null || targetNode == plannedTargetNode)
         {
             return;
@@ -176,7 +200,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
 
         plannedTargetNode = targetNode;
         repathCooldownRemaining = repathInterval;
-        movement.SetDestination(lastKnownTargetPosition);
+        movement.SetDestination(trackedTargetPosition);
     }
 
     private int FindNearestWaypointIndex()
