@@ -1,43 +1,74 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class Shell : MonoBehaviour {
-
+[RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
+public class Shell : MonoBehaviour
+{
     public GameObject explosion;
-    float speed = 0.0f;
-    float mass = 1.0f;
-    float force = 30.0f;
-    float drag = 1.0f;
-    float acceleration;
-    float ySpeed = 0.0f; 
-    float gravity = -9.8f;
-    float gravityAcceleration = 0.0f;
 
-    void OnCollisionEnter(Collision col) {
+    [SerializeField, Min(0.1f)] private float initialSpeed = 30f;
+    [SerializeField, Min(0f)] private float drag = 1f;
+    [SerializeField, Min(0f)] private float downwardAcceleration = 9.8f;
 
-        if (col.gameObject.tag == "tank") {
-            GameObject exp = Instantiate(explosion, this.transform.position, Quaternion.identity);
-            Destroy(exp, 0.5f);
-            Destroy(this.gameObject);
-        }
+    private Rigidbody body;
+    private Collider shellCollider;
+    private GameObject owner;
+    private float currentSpeed;
+    private float verticalSpeed;
+    private bool exploded;
+
+    private void Awake()
+    {
+        body = GetComponent<Rigidbody>();
+        shellCollider = GetComponent<Collider>();
+        body.useGravity = false;
+        body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        currentSpeed = initialSpeed;
     }
 
-    private void Start() 
+    private void FixedUpdate()
     {
-        acceleration = force / mass;
-        speed += acceleration;
-        gravityAcceleration = gravity / mass;
-    }
-
-    void Update() 
-    {
-        if(PauseManager.Instance.IsPaused)
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
-            transform.Translate(Vector3.zero);
+            body.linearVelocity = Vector3.zero;
             return;
         }
 
-        speed *= (1 - Time.deltaTime * drag);
-        ySpeed += gravityAcceleration * Time.deltaTime * 0.01f;
-        transform.Translate(0, ySpeed, speed * Time.deltaTime);
+        currentSpeed *= Mathf.Max(0f, 1f - Time.fixedDeltaTime * drag);
+        verticalSpeed -= downwardAcceleration * Time.fixedDeltaTime;
+        body.linearVelocity = transform.forward * currentSpeed + Vector3.up * verticalSpeed;
+    }
+
+    public void SetOwner(GameObject tank)
+    {
+        owner = tank;
+        if (owner == null || shellCollider == null)
+        {
+            return;
+        }
+
+        foreach (Collider tankCollider in owner.GetComponentsInChildren<Collider>())
+        {
+            Physics.IgnoreCollision(shellCollider, tankCollider);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (exploded || owner != null && collision.transform.IsChildOf(owner.transform))
+        {
+            return;
+        }
+
+        exploded = true;
+        if (explosion != null)
+        {
+            GameObject effect = Instantiate(explosion, transform.position, Quaternion.identity);
+            if (effect.TryGetComponent(out ExplosionDamage damageArea))
+            {
+                damageArea.SetSource(owner);
+            }
+        }
+
+        Destroy(gameObject);
     }
 }

@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="BattleOverlay" class="battle-overlay" style="display: none;">
+        <ui:VisualElement name="BattleHud" class="battle-hud">
+            <ui:VisualElement class="hud-card">
+                <ui:Label text="VIDA" class="hud-caption" />
+                <ui:Label name="HealthLabel" text="100 / 100" class="hud-value" />
+                <ui:VisualElement class="health-track">
+                    <ui:VisualElement name="HealthFill" class="health-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-card score-card">
+                <ui:Label text="PONTOS" class="hud-caption" />
+                <ui:Label name="ScoreLabel" text="0" class="hud-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="DefeatScreen" class="defeat-screen">
+            <ui:VisualElement class="defeat-card">
+                <ui:Label text="DERROTA" class="defeat-title" />
+                <ui:Label name="FinalScoreLabel" text="PONTUAÇÃO FINAL: 0" class="defeat-score" />
+                <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
