@@ -536,7 +536,7 @@ MeshCollider:
   m_Mesh: {fileID: 1826178310}
 --- !u!33 &73552619
 MeshFilter:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 10
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -1089,6 +1089,74 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.InputActionReference
   m_Asset: {fileID: -944628639613478452, guid: 0d6514a974fb09041a3655243629d38a, type: 3}
   m_ActionId: 852140f2-7766-474d-8707-702459ba45f3
+--- !u!1001 &385537301
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -30.661093
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.4890862
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e7924470ad3831443984c2d2aa92a83e,
+        type: 3}
+      propertyPath: m_Name
+      value: Fenomeno small
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e7924470ad3831443984c2d2aa92a83e, type: 3}
 --- !u!1 &391897318
 GameObject:
   m_ObjectHideFlags: 0
@@ -11293,3 +11361,4 @@ SceneRoots:
   - {fileID: 158915692}
   - {fileID: 831853992}
   - {fileID: 669048661}
+  - {fileID: 385537301}
