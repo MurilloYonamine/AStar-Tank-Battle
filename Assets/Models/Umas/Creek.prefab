@@ -30,6 +30,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6938391260596658440}
+  - {fileID: 4884220586449574619}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &3560058171350417492
@@ -371,8 +372,7 @@ Transform:
   m_LocalPosition: {x: 0.000010554959, y: 1.0796412, z: -0.025321364}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 4884220586449574619}
+  m_Children: []
   m_Father: {fileID: 6938391260596658440}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8793404300833214937
@@ -459,7 +459,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: fe9023d0127f7dd4784e2a2c9b0bd514,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.609
+      value: 2.219
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fe9023d0127f7dd4784e2a2c9b0bd514,
         type: 3}
@@ -511,6 +511,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Super creek mummy v2
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: fe9023d0127f7dd4784e2a2c9b0bd514,
+        type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 703bcc6f29494d94fb6bd85ee041e618, type: 3}
     - target: {fileID: 5866666021909216657, guid: fe9023d0127f7dd4784e2a2c9b0bd514,
         type: 3}
       propertyPath: m_Controller

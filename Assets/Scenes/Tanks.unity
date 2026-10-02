@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 072bb4b2138d452180fea2908adab46c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankHealth
-  maxHealth: 1000
+  maxHealth: 10000
   deathExplosion: {fileID: 195792, guid: 89e78efe92dfe5a42837b392cdb0bf9e, type: 3}
   deactivateOnDeath: 1
 --- !u!1 &102909916
@@ -516,7 +516,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 072bb4b2138d452180fea2908adab46c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankHealth
-  maxHealth: 100
+  maxHealth: 10000
   deathExplosion: {fileID: 195792, guid: 89e78efe92dfe5a42837b392cdb0bf9e, type: 3}
   deactivateOnDeath: 1
 --- !u!1 &705507993
@@ -908,6 +908,109 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &899318490
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1524486523037663393, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 703bcc6f29494d94fb6bd85ee041e618, type: 3}
+    - target: {fileID: 2182668876329722018, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_Name
+      value: Creek
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5.7856226
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 5.7856226
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 5.7856226
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 12.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.0879097
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 2887154942990734001, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4224661359875676124, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 0a5019494fd38bc479f158f9a72f6d29, type: 2}
+    - target: {fileID: 4224661359875676124, guid: d20da398bdbb84b44b33528f10adfc09,
+        type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'Head'\n\tTransform 'Arm_R'\n\tTransform
+        'Waist'\n\tTransform 'Chest'\n\tTransform 'Wrist_L'\n\tTransform 'Shoulder_L'\n\tTransform
+        'Neck'\n\tTransform 'Wrist_R'\n\tTransform 'Thigh_R'\n\tTransform 'Knee_R'\n\tand
+        more ...\n\tFrom animation clip 'SocoTeste'"
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d20da398bdbb84b44b33528f10adfc09, type: 3}
 --- !u!1 &960752928
 GameObject:
   m_ObjectHideFlags: 0
@@ -2792,3 +2895,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 158915692}
   - {fileID: 831853992}
+  - {fileID: 899318490}
