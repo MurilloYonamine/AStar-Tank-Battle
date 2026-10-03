@@ -20,6 +20,7 @@ public class MenuManager : MonoBehaviour
     private Button _scoreBackButton;
 
     private Button _playBackButton;
+    private Button _skipLoginButton;
     private Button _openRegisterButton;
     private Button _startButton;
 
@@ -112,6 +113,7 @@ public class MenuManager : MonoBehaviour
         _loginPasswordField = root.Q<TextField>("LoginPasswordField");
         _loginError = root.Q<Label>("LoginError");
         _playBackButton = root.Q<Button>("PlayBackButton");
+        _skipLoginButton = root.Q<Button>("SkipLoginButton");
         _openRegisterButton = root.Q<Button>("OpenRegisterButton");
         _startButton = root.Q<Button>("StartButton");
         _loginError.style.display = DisplayStyle.None;
@@ -131,6 +133,7 @@ public class MenuManager : MonoBehaviour
         _scoreBackButton.clicked += OnBackClicked;
 
         _playBackButton.clicked += OnPlayBackClicked;
+        _skipLoginButton.clicked += OnSkipLoginClicked;
         _openRegisterButton.clicked += OnOpenRegisterClicked;
         _startButton.clicked += OnStartClicked;
 
@@ -154,6 +157,7 @@ public class MenuManager : MonoBehaviour
         _scoreBackButton.clicked -= OnBackClicked;
 
         _playBackButton.clicked -= OnPlayBackClicked;
+        _skipLoginButton.clicked -= OnSkipLoginClicked;
         _openRegisterButton.clicked -= OnOpenRegisterClicked;
         _startButton.clicked -= OnStartClicked;
 
@@ -202,6 +206,13 @@ public class MenuManager : MonoBehaviour
         _mainMenu.style.display = DisplayStyle.Flex;
         _loginError.style.display = DisplayStyle.None;
         _registerError.style.display = DisplayStyle.None;
+    }
+
+    private void OnSkipLoginClicked()
+    {
+        _loginError.style.display = DisplayStyle.None;
+        _playScreen.style.display = DisplayStyle.None;
+        GameManager.Instance.StartGame("Convidado");
     }
 
     private void OnStartClicked()
