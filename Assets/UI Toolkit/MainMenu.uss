@@ -84,7 +84,10 @@
 }
 
 #ScoreTitle,
-#PlayTitle {
+#PlayTitle,
+.auth-title,
+#LoginTitle,
+#RegisterTitle {
     position: absolute;
     left: 0;
     right: 0;
@@ -100,8 +103,11 @@
     font-size: 42px;
 }
 
-#PlayTitle {
-    font-size: 128px;
+#PlayTitle,
+.auth-title,
+#LoginTitle,
+#RegisterTitle {
+    font-size: 72px;
 }
 
 #ScoreList {
@@ -191,6 +197,82 @@
     scale: 0.95 0.95;
 }
 
+.auth-section {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.auth-form {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: 70%;
+    max-width: 800px;
+    min-width: 320px;
+    translate: -50% -50%;
+    flex-direction: column;
+}
+
+.auth-field {
+    width: 100%;
+    margin-bottom: 14px;
+    flex-direction: column;
+    --unity-cursor-color: var(--color-primary);
+}
+
+.auth-field .unity-base-field__label {
+    width: 100%;
+    margin-bottom: 6px;
+    color: var(--color-text);
+    font-size: 24px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.auth-field .unity-base-field__input {
+    width: 100%;
+    min-height: 80px;
+    padding-left: 18px;
+    padding-right: 18px;
+    background-color: var(--color-panel);
+    color: var(--color-primary);
+    --unity-cursor-color: var(--color-primary);
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 6px;
+    border-left-width: 3px;
+    border-top-color: var(--color-primary);
+    border-right-color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    border-left-color: var(--color-primary);
+    font-size: 52px;
+}
+
+.auth-field:hover .unity-base-field__input,
+.auth-field:focus .unity-base-field__input {
+    border-color: rgb(255, 230, 120);
+    background-color: var(--color-secondary);
+}
+
+.auth-form .input-error {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    max-width: none;
+    translate: 0 0;
+    min-height: 30px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    color: rgb(255, 100, 100);
+    font-size: 24px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
 #PlayerNameField {
     position: absolute;
     left: 50%;
@@ -251,30 +333,32 @@
     -unity-text-align: middle-center;
 }
 
-#PlayButtonContainer {
+#PlayButtonContainer,
+#RegisterButtonContainer,
+.auth-button-container {
     position: absolute;
     left: 0;
     right: 0;
-    top: 68%;
-    bottom: 8%;
+    bottom: 6%;
+    height: 90px;
     flex-direction: row;
     align-items: center;
     justify-content: center;
 }
 
 .play-screen-button {
-    width: 28%;
-    max-width: 320px;
-    min-width: 180px;
-    height: 100px;
-    margin-left: var(--spacing-small);
-    margin-right: var(--spacing-small);
+    width: 22%;
+    max-width: 240px;
+    min-width: 140px;
+    height: 80px;
+    margin-left: 8px;
+    margin-right: 8px;
     background-color: var(--color-panel);
     color: var(--color-primary);
     border-width: 2px;
     border-color: var(--color-border);
     -unity-font-style: bold;
-    font-size: 32px;
+    font-size: 26px;
     transition-property: scale;
     transition-duration: 0.1s;
 }
@@ -287,37 +371,90 @@
     scale: 0.95 0.95;
 }
 
-#StartButton {
+#StartButton,
+#RegisterSubmitButton,
+.primary-button {
     background-color: var(--color-primary);
     color: var(--color-background);
     border-color: var(--color-primary);
 }
 
-#StartButton:hover {
+#StartButton:hover,
+#RegisterSubmitButton:hover,
+.primary-button:hover {
     background-color: rgb(255, 220, 110);
     color: var(--color-background);
     border-color: var(--color-primary);
 }
 
-#StartButton:active {
+#StartButton:active,
+#RegisterSubmitButton:active,
+.primary-button:active {
     background-color: rgb(210, 170, 40);
     color: var(--color-background);
     border-color: var(--color-primary);
 }
 
-#PlayBackButton {
+#SkipLoginButton,
+.skip-button {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+#SkipLoginButton:hover,
+.skip-button:hover {
+    background-color: rgb(48, 76, 126);
+    color: rgb(255, 255, 255);
+    border-color: rgb(100, 140, 200);
+}
+
+#SkipLoginButton:active,
+.skip-button:active {
+    background-color: var(--color-panel);
+    color: var(--color-text);
+}
+
+#OpenRegisterButton,
+.middle-button {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+#OpenRegisterButton:hover,
+.middle-button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+#OpenRegisterButton:active,
+.middle-button:active {
+    background-color: rgb(210, 170, 40);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+#PlayBackButton,
+#RegisterBackButton,
+.back-button {
     background-color: var(--color-danger);
     color: var(--color-text);
     border-color: var(--color-danger-border);
 }
 
-#PlayBackButton:hover {
+#PlayBackButton:hover,
+#RegisterBackButton:hover,
+.back-button:hover {
     background-color: var(--color-danger-hover);
     color: var(--color-text);
     border-color: var(--color-danger-hover-border);
 }
 
-#PlayBackButton:active {
+#PlayBackButton:active,
+#RegisterBackButton:active,
+.back-button:active {
     background-color: var(--color-danger-active);
     color: var(--color-text);
     border-color: var(--color-danger-border);

@@ -8,9 +8,10 @@ using UnityEngine.Networking;
 
 public class DataManager : MonoBehaviour
 {
-    private const string URL_BASE = "http://localhost/senac/a6gsd/sistema";
-    private const string URL_GET = URL_BASE + "/recuperar.php"; // URL para receber os dados
-    private const string URL_POST = URL_BASE + "/adicionar.php"; // URL para enviar os dados
+    private const string URL_BASE = "http://localhost/gsd";
+    private const string URL_GET = URL_BASE + "/?action=api_listar";
+    private const string URL_POST = URL_BASE + "/?action=api_inserir";
+    private const string URL_UPDATE = URL_BASE + "/?action=api_atualizar";
 
     public string jsonData; // vai receber os dados no formato JSON
 
@@ -22,9 +23,14 @@ public class DataManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void SaveData(string playerName, int score, string date)
+    public void SaveData(string playerName, string email, string password, int score)
     {
-        StartCoroutine(InsertNewData(playerName, score, date));
+        StartCoroutine(InsertNewData(playerName, email, password, score));
+    }
+
+    public void UpdatePlayerData(int id, string playerName, string email, string password, int score)
+    {
+        StartCoroutine(UpdateData(id, playerName, email, password, score));
     }
 
 
@@ -36,8 +42,7 @@ public class DataManager : MonoBehaviour
     private IEnumerator LoadDataFromJson()
     {
         WWWForm form = new WWWForm();
-        form.AddField("chave_secreta", "123456");
-
+        
         UnityWebRequest www = UnityWebRequest.Post(URL_GET, form);
         www.certificateHandler = new BypassHTTPSCertificate();
         yield return www.SendWebRequest();
@@ -54,12 +59,14 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    private IEnumerator InsertNewData(string playerName, int score, string date)
+    private IEnumerator InsertNewData(string playerName, string email, string password, int score)
     {
         WWWForm form = new WWWForm();
-        form.AddField("apelido", playerName);
+        form.AddField("name", playerName);
+        form.AddField("nome", playerName);
+        form.AddField("email", email);
+        form.AddField("password", password);
         form.AddField("pontos", score);
-        form.AddField("data", date);
 
         using (UnityWebRequest www = UnityWebRequest.Post(URL_POST, form))
         {
@@ -72,6 +79,31 @@ public class DataManager : MonoBehaviour
             else
             {
                 Debug.Log("Dados enviados com sucesso: " + www.downloadHandler.text);
+            }
+        }
+    }
+
+    private IEnumerator UpdateData(int id, string playerName, string email, string password, int score)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("id", id);
+        form.AddField("name", playerName);
+        form.AddField("nome", playerName);
+        form.AddField("email", email);
+        form.AddField("password", password);
+        form.AddField("pontos", score);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(URL_UPDATE, form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Erro ao atualizar dados: " + www.error);
+            }
+            else
+            {
+                Debug.Log("Dados atualizados com sucesso: " + www.downloadHandler.text);
             }
         }
     }
