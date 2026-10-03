@@ -113,6 +113,7 @@ public class Drive : MonoBehaviour
             {
                 shell.SetOwner(gameObject);
             }
+            GetComponent<TankAppearance>()?.CharacterAnimation?.PlayAttack();
         }
     }
 

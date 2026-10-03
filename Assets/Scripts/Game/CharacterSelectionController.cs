@@ -22,6 +22,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
     [SerializeField] private Transform previewRoot;
     [SerializeField] private Camera previewCamera;
     [SerializeField, Min(1f)] private float rotationSpeed = 15f;
+    [Tooltip("Raises only the character in the selection preview, not the tank or battle actor.")]
+    [SerializeField, Min(0f)] private float selectionCharacterHeightOffset = 0.15f;
 
     private VisualElement screen;
     private VisualElement previewImage;
@@ -33,6 +35,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
     private Button backButton;
     private GameObject previewModel;
     private RenderTexture previewTexture;
+    private Color previewBackground;
+    private CameraClearFlags previewClearFlags;
     private int selectedIndex;
 
     public bool IsOpen { get; private set; }
@@ -63,16 +67,30 @@ public sealed class CharacterSelectionController : MonoBehaviour
         if (previewModel != null) previewModel.SetActive(false);
     }
 
+    public void ShowResultPreview(int index, VisualElement resultImage)
+    {
+        if (resultImage == null || CharacterCount == 0) return;
+        EnsureUI();
+        Close();
+        // A separate, collision-free preview dances. The dead gameplay actor stays dead.
+        ShowCharacter(Mathf.Clamp(index, 0, CharacterCount - 1), true);
+        previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.PlayDance();
+        resultImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(previewTexture));
+        previewCamera.enabled = true;
+    }
+
     public void StepSelection(int direction)
     {
         if (!IsOpen || CharacterCount == 0) return;
         selectedIndex = (selectedIndex + direction % CharacterCount + CharacterCount) % CharacterCount;
         ShowCharacter(selectedIndex);
+        BattleAudioController.PlaySelectionChange();
     }
 
     public void ConfirmSelection()
     {
         if (!IsOpen) return;
+        BattleAudioController.PlayButtonClick();
         // Keep the visual preview visible until the session fade covers it.
         IsOpen = false;
         SetControlsEnabled(false);
@@ -91,6 +109,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
     public void CancelSelection()
     {
         if (!IsOpen) return;
+        BattleAudioController.PlayButtonClick();
         Close();
         Cancelled?.Invoke();
     }
@@ -116,7 +135,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
     {
         if (screen != null) return;
         var root = document.rootVisualElement;
-        root.styleSheets.Add(styleSheet);
+        if (styleSheet != null && !root.styleSheets.Contains(styleSheet)) root.styleSheets.Add(styleSheet);
         screen = root.Q<VisualElement>("CharacterSelection");
         previewImage = root.Q<VisualElement>("CharacterPreview");
         nameLabel = root.Q<Label>("CharacterName");
@@ -133,6 +152,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         previewTexture = new RenderTexture(960, 720, 24, RenderTextureFormat.ARGB32);
         previewTexture.name = "Character Preview";
         previewTexture.Create();
+        previewBackground = previewCamera.backgroundColor;
+        previewClearFlags = previewCamera.clearFlags;
         previewCamera.targetTexture = previewTexture;
         previewImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(previewTexture));
     }
@@ -140,7 +161,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
     private void PreviousCharacter() => StepSelection(-1);
     private void NextCharacter() => StepSelection(1);
 
-    private void ShowCharacter(int index)
+    private void ShowCharacter(int index, bool characterOnly = false)
     {
         if (previewModel != null)
         {
@@ -152,6 +173,9 @@ public sealed class CharacterSelectionController : MonoBehaviour
         previewModel = Instantiate(option.ModelPrefab, previewRoot);
         previewModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         previewModel.transform.localScale = Vector3.one;
+        TankCharacterAnimation previewAnimation = previewModel.GetComponentInChildren<TankCharacterAnimation>(true);
+        previewAnimation?.PlayIdle();
+        if (!characterOnly) previewAnimation?.SetVisualHeightOffset(selectionCharacterHeightOffset);
         int layer = LayerMask.NameToLayer("CharacterPreview");
         foreach (Transform child in previewModel.GetComponentsInChildren<Transform>(true))
             child.gameObject.layer = layer;
@@ -159,18 +183,38 @@ public sealed class CharacterSelectionController : MonoBehaviour
         // Preview models must not participate in navigation, collisions or damage.
         foreach (Collider collider in previewModel.GetComponentsInChildren<Collider>(true))
             collider.enabled = false;
-        Renderer[] renderers = previewModel.GetComponentsInChildren<Renderer>();
-        Bounds bounds = new(previewRoot.position, Vector3.one);
-        if (renderers.Length > 0)
+
+        if (characterOnly)
         {
-            bounds = renderers[0].bounds;
-            foreach (Renderer renderer in renderers) bounds.Encapsulate(renderer.bounds);
+            Animator animator = previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.Animator;
+            if (animator != null)
+            {
+                // Hide the tank only in this disposable preview; keep the original prefab and battle actor intact.
+                foreach (Renderer renderer in previewModel.GetComponentsInChildren<Renderer>(true))
+                    if (!renderer.transform.IsChildOf(animator.transform)) renderer.enabled = false;
+            }
         }
 
-        Vector3 direction = new Vector3(3f, 2f, 4f).normalized;
+        Renderer[] renderers = previewModel.GetComponentsInChildren<Renderer>();
+        Bounds bounds = new(previewRoot.position, Vector3.one);
+        bool hasBounds = false;
+        foreach (Renderer renderer in renderers)
+        {
+            if (!renderer.enabled) continue;
+            if (hasBounds) bounds.Encapsulate(renderer.bounds);
+            else { bounds = renderer.bounds; hasBounds = true; }
+        }
+
+        previewCamera.clearFlags = characterOnly ? CameraClearFlags.SolidColor : previewClearFlags;
+        previewCamera.backgroundColor = characterOnly ? Color.clear : previewBackground;
+        Vector3 direction = characterOnly
+            ? new Vector3(0f, 0.15f, 1f).normalized
+            : new Vector3(3f, 2f, 4f).normalized;
         previewCamera.transform.position = bounds.center + direction * 8f;
         previewCamera.transform.LookAt(bounds.center);
-        previewCamera.orthographicSize = Mathf.Max(1.8f, bounds.extents.magnitude * 1.15f);
+        previewCamera.orthographicSize = characterOnly
+            ? Mathf.Max(0.75f, Mathf.Max(bounds.extents.y, bounds.extents.x / previewCamera.aspect) * 1.05f)
+            : Mathf.Max(1.8f, bounds.extents.magnitude * 1.15f);
         nameLabel.text = option.DisplayName.ToUpperInvariant();
         indexLabel.text = $"{index + 1} / {CharacterCount}";
     }

@@ -10,6 +10,7 @@ public sealed class TankAppearance : MonoBehaviour
     [SerializeField] private Vector3 muzzlePosition = new(0f, 0.1f, 1.25f);
 
     public string CharacterName { get; private set; }
+    public TankCharacterAnimation CharacterAnimation { get; private set; }
 
     public void ApplyCharacter(GameObject modelPrefab, string characterName)
     {
@@ -24,6 +25,13 @@ public sealed class TankAppearance : MonoBehaviour
         modelRoot.localScale = Vector3.one;
         modelRoot.name = "Character Model";
         CharacterName = characterName;
+        CharacterAnimation = modelRoot.GetComponentInChildren<TankCharacterAnimation>(true);
+        CharacterAnimation?.PlayIdle();
+        foreach (Animator animator in modelRoot.GetComponentsInChildren<Animator>(true))
+        {
+            // Tank movement is owned by Drive/A*, never by cosmetic animation root motion.
+            animator.applyRootMotion = false;
+        }
 
         Transform turret = FindTurret(modelRoot);
         if (turret == null)
@@ -44,6 +52,8 @@ public sealed class TankAppearance : MonoBehaviour
         else if (TryGetComponent(out AITank aiTank))
         {
             aiTank.SetWeaponTransforms(turret, muzzle);
+            // The previous model is destroyed; never keep its Animator (or another tank's).
+            aiTank.anim = modelRoot.GetComponentInChildren<Animator>(true);
             gameObject.name = "Enemy - " + characterName;
         }
     }

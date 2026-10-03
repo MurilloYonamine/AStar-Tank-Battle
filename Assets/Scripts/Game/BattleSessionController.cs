@@ -9,6 +9,7 @@ public sealed class BattleSessionController : MonoBehaviour
 {
     [Header("Scene references")]
     [SerializeField] private UIDocument menuDocument;
+    [SerializeField] private MenuManager menuManager;
     [SerializeField] private UIDocument hudDocument;
     [SerializeField] private StyleSheet hudStyle;
     [SerializeField] private TankHealth playerHealth;
@@ -20,6 +21,7 @@ public sealed class BattleSessionController : MonoBehaviour
     [SerializeField] private TankAppearance playerAppearance;
     [SerializeField] private TankAppearance[] enemyAppearances;
     [SerializeField] private BattleCameraController battleCamera;
+    [SerializeField] private EnemyTankSpawner enemySpawner;
 
     [Header("Match intro (unscaled seconds)")]
     [SerializeField, Min(0.01f)] private float fadeDuration = 0.3f;
@@ -51,10 +53,14 @@ public sealed class BattleSessionController : MonoBehaviour
     private VisualElement matchFade;
     private Label countdownLabel;
     private Coroutine roundIntro;
+    private Coroutine roundResult;
+    private VisualElement resultCharacterPreview;
+    private int selectedCharacterIndex;
     private float hudSortingOrder;
 
     public bool IsRoundActive => roundActive;
     public bool IsStartingRound { get; private set; }
+    public int RoundScore => observedPlayerData != null ? observedPlayerData.pontos : 0;
 
     private void Awake()
     {
@@ -95,12 +101,13 @@ public sealed class BattleSessionController : MonoBehaviour
         VisualElement menuRoot = menuDocument.rootVisualElement;
         mainMenu = menuRoot.Q<VisualElement>("MainMenu");
         hudRoot = hudDocument.rootVisualElement;
-        hudRoot.styleSheets.Add(hudStyle);
+        if (!hudRoot.styleSheets.Contains(hudStyle)) hudRoot.styleSheets.Add(hudStyle);
         hudRoot.pickingMode = PickingMode.Ignore;
 
         battleOverlay = hudRoot.Q<VisualElement>("BattleOverlay");
         battleHud = hudRoot.Q<VisualElement>("BattleHud");
         defeatScreen = hudRoot.Q<VisualElement>("DefeatScreen");
+        resultCharacterPreview = hudRoot.Q<VisualElement>("ResultCharacterPreview");
         healthFill = hudRoot.Q<VisualElement>("HealthFill");
         healthLabel = hudRoot.Q<Label>("HealthLabel");
         scoreLabel = hudRoot.Q<Label>("ScoreLabel");
@@ -138,10 +145,25 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         PlayerData currentData = manager.PlayerData;
-        if (currentData != null && !ReferenceEquals(currentData, observedPlayerData))
+        bool startRequested = !roundActive && !IsStartingRound &&
+            (characterSelection == null || !characterSelection.IsOpen) &&
+            PauseManager.Instance != null && !PauseManager.Instance.IsPaused;
+        if (currentData != null &&
+            (!ReferenceEquals(currentData, observedPlayerData) || startRequested))
         {
             StopRoundIntro();
-            observedPlayerData = currentData;
+            StopRoundResult();
+            roundActive = false;
+            enemySpawner?.StopSpawning(true);
+            // AuthMenu may reuse a cached account. Keep it untouched and give this round
+            // its own score, retaining the ID and fields used by Murilo's existing API.
+            observedPlayerData = new PlayerData(currentData.id, currentData.name,
+                currentData.email, currentData.password, 0,
+                currentData.created_at, currentData.updated_at);
+            manager.StartGame(observedPlayerData);
+            battleOverlay.style.display = DisplayStyle.None;
+            defeatScreen.style.display = DisplayStyle.None;
+            menuDocument.rootVisualElement.style.display = DisplayStyle.None;
             if (characterSelection != null)
             {
                 roundActive = false;
@@ -190,7 +212,12 @@ public sealed class BattleSessionController : MonoBehaviour
         }
     }
 
-    private void OnDisable() => StopRoundIntro();
+    private void OnDisable()
+    {
+        enemySpawner?.StopSpawning();
+        StopRoundIntro();
+        StopRoundResult();
+    }
 
     private static TankSpawn CaptureSpawn(TankHealth health)
     {
@@ -205,6 +232,7 @@ public sealed class BattleSessionController : MonoBehaviour
     private void BeginSelectedRound(int selectedIndex)
     {
         if (IsStartingRound) return;
+        selectedCharacterIndex = selectedIndex;
         if (matchIntro != null && matchFade != null && countdownLabel != null)
         {
             IsStartingRound = true;
@@ -255,9 +283,11 @@ public sealed class BattleSessionController : MonoBehaviour
         for (int number = 1; number <= 3; number++)
         {
             countdownLabel.text = number.ToString();
+            BattleAudioController.PlayCountdown();
             yield return new WaitForSecondsRealtime(countdownStepDuration);
         }
         countdownLabel.text = "JÁ!";
+        BattleAudioController.PlayMatchStart();
         yield return new WaitForSecondsRealtime(goDuration);
 
         HideMatchIntro();
@@ -296,10 +326,11 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void CancelCharacterSelection()
     {
+        enemySpawner?.StopSpawning(true);
         // Cancelling an unstarted round must not submit a score to the server.
         GameManager.Instance.enabled = false;
         PauseManager.Instance.SetPause(true);
-        if (mainMenu != null) mainMenu.style.display = DisplayStyle.Flex;
+        ShowMainMenu();
         if (battleCamera != null) battleCamera.ShowMenu();
     }
 
@@ -331,7 +362,7 @@ public sealed class BattleSessionController : MonoBehaviour
                 }
             }
 
-            tank.SetActive(true);
+            tank.SetActive(enemySpawner == null || spawn.Health == playerHealth);
         }
 
         Physics.SyncTransforms();
@@ -354,6 +385,7 @@ public sealed class BattleSessionController : MonoBehaviour
             }
         }
 
+        enemySpawner?.PrepareForRound();
         if (battleCamera != null) battleCamera.ShowBattle(playerHealth.transform);
         battleOverlay.style.display = DisplayStyle.Flex;
         hudRoot.pickingMode = IsStartingRound ? PickingMode.Position : PickingMode.Ignore;
@@ -367,6 +399,7 @@ public sealed class BattleSessionController : MonoBehaviour
         GameManager.Instance.enabled = true;
         if (PauseManager.Instance != null) PauseManager.Instance.SetPause(false);
         roundActive = true;
+        enemySpawner?.StartSpawning();
     }
 
     private void OnEnemyDied(TankHealth enemyHealth, GameObject source)
@@ -389,6 +422,7 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         roundActive = false;
+        enemySpawner?.StopSpawning();
         StopCombatDamage();
 
         if (PauseManager.Instance != null)
@@ -397,31 +431,66 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         GameManager manager = GameManager.Instance;
-        int finalScore = manager != null && manager.PlayerData != null
-            ? manager.PlayerData.pontos
-            : 0;
+        int finalScore = RoundScore;
         if (manager != null && manager.PlayerData != null)
         {
             manager.EndGame();
             manager.enabled = false;
         }
 
-        finalScoreLabel.text = $"PONTUAÇÃO FINAL: {finalScore}";
+        finalScoreLabel.text = finalScore.ToString();
+        RefreshHud();
+        if (health.DeathAnimationDuration > 0f)
+            roundResult = StartCoroutine(WaitForDeathThenShowResult(health.DeathAnimationDuration));
+        else ShowRoundResult();
+    }
+
+    private IEnumerator WaitForDeathThenShowResult(float duration)
+    {
+        yield return new WaitForSecondsRealtime(duration + 0.15f);
+        roundResult = null;
+        ShowRoundResult();
+    }
+
+    private void ShowRoundResult()
+    {
+        BattleAudioController.PlayResult();
         hudRoot.pickingMode = PickingMode.Position;
         battleHud.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.Flex;
+        characterSelection?.ShowResultPreview(selectedCharacterIndex, resultCharacterPreview);
+    }
+
+    private void StopRoundResult()
+    {
+        if (roundResult != null) StopCoroutine(roundResult);
+        roundResult = null;
+        characterSelection?.Close();
     }
 
     private void ReturnToMenu()
     {
+        BattleAudioController.PlayButtonClick();
+        roundActive = false;
+        enemySpawner?.StopSpawning(true);
+        StopRoundIntro();
+        StopRoundResult();
+        if (GameManager.Instance != null) GameManager.Instance.enabled = false;
+        if (PauseManager.Instance != null) PauseManager.Instance.SetPause(true);
         if (battleCamera != null) battleCamera.ShowMenu();
         defeatScreen.style.display = DisplayStyle.None;
         battleOverlay.style.display = DisplayStyle.None;
         hudRoot.pickingMode = PickingMode.Ignore;
-        if (mainMenu != null)
-        {
-            mainMenu.style.display = DisplayStyle.Flex;
-        }
+        ShowMainMenu();
+    }
+
+    private void ShowMainMenu()
+    {
+        menuDocument.rootVisualElement.style.display = DisplayStyle.Flex;
+        // Use the public navigation API so login, score and settings are closed too.
+        MenuManager menu = menuManager != null ? menuManager : MenuManager.Instance;
+        if (menu != null) menu.OpenMainMenu();
+        else if (mainMenu != null) mainMenu.style.display = DisplayStyle.Flex;
     }
 
     private void RefreshHud()
@@ -432,8 +501,7 @@ public sealed class BattleSessionController : MonoBehaviour
             : 0f;
         healthFill.style.width = new Length(healthPercent, LengthUnit.Percent);
 
-        PlayerData data = GameManager.Instance != null ? GameManager.Instance.PlayerData : null;
-        scoreLabel.text = data != null ? data.pontos.ToString() : "0";
+        scoreLabel.text = RoundScore.ToString();
     }
 
     private static void StopCombatDamage()

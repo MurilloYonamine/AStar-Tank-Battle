@@ -7,10 +7,10 @@ using UnityEngine;
 public sealed class EnemyTankPerception : MonoBehaviour
 {
     [Header("Vision")]
-    [SerializeField, Min(0.1f)] private float viewDistance = 30f;
-    [SerializeField, Range(1f, 360f)] private float fieldOfView = 120f;
+    [SerializeField, Min(0.1f)] private float viewDistance = 35f;
+    [SerializeField, Range(1f, 360f)] private float fieldOfView = 150f;
     [SerializeField, Min(0f)] private float sensorHeight = 1f;
-    [SerializeField] private LayerMask obstacleMask = 1 << 6;
+    [SerializeField] private LayerMask obstacleMask = (1 << 6) | (1 << 8);
 
     [Header("Attack")]
     [SerializeField, Min(0.1f)] private float attackRange = 18f;
@@ -40,22 +40,32 @@ public sealed class EnemyTankPerception : MonoBehaviour
             return false;
         }
 
-        return !Physics.Raycast(
-            origin,
-            toTarget / distance,
-            distance,
-            obstacleMask,
-            QueryTriggerInteraction.Ignore);
+        return HasLineOfSightFrom(transform.position, target, targetCollider);
+    }
+
+    public bool HasLineOfSightFrom(Vector3 position, Transform target, Collider targetCollider)
+    {
+        if (target == null) return false;
+        Vector3 origin = position + Vector3.up * sensorHeight;
+        Vector3 direction = GetTargetPosition(target, targetCollider) - origin;
+        float distance = direction.magnitude;
+        return distance >= 0.01f && distance <= viewDistance &&
+            !Physics.Raycast(origin, direction / distance, distance, obstacleMask, QueryTriggerInteraction.Collide);
     }
 
     public bool IsWithinAttackRange(Transform target, Collider targetCollider)
+    {
+        return IsWithinAttackRangeFrom(transform.position, target, targetCollider);
+    }
+
+    public bool IsWithinAttackRangeFrom(Vector3 position, Transform target, Collider targetCollider)
     {
         if (target == null)
         {
             return false;
         }
 
-        Vector3 toTarget = GetTargetPosition(target, targetCollider) - GetSensorPosition();
+        Vector3 toTarget = GetTargetPosition(target, targetCollider) - (position + Vector3.up * sensorHeight);
         return toTarget.sqrMagnitude <= attackRange * attackRange;
     }
 

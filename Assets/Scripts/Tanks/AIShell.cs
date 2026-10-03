@@ -8,6 +8,7 @@ public class AIShell : MonoBehaviour
     private Rigidbody body;
     private Collider shellCollider;
     private GameObject owner;
+    private int ownerGeneration;
     private Vector3 velocityBeforePause;
     private bool wasPaused;
     private bool exploded;
@@ -22,6 +23,8 @@ public class AIShell : MonoBehaviour
     public void SetOwner(GameObject tank)
     {
         owner = tank;
+        ownerGeneration = owner != null && owner.TryGetComponent(out AITank attacker)
+            ? attacker.WeaponGeneration : 0;
         if (owner == null || shellCollider == null)
         {
             return;
@@ -35,6 +38,7 @@ public class AIShell : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (exploded) return;
         bool isPaused = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         if (isPaused)
         {
@@ -58,6 +62,11 @@ public class AIShell : MonoBehaviour
 
         if (body.linearVelocity.sqrMagnitude > 0.001f)
         {
+            if (ProjectileObstacleCheck.TryHitCover(shellCollider, body.linearVelocity, out Vector3 impact))
+            {
+                ExplodeAt(impact, true);
+                return;
+            }
             body.MoveRotation(Quaternion.LookRotation(body.linearVelocity));
         }
     }
@@ -69,10 +78,20 @@ public class AIShell : MonoBehaviour
             return;
         }
 
+        ExplodeAt(transform.position, ProjectileObstacleCheck.IsObstacle(collision.collider));
+    }
+
+    private void ExplodeAt(Vector3 position, bool blockedByObstacle = false)
+    {
+        if (exploded) return;
         exploded = true;
+        shellCollider.enabled = false;
+        body.linearVelocity = Vector3.zero;
+        if (blockedByObstacle && owner != null && owner.TryGetComponent(out AITank attacker))
+            attacker.NotifyBlockedShot(ownerGeneration);
         if (explosion != null)
         {
-            GameObject effect = Instantiate(explosion, transform.position, Quaternion.identity);
+            GameObject effect = Instantiate(explosion, position, Quaternion.identity);
             if (effect.TryGetComponent(out ExplosionDamage damageArea))
             {
                 damageArea.SetSource(owner);

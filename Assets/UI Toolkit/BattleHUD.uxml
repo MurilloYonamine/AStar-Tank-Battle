@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="BattleHUD.uss" />
     <ui:VisualElement name="BattleOverlay" class="battle-overlay" style="display: none;">
         <ui:VisualElement name="BattleHud" class="battle-hud">
             <ui:VisualElement class="hud-card">
@@ -15,14 +16,15 @@
         </ui:VisualElement>
         <ui:VisualElement name="DefeatScreen" class="defeat-screen">
             <ui:VisualElement class="defeat-card">
-                <ui:Label text="DERROTA" class="defeat-title" />
-                <ui:Label name="FinalScoreLabel" text="PONTUAÇÃO FINAL: 0" class="defeat-score" />
-                <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button" />
+                <ui:Label text="PONTUAÇÃO FINAL" class="result-score-caption" />
+                <ui:Label name="FinalScoreLabel" text="0" class="defeat-score battle-ui-title" />
+                <ui:VisualElement name="ResultCharacterPreview" class="result-character-preview" picking-mode="Ignore" />
+                <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button battle-ui-button battle-ui-primary" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="MatchIntro" class="match-intro" style="display: none;">
         <ui:VisualElement name="MatchFade" class="match-fade" />
-        <ui:Label name="CountdownLabel" text="1" class="match-countdown" style="display: none;" picking-mode="Ignore" />
+        <ui:Label name="CountdownLabel" text="1" class="match-countdown battle-ui-title" style="display: none;" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

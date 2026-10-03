@@ -27,6 +27,7 @@ public class Shell : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (exploded) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
             body.linearVelocity = Vector3.zero;
@@ -36,6 +37,8 @@ public class Shell : MonoBehaviour
         currentSpeed *= Mathf.Max(0f, 1f - Time.fixedDeltaTime * drag);
         verticalSpeed -= downwardAcceleration * Time.fixedDeltaTime;
         body.linearVelocity = transform.forward * currentSpeed + Vector3.up * verticalSpeed;
+        if (ProjectileObstacleCheck.TryHitCover(shellCollider, body.linearVelocity, out Vector3 impact))
+            ExplodeAt(impact);
     }
 
     public void SetOwner(GameObject tank)
@@ -59,10 +62,18 @@ public class Shell : MonoBehaviour
             return;
         }
 
+        ExplodeAt(transform.position);
+    }
+
+    private void ExplodeAt(Vector3 position)
+    {
+        if (exploded) return;
         exploded = true;
+        shellCollider.enabled = false;
+        body.linearVelocity = Vector3.zero;
         if (explosion != null)
         {
-            GameObject effect = Instantiate(explosion, transform.position, Quaternion.identity);
+            GameObject effect = Instantiate(explosion, position, Quaternion.identity);
             if (effect.TryGetComponent(out ExplosionDamage damageArea))
             {
                 damageArea.SetSource(owner);

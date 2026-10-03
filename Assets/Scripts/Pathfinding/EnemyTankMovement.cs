@@ -18,9 +18,9 @@ public sealed class EnemyTankMovement : MonoBehaviour
     [SerializeField, Min(0f)] private float collisionSkin = 0.05f;
     [SerializeField] private LayerMask obstacleMask = 1 << 6;
     [Header("Blocked path recovery")]
-    [SerializeField, Min(0.2f)] private float blockedTimeout = 0.8f;
-    [SerializeField, Min(0.2f)] private float retryInterval = 1.2f;
-    [SerializeField, Min(0.5f)] private float avoidanceDuration = 4f;
+    [SerializeField, Min(0.2f)] private float blockedTimeout = 0.45f;
+    [SerializeField, Min(0.2f)] private float retryInterval = 0.65f;
+    [SerializeField, Min(0.5f)] private float avoidanceDuration = 6f;
 
     private readonly AStarPathfinder pathfinder = new();
     private readonly List<GridNode> currentPath = new();
@@ -34,9 +34,12 @@ public sealed class EnemyTankMovement : MonoBehaviour
     private Vector3 progressPosition;
     private float blockedTime;
     private float retryRemaining;
-    private int failedAttempts;
+    private bool isYielding;
+    private Vector3 yieldPosition;
+    private bool shouldFaceTarget;
+    private Vector3 facingPosition;
 
-    public bool IsMoving => currentNodeIndex < currentPath.Count;
+    public bool IsMoving => isYielding || currentNodeIndex < currentPath.Count;
     public bool HasDestination { get; private set; }
     public IReadOnlyList<GridNode> CurrentPath => currentPath;
 
@@ -59,7 +62,7 @@ public sealed class EnemyTankMovement : MonoBehaviour
         retryRemaining = Mathf.Max(0f, retryRemaining - Time.fixedDeltaTime);
         if (HasDestination && !IsMoving && retryRemaining <= 0f)
         {
-            RecalculatePath();
+            if (!RecalculatePath()) TryBeginYield();
         }
 
         if (IsMoving)
@@ -77,25 +80,46 @@ public sealed class EnemyTankMovement : MonoBehaviour
 
             if (blockedTime >= blockedTimeout && retryRemaining <= 0f)
             {
-                GridNode blockedNode = currentPath[currentNodeIndex];
+                GridNode blockedNode = isYielding
+                    ? grid.GetNodeFromWorldPosition(yieldPosition)
+                    : currentPath[currentNodeIndex];
                 GridNode currentNode = grid.GetNodeFromWorldPosition(body.position);
                 if (blockedNode != currentNode)
                 {
                     avoidedCells[blockedNode] = Time.time + avoidanceDuration;
                 }
 
-                RecalculatePath();
+                isYielding = false;
+                bool foundPath = RecalculatePath();
+                if (!foundPath || blockedNode == currentNode ||
+                    blockedNode == grid.GetNodeFromWorldPosition(destination))
+                    TryBeginYield();
             }
         }
 
         FollowPath();
+        if (!IsMoving && shouldFaceTarget)
+        {
+            Vector3 direction = Vector3.ProjectOnPlane(facingPosition - body.position, Vector3.up);
+            if (direction.sqrMagnitude > 0.0001f)
+            {
+                Quaternion rotation = Quaternion.RotateTowards(body.rotation, Quaternion.LookRotation(direction),
+                    rotationSpeed * Time.fixedDeltaTime);
+                if (TankCollisionGuard.CanOccupy(hull, body.position, rotation, obstacleMask))
+                {
+                    body.MoveRotation(rotation);
+                    TankCollisionGuard.ReservePose(hull, body.position, rotation);
+                }
+            }
+        }
     }
 
     public bool SetDestination(Vector3 destination)
     {
         this.destination = destination;
+        shouldFaceTarget = false;
         HasDestination = true;
-        failedAttempts = 0;
+        isYielding = false;
         return RecalculatePath();
     }
 
@@ -124,16 +148,11 @@ public sealed class EnemyTankMovement : MonoBehaviour
         if (!pathfinder.TryFindPath(grid, startNode, destinationNode, out List<GridNode> newPath,
                 temporaryObstacles))
         {
-            failedAttempts++;
-            if (failedAttempts >= 3)
-            {
-                HasDestination = false;
-            }
+            // Keep the goal pending: a temporary tank blockage must never permanently stop pursuit.
             grid.SetDebugPath(null);
             return false;
         }
 
-        failedAttempts = 0;
         if (newPath.Count > 0 &&
             Vector3.ProjectOnPlane(startNode.WorldPosition - body.position, Vector3.up).sqrMagnitude >
             nodeReachDistance * nodeReachDistance)
@@ -150,6 +169,8 @@ public sealed class EnemyTankMovement : MonoBehaviour
     public void Stop()
     {
         HasDestination = false;
+        shouldFaceTarget = false;
+        isYielding = false;
         blockedTime = 0f;
         retryRemaining = 0f;
         avoidedCells.Clear();
@@ -160,6 +181,62 @@ public sealed class EnemyTankMovement : MonoBehaviour
         {
             grid.SetDebugPath(null);
         }
+    }
+
+    public void FaceTarget(Vector3 position)
+    {
+        facingPosition = position;
+        shouldFaceTarget = true;
+    }
+
+    private bool TryBeginYield()
+    {
+        if (grid == null || !grid.IsBuilt) return false;
+        GridNode start = grid.GetNodeFromWorldPosition(body.position);
+        GridNode goal = grid.GetNearestWalkableNode(destination);
+        if (start == null || goal == null) return false;
+        CollectTemporaryObstacles(start, goal);
+        float bestScore = float.PositiveInfinity;
+        Vector3 bestPosition = Vector3.zero;
+
+        foreach (GridNode neighbour in start.Neighbours)
+        {
+            if (!neighbour.IsWalkable || temporaryObstacles.Contains(neighbour)) continue;
+            // Back out or step sideways on one axis; never take a diagonal shortcut through the grid.
+            Vector3 direction = (neighbour.WorldPosition - start.WorldPosition).normalized;
+            Vector3 candidate = body.position + direction * grid.CellSize;
+            if (grid.GetNodeFromWorldPosition(candidate) != neighbour ||
+                !TankCollisionGuard.CanOccupy(hull, candidate, body.rotation, obstacleMask)) continue;
+            bool blocked = false;
+            foreach (RaycastHit hit in body.SweepTestAll(direction, grid.CellSize + collisionSkin,
+                         QueryTriggerInteraction.Ignore))
+            {
+                if (TankCollisionGuard.IsBlocking(hit.collider, transform, obstacleMask) &&
+                    hit.distance < grid.CellSize + collisionSkin)
+                {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (blocked) continue;
+            // The escape is useful even when a temporary blockage still prevents reaching the goal.
+            bool hasRoute = pathfinder.TryFindPath(grid, neighbour, goal, out List<GridNode> route,
+                temporaryObstacles);
+            float score = (hasRoute ? route.Count : grid.Width + grid.Depth) +
+                (candidate - destination).sqrMagnitude * 0.001f;
+            if (score >= bestScore) continue;
+            bestScore = score;
+            bestPosition = candidate;
+        }
+        if (float.IsPositiveInfinity(bestScore)) return false;
+        isYielding = true;
+        yieldPosition = bestPosition;
+        currentPath.Clear();
+        currentNodeIndex = 0;
+        HasDestination = true;
+        blockedTime = 0f;
+        progressPosition = body.position;
+        return true;
     }
 
     private void CollectTemporaryObstacles(GridNode startNode, GridNode destinationNode)
@@ -219,8 +296,7 @@ public sealed class EnemyTankMovement : MonoBehaviour
             return;
         }
 
-        GridNode targetNode = currentPath[currentNodeIndex];
-        Vector3 targetPosition = targetNode.WorldPosition;
+        Vector3 targetPosition = isYielding ? yieldPosition : currentPath[currentNodeIndex].WorldPosition;
         targetPosition.y = body.position.y;
 
         Vector3 direction = targetPosition - body.position;
@@ -229,6 +305,12 @@ public sealed class EnemyTankMovement : MonoBehaviour
         float distance = direction.magnitude;
         if (distance <= nodeReachDistance)
         {
+            if (isYielding)
+            {
+                isYielding = false;
+                RecalculatePath();
+                return;
+            }
             currentNodeIndex++;
             if (!IsMoving)
             {

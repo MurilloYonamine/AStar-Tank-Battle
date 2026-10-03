@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Applies one radial damage pulse to each tank inside the explosion collider.
+/// Applies one radial damage pulse to each tank except the tank that fired it.
 /// </summary>
 [RequireComponent(typeof(SphereCollider))]
 public sealed class ExplosionDamage : MonoBehaviour
@@ -15,6 +15,7 @@ public sealed class ExplosionDamage : MonoBehaviour
     private readonly HashSet<TankHealth> damagedTanks = new();
     private SphereCollider areaCollider;
     private GameObject source;
+    private TankHealth sourceTank;
 
     private void Awake()
     {
@@ -44,6 +45,7 @@ public sealed class ExplosionDamage : MonoBehaviour
     public void SetSource(GameObject damageSource)
     {
         source = damageSource;
+        sourceTank = source != null ? source.GetComponentInParent<TankHealth>() : null;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -59,7 +61,8 @@ public sealed class ExplosionDamage : MonoBehaviour
         }
 
         TankHealth health = other.GetComponentInParent<TankHealth>();
-        if (health == null || health.IsDead || damagedTanks.Contains(health))
+        // Compare individual tanks, not teams: another enemy's shot still deals damage.
+        if (health == null || health == sourceTank || health.IsDead || damagedTanks.Contains(health))
         {
             return;
         }
