@@ -6,6 +6,7 @@ public class AITank : MonoBehaviour
     public GameObject bulletSpawn;
     public GameObject enemy;
     public Transform cannon;
+    public Animator anim;
 
     [Min(1f)] public float rotationSpeed = 120f;
     [Min(0.1f)] public float fireInterval = 1.5f;
@@ -70,6 +71,9 @@ public class AITank : MonoBehaviour
             perception.IsWithinAttackRange(enemy.transform, targetCollider) &&
             fireCooldownRemaining <= 0f)
         {
+            Debug.Log("Atirou");
+            //anim.SetTrigger("isHittingT");
+            anim.Play("Soco");
             CreateBullet();
             fireCooldownRemaining = Mathf.Max(0.1f, fireInterval);
         }
