@@ -511,6 +511,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Super creek mummy v2
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: fe9023d0127f7dd4784e2a2c9b0bd514,
+        type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: fe9023d0127f7dd4784e2a2c9b0bd514, type: 3}
+    - target: {fileID: 5866666021909216657, guid: fe9023d0127f7dd4784e2a2c9b0bd514,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 02c828f75e270754db6b763574d05654, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: -8700617353114198275, guid: fe9023d0127f7dd4784e2a2c9b0bd514, type: 3}

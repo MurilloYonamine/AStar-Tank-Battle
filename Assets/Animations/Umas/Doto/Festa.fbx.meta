@@ -1,54 +1,9 @@
 fileFormatVersion: 2
-guid: 9c3c366adda0c85449b69cf2774a5092
+guid: feee18e4cb514d44cb0daaa317484b58
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Brow_L
-    second: {fileID: 2100000, guid: 98679db55863d0642b274edf86877c57, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Brow_R
-    second: {fileID: 2100000, guid: 471117dd9410999498a5d559a79e2ef5, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Cheek
-    second: {fileID: 2100000, guid: fc2b6305f64d83a4ea5db72a2f0f6238, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Eyes
-    second: {fileID: 2100000, guid: 328dd892d1014384dbc393d32e5ff4a8, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Mouth
-    second: {fileID: 2100000, guid: d6a4be7874cffba4d96f890b223dde6b, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: body
-    second: {fileID: 2100000, guid: b89e5bbf14caab74d8b3f1d517c5829a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: head_skibidi
-    second: {fileID: 2100000, guid: c5d7b081c70f3a242b4624e76bdcf9a2, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: mtl_mchr1002_00_hair
-    second: {fileID: 2100000, guid: 9341e33afafaad947b23a1632e72538a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: mtl_mtail0001_00
-    second: {fileID: 2100000, guid: 26986e65434aa954586a9d17ac0a820e, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0

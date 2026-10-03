@@ -464,7 +464,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: c816a009419f6bd42ab6f5f74fcb8707,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.05
+      value: 1.822
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c816a009419f6bd42ab6f5f74fcb8707,
         type: 3}
@@ -511,6 +511,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: doto chibi
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: c816a009419f6bd42ab6f5f74fcb8707,
+        type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 506d5adcae1448e47beb5e7871894df9, type: 3}
+    - target: {fileID: 5866666021909216657, guid: c816a009419f6bd42ab6f5f74fcb8707,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: f7a5c44f2cd296a44b69ef4a215b88f6, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
