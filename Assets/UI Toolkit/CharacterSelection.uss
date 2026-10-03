@@ -1,0 +1,86 @@
+.selection-screen {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(16, 26, 46);
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+.selection-title {
+    font-size: 36px;
+    color: rgb(242, 201, 76);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+.selection-subtitle, .selection-index, .selection-hint {
+    font-size: 17px;
+    color: rgb(196, 209, 232);
+    -unity-text-align: middle-center;
+}
+.selection-carousel {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    max-height: 420px;
+    min-height: 170px;
+}
+.selection-preview {
+    width: 560px;
+    max-width: 70%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.selection-arrow {
+    width: 68px;
+    height: 90px;
+    font-size: 54px;
+    background-color: rgb(36, 52, 82);
+    color: rgb(242, 201, 76);
+    border-width: 0;
+    border-radius: 8px;
+}
+.selection-name {
+    font-size: 32px;
+    color: rgb(245, 245, 245);
+    -unity-font-style: bold;
+}
+.selection-index {
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+.selection-actions {
+    flex-direction: row;
+    justify-content: center;
+}
+.selection-button {
+    width: 270px;
+    height: 58px;
+    margin-left: 8px;
+    margin-right: 8px;
+    background-color: rgb(242, 201, 76);
+    color: rgb(16, 26, 46);
+    border-width: 0;
+    border-radius: 6px;
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+.selection-back {
+    width: 170px;
+    background-color: rgb(36, 52, 82);
+    color: rgb(245, 245, 245);
+}
+.selection-button:hover, .selection-arrow:hover {
+    background-color: rgb(255, 220, 110);
+    color: rgb(16, 26, 46);
+}
+.selection-hint {
+    font-size: 14px;
+    margin-top: 14px;
+}

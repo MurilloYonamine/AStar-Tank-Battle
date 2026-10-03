@@ -21,4 +21,8 @@
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
+    <ui:VisualElement name="MatchIntro" class="match-intro" style="display: none;">
+        <ui:VisualElement name="MatchFade" class="match-fade" />
+        <ui:Label name="CountdownLabel" text="1" class="match-countdown" style="display: none;" picking-mode="Ignore" />
+    </ui:VisualElement>
 </ui:UXML>

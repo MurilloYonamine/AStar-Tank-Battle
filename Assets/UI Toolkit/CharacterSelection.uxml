@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="CharacterSelection" class="selection-screen" style="display: none;">
+        <ui:Label text="ESCOLHA SUA PERSONAGEM" class="selection-title" />
+        <ui:Label text="As outras quatro serão suas inimigas." class="selection-subtitle" />
+        <ui:VisualElement class="selection-carousel">
+            <ui:Button name="PreviousCharacterButton" text="‹" class="selection-arrow" />
+            <ui:VisualElement name="CharacterPreview" class="selection-preview" picking-mode="Ignore" />
+            <ui:Button name="NextCharacterButton" text="›" class="selection-arrow" />
+        </ui:VisualElement>
+        <ui:Label name="CharacterName" text="DOTO" class="selection-name" />
+        <ui:Label name="CharacterIndex" text="1 / 5" class="selection-index" />
+        <ui:VisualElement class="selection-actions">
+            <ui:Button name="CharacterBackButton" text="VOLTAR" class="selection-button selection-back" />
+            <ui:Button name="ConfirmCharacterButton" text="COMEÇAR PARTIDA" class="selection-button" />
+        </ui:VisualElement>
+        <ui:Label text="← → trocar personagem  •  Clique em COMEÇAR PARTIDA para confirmar" class="selection-hint" />
+    </ui:VisualElement>
+</ui:UXML>
