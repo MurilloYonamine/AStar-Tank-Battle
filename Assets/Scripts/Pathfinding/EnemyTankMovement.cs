@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// Rotates and moves an enemy tank through the sequence of nodes returned by A*.
-/// Decision making and path recalculation intentionally remain outside this class.
+/// The state machine chooses destinations; this component retries paths when physical travel is blocked.
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public sealed class EnemyTankMovement : MonoBehaviour
@@ -17,14 +17,27 @@ public sealed class EnemyTankMovement : MonoBehaviour
     [SerializeField, Min(0.01f)] private float nodeReachDistance = 0.2f;
     [SerializeField, Min(0f)] private float collisionSkin = 0.05f;
     [SerializeField] private LayerMask obstacleMask = 1 << 6;
+    [Header("Blocked path recovery")]
+    [SerializeField, Min(0.2f)] private float blockedTimeout = 0.8f;
+    [SerializeField, Min(0.2f)] private float retryInterval = 1.2f;
+    [SerializeField, Min(0.5f)] private float avoidanceDuration = 4f;
 
     private readonly AStarPathfinder pathfinder = new();
     private readonly List<GridNode> currentPath = new();
+    private readonly HashSet<GridNode> temporaryObstacles = new();
+    private readonly Dictionary<GridNode, float> avoidedCells = new();
+    private readonly List<GridNode> expiredCells = new();
     private int currentNodeIndex;
     private Rigidbody body;
     private BoxCollider hull;
+    private Vector3 destination;
+    private Vector3 progressPosition;
+    private float blockedTime;
+    private float retryRemaining;
+    private int failedAttempts;
 
     public bool IsMoving => currentNodeIndex < currentPath.Count;
+    public bool HasDestination { get; private set; }
     public IReadOnlyList<GridNode> CurrentPath => currentPath;
 
     private void Awake()
@@ -43,38 +56,103 @@ public sealed class EnemyTankMovement : MonoBehaviour
             return;
         }
 
+        retryRemaining = Mathf.Max(0f, retryRemaining - Time.fixedDeltaTime);
+        if (HasDestination && !IsMoving && retryRemaining <= 0f)
+        {
+            RecalculatePath();
+        }
+
+        if (IsMoving)
+        {
+            // Measure actual travel instead of trusting MovePosition: physics can reject a pose.
+            if ((body.position - progressPosition).sqrMagnitude >= 0.0025f)
+            {
+                progressPosition = body.position;
+                blockedTime = 0f;
+            }
+            else
+            {
+                blockedTime += Time.fixedDeltaTime;
+            }
+
+            if (blockedTime >= blockedTimeout && retryRemaining <= 0f)
+            {
+                GridNode blockedNode = currentPath[currentNodeIndex];
+                GridNode currentNode = grid.GetNodeFromWorldPosition(body.position);
+                if (blockedNode != currentNode)
+                {
+                    avoidedCells[blockedNode] = Time.time + avoidanceDuration;
+                }
+
+                RecalculatePath();
+            }
+        }
+
         FollowPath();
     }
 
     public bool SetDestination(Vector3 destination)
     {
+        this.destination = destination;
+        HasDestination = true;
+        failedAttempts = 0;
+        return RecalculatePath();
+    }
+
+    private bool RecalculatePath()
+    {
         ResolveGrid();
 
         if (grid == null || !grid.IsBuilt)
         {
+            HasDestination = false;
             Debug.LogWarning("EnemyTankMovement could not find a built TankGrid.", this);
             return false;
         }
 
-        GridNode startNode = grid.GetNodeFromWorldPosition(transform.position);
-        GridNode destinationNode = grid.GetNodeFromWorldPosition(destination);
+        GridNode startNode = grid.GetNearestWalkableNode(transform.position);
+        GridNode destinationNode = grid.GetNearestWalkableNode(destination);
 
         currentPath.Clear();
         currentNodeIndex = 0;
+        blockedTime = 0f;
+        progressPosition = body.position;
+        // Different retry times let one tank yield instead of both retrying in lockstep.
+        retryRemaining = retryInterval + Mathf.Abs(GetInstanceID() % 7) * 0.08f;
+        CollectTemporaryObstacles(startNode, destinationNode);
 
-        if (!pathfinder.TryFindPath(grid, startNode, destinationNode, out List<GridNode> newPath))
+        if (!pathfinder.TryFindPath(grid, startNode, destinationNode, out List<GridNode> newPath,
+                temporaryObstacles))
         {
+            failedAttempts++;
+            if (failedAttempts >= 3)
+            {
+                HasDestination = false;
+            }
             grid.SetDebugPath(null);
             return false;
         }
 
+        failedAttempts = 0;
+        if (newPath.Count > 0 &&
+            Vector3.ProjectOnPlane(startNode.WorldPosition - body.position, Vector3.up).sqrMagnitude >
+            nodeReachDistance * nodeReachDistance)
+        {
+            // Return to the current cell's center before turning into the next orthogonal edge.
+            newPath.Insert(0, startNode);
+        }
         currentPath.AddRange(newPath);
+        HasDestination = currentPath.Count > 0;
         grid.SetDebugPath(currentPath);
         return true;
     }
 
     public void Stop()
     {
+        HasDestination = false;
+        blockedTime = 0f;
+        retryRemaining = 0f;
+        avoidedCells.Clear();
         currentPath.Clear();
         currentNodeIndex = 0;
 
@@ -82,6 +160,56 @@ public sealed class EnemyTankMovement : MonoBehaviour
         {
             grid.SetDebugPath(null);
         }
+    }
+
+    private void CollectTemporaryObstacles(GridNode startNode, GridNode destinationNode)
+    {
+        temporaryObstacles.Clear();
+        expiredCells.Clear();
+        foreach (KeyValuePair<GridNode, float> avoided in avoidedCells)
+        {
+            if (avoided.Value <= Time.time)
+            {
+                expiredCells.Add(avoided.Key);
+            }
+            else
+            {
+                temporaryObstacles.Add(avoided.Key);
+            }
+        }
+
+        foreach (GridNode expired in expiredCells)
+        {
+            avoidedCells.Remove(expired);
+        }
+
+        // Snapshot moving hulls only when A* runs. Never mark shared grid nodes permanently blocked.
+        foreach (TankHealth tank in FindObjectsByType<TankHealth>(FindObjectsSortMode.None))
+        {
+            if (tank.gameObject == gameObject || tank.IsDead ||
+                !tank.TryGetComponent(out Collider otherHull))
+            {
+                continue;
+            }
+
+            Bounds occupied = otherHull.bounds;
+            Vector3 scaledSize = Vector3.Scale(hull.size, hull.transform.lossyScale);
+            float clearance = new Vector2(scaledSize.x, scaledSize.z).magnitude * 0.5f + collisionSkin;
+            occupied.Expand(new Vector3(clearance * 2f, 0f, clearance * 2f));
+            foreach (GridNode node in grid.GetAllNodes())
+            {
+                Vector3 point = node.WorldPosition;
+                if (point.x >= occupied.min.x && point.x <= occupied.max.x &&
+                    point.z >= occupied.min.z && point.z <= occupied.max.z)
+                {
+                    temporaryObstacles.Add(node);
+                }
+            }
+        }
+
+        temporaryObstacles.Remove(startNode);
+        // Chase still targets the player's cell, as required by the assignment.
+        temporaryObstacles.Remove(destinationNode);
     }
 
     private void FollowPath()
@@ -102,6 +230,10 @@ public sealed class EnemyTankMovement : MonoBehaviour
         if (distance <= nodeReachDistance)
         {
             currentNodeIndex++;
+            if (!IsMoving)
+            {
+                HasDestination = false;
+            }
             return;
         }
 

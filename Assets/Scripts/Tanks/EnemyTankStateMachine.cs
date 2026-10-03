@@ -29,7 +29,6 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
     private float targetMemoryRemaining;
     private float repathCooldownRemaining;
     private int nextWaypointIndex;
-    private bool patrolRouteUnavailable;
 
     public EnemyTankState CurrentState { get; private set; } = EnemyTankState.Patrol;
 
@@ -117,7 +116,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
                         EnterChase();
                     }
                 }
-                else if (!patrolRouteUnavailable && !movement.IsMoving)
+                else if (!movement.HasDestination && repathCooldownRemaining <= 0f)
                 {
                     TryStartNextPatrolRoute();
                 }
@@ -159,7 +158,6 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         CurrentState = EnemyTankState.Patrol;
         movement.Stop();
         plannedTargetNode = null;
-        patrolRouteUnavailable = false;
         nextWaypointIndex = FindNearestWaypointIndex();
         TryStartNextPatrolRoute();
     }
@@ -193,14 +191,17 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         }
 
         GridNode targetNode = grid.GetNodeFromWorldPosition(trackedTargetPosition);
-        if (targetNode == null || targetNode == plannedTargetNode)
+        if (targetNode == null || targetNode == plannedTargetNode && movement.HasDestination)
         {
             return;
         }
 
         plannedTargetNode = targetNode;
         repathCooldownRemaining = repathInterval;
-        movement.SetDestination(trackedTargetPosition);
+        if (!movement.SetDestination(trackedTargetPosition))
+        {
+            plannedTargetNode = null;
+        }
     }
 
     private int FindNearestWaypointIndex()
@@ -233,9 +234,10 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
 
     private void TryStartNextPatrolRoute()
     {
+        // Retry unreachable patrol routes after a delay: another tank may move out of the way.
+        repathCooldownRemaining = repathInterval;
         if (grid == null || !grid.IsBuilt || patrolWaypoints == null || patrolWaypoints.Length == 0)
         {
-            patrolRouteUnavailable = true;
             return;
         }
 
@@ -258,6 +260,5 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
             }
         }
 
-        patrolRouteUnavailable = true;
     }
 }

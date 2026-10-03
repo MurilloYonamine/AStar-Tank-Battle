@@ -3,6 +3,8 @@ using System.Collections.Generic;
 /// <summary>
 /// A* implementation adapted from the group's AStar-Pathfinding-3D project.
 /// It uses g, h and f costs, an open list, a closed set and parent references.
+/// Reference: AStar-Pathfinding-3D/Assets/Scripts/Pathfinding/AStar.cs (Run and path reconstruction).
+/// Adaptation: logical cells, Manhattan distance and optional temporary hull obstacles.
 /// </summary>
 public sealed class AStarPathfinder
 {
@@ -13,7 +15,8 @@ public sealed class AStarPathfinder
         TankGrid grid,
         GridNode startNode,
         GridNode destinationNode,
-        out List<GridNode> path)
+        out List<GridNode> path,
+        ISet<GridNode> temporaryObstacles = null)
     {
         path = new List<GridNode>();
 
@@ -49,7 +52,8 @@ public sealed class AStarPathfinder
 
             foreach (GridNode neighbour in currentNode.Neighbours)
             {
-                if (!neighbour.IsWalkable || closedNodes.Contains(neighbour))
+                if (!neighbour.IsWalkable || closedNodes.Contains(neighbour) ||
+                    temporaryObstacles != null && temporaryObstacles.Contains(neighbour))
                 {
                     continue;
                 }

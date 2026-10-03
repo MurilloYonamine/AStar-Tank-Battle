@@ -8,7 +8,7 @@ public class AITank : MonoBehaviour
     public Transform cannon;
 
     [Min(1f)] public float rotationSpeed = 120f;
-    [Min(0.1f)] public float fireInterval = 1.5f;
+    [Min(0.1f)] public float fireInterval = 3f;
     [SerializeField, Min(0.1f)] private float projectileSpeed = 15f;
 
     private const float AimToleranceDegrees = 2f;
@@ -42,6 +42,7 @@ public class AITank : MonoBehaviour
         {
             restingCannonRotation = cannon.localRotation;
         }
+        fireCooldownRemaining = fireInterval;
     }
 
     private void Update()
@@ -85,11 +86,19 @@ public class AITank : MonoBehaviour
 
     public void ResetForNewRound()
     {
-        fireCooldownRemaining = 0f;
+        fireCooldownRemaining = fireInterval;
         if (cannon != null)
         {
             cannon.localRotation = restingCannonRotation;
         }
+    }
+
+    public void SetWeaponTransforms(Transform turret, Transform muzzle)
+    {
+        cannon = turret;
+        bulletSpawn = muzzle.gameObject;
+        restingCannonRotation = cannon.localRotation;
+        ResetForNewRound();
     }
 
     private bool TryAimAtTarget()

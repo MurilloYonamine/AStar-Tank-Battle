@@ -17,11 +17,17 @@ public class Drive : MonoBehaviour
     public Transform cannon;
     public Transform bulletSpawn;
     public GameObject bulletPrefab;
+    [Tooltip("Starting upward pitch in degrees; manual elevation remains available.")]
+    [SerializeField, Range(-10f, 30f)] private float initialElevation = 5f;
+    [SerializeField, Range(-20f, 0f)] private float minimumElevation = -5f;
+    [SerializeField, Range(0f, 60f)] private float maximumElevation = 30f;
 
     private InputAction fireAction;
     private Rigidbody body;
     private BoxCollider hull;
     private Vector2 moveInput;
+    private float elevation;
+    private Quaternion cannonRestRotation;
     private readonly LayerMask obstacleMask = 1 << 6;
     private const float CollisionSkin = 0.05f;
 
@@ -33,6 +39,11 @@ public class Drive : MonoBehaviour
         body.useGravity = false;
         body.constraints = RigidbodyConstraints.FreezePositionY |
             RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        if (cannon != null)
+        {
+            cannonRestRotation = cannon.localRotation;
+            ResetAim();
+        }
 
         if (moveAction != null && moveAction.action != null)
         {
@@ -81,21 +92,45 @@ public class Drive : MonoBehaviour
 
         if (IsPressed(rotateUp))
         {
-            cannon.RotateAround(cannon.position, cannon.right, -30 * Time.deltaTime);
+            elevation += 30f * Time.deltaTime;
         }
         else if (IsPressed(rotateDown))
         {
-            cannon.RotateAround(cannon.position, cannon.right, 30 * Time.deltaTime);
+            elevation -= 30f * Time.deltaTime;
+        }
+
+        elevation = Mathf.Clamp(elevation, minimumElevation, maximumElevation);
+        if (cannon != null)
+        {
+            cannon.localRotation = cannonRestRotation * Quaternion.Euler(-elevation, 0f, 0f);
         }
 
         if (fireAction != null && fireAction.WasPressedThisFrame())
         {
-            GameObject projectile = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+            GameObject projectile = Instantiate(bulletPrefab, bulletSpawn.position,
+                Quaternion.LookRotation(cannon.forward));
             if (projectile.TryGetComponent(out Shell shell))
             {
                 shell.SetOwner(gameObject);
             }
         }
+    }
+
+    public void ResetAim()
+    {
+        elevation = Mathf.Clamp(initialElevation, minimumElevation, maximumElevation);
+        if (cannon != null)
+        {
+            cannon.localRotation = cannonRestRotation * Quaternion.Euler(-elevation, 0f, 0f);
+        }
+    }
+
+    public void SetWeaponTransforms(Transform turret, Transform muzzle)
+    {
+        cannon = turret;
+        bulletSpawn = muzzle;
+        cannonRestRotation = cannon.localRotation;
+        ResetAim();
     }
 
     private void FixedUpdate()

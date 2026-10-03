@@ -18,6 +18,8 @@ public sealed class TankGrid : MonoBehaviour
     [SerializeField] private LayerMask obstacleMask;
     [SerializeField, Min(0.1f)] private float obstacleCheckHeight = 3f;
     [SerializeField, Range(0.1f, 1f)] private float obstacleCheckScale = 0.9f;
+    [Tooltip("Extra clearance around cell checks so a tank hull can turn near walls.")]
+    [SerializeField, Min(0f)] private float hullClearance = 0.25f;
 
     [Header("Debug")]
     [SerializeField] private bool drawGrid = true;
@@ -61,6 +63,7 @@ public sealed class TankGrid : MonoBehaviour
     [ContextMenu("Rebuild Grid")]
     public void BuildGrid()
     {
+        Physics.SyncTransforms();
         nodes = new GridNode[width, depth];
         debugPath.Clear();
 
@@ -131,6 +134,33 @@ public sealed class TankGrid : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Finds an approach cell when the player is physically near a wall but its grid cell is blocked.
+    /// The original destination cell is always preferred when it is walkable.
+    /// </summary>
+    public GridNode GetNearestWalkableNode(Vector3 worldPosition)
+    {
+        GridNode current = GetNodeFromWorldPosition(worldPosition);
+        if (current != null && current.IsWalkable)
+        {
+            return current;
+        }
+
+        GridNode nearest = null;
+        float bestDistance = float.PositiveInfinity;
+        foreach (GridNode node in GetAllNodes())
+        {
+            float distance = Vector3.ProjectOnPlane(node.WorldPosition - worldPosition, Vector3.up).sqrMagnitude;
+            if (node.IsWalkable && distance < bestDistance)
+            {
+                nearest = node;
+                bestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
     private Vector3 GetCellCenter(int x, int z)
     {
         return Origin + new Vector3((x + 0.5f) * cellSize, 0f, (z + 0.5f) * cellSize);
@@ -139,9 +169,9 @@ public sealed class TankGrid : MonoBehaviour
     private bool IsCellBlocked(Vector3 worldPosition)
     {
         Vector3 halfExtents = new(
-            cellSize * obstacleCheckScale * 0.5f,
+            cellSize * obstacleCheckScale * 0.5f + hullClearance,
             obstacleCheckHeight * 0.5f,
-            cellSize * obstacleCheckScale * 0.5f);
+            cellSize * obstacleCheckScale * 0.5f + hullClearance);
 
         Vector3 checkCenter = worldPosition + Vector3.up * (obstacleCheckHeight * 0.5f);
 
