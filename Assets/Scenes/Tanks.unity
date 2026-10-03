@@ -625,6 +625,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuManager
   _uiDocument: {fileID: 831853991}
   _dataManager: {fileID: 1146689232}
+  _audioMixer: {fileID: 24100000, guid: 84c594abffd7ef04381b5c96e52c0375, type: 2}
 --- !u!4 &493057499
 Transform:
   m_ObjectHideFlags: 0
