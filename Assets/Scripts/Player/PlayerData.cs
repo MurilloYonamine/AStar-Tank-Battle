@@ -9,15 +9,41 @@ convertidos em JSON para envio dos dados depois.
 [System.Serializable]
 public class PlayerData
 {
-    public string apelido;
+    public int id;
+    public string name;
+    public string email;
+    public string password;
     public int pontos;
-    public string data;
+    public string created_at;
+    public string updated_at;
 
-    public PlayerData(string playerName, int score, string date)
+    public PlayerData()
     {
-        this.apelido = playerName;
-        this.pontos = score;
-        this.data = date;
+    }
+
+    public PlayerData(string name, int pontos)
+    {
+        this.name = name;
+        this.pontos = pontos;
+    }
+
+    public PlayerData(string name, string email, string password, int pontos)
+    {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.pontos = pontos;
+    }
+
+    public PlayerData(int id, string name, string email, string password, int pontos, string created_at, string updated_at)
+    {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.pontos = pontos;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 }
 

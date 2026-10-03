@@ -35,13 +35,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void StartGame(string playerName)
+    public void StartGame(string playerName, string email = "", string password = "")
     {
         PauseManager.Instance.SetPause(false);
 
-        PlayerData = new PlayerData(playerName, score: 0, System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+        PlayerData = new PlayerData(playerName, email, password, 0);
+
         Debug.Log("Jogo iniciado para o jogador: " + playerName);
     }
+
+    public void StartGame(PlayerData player)
+    {
+        PauseManager.Instance.SetPause(false);
+
+        PlayerData = player;
+
+        Debug.Log("Jogo iniciado para o jogador: " + player.name);
+    }
+
 
     public void AddScore(int score)
     {
@@ -52,6 +63,25 @@ public class GameManager : MonoBehaviour
     public void EndGame()
     {
         Debug.Log("Fim de jogo. Pontuação final: " + PlayerData.pontos);
-        _dataManager.SaveData(PlayerData.apelido, PlayerData.pontos, PlayerData.data);
+
+        if (PlayerData.id > 0)
+        {
+            _dataManager.UpdatePlayerData(
+                PlayerData.id,
+                PlayerData.name,
+                PlayerData.email,
+                PlayerData.password,
+                PlayerData.pontos
+            );
+        }
+        else
+        {
+            _dataManager.SaveData(
+                PlayerData.name,
+                PlayerData.email,
+                PlayerData.password,
+                PlayerData.pontos
+            );
+        }
     }
 }
