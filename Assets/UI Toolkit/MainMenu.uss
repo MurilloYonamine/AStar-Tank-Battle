@@ -347,18 +347,18 @@
 }
 
 .play-screen-button {
-    width: 24%;
-    max-width: 260px;
-    min-width: 160px;
+    width: 22%;
+    max-width: 240px;
+    min-width: 140px;
     height: 80px;
-    margin-left: var(--spacing-small);
-    margin-right: var(--spacing-small);
+    margin-left: 8px;
+    margin-right: 8px;
     background-color: var(--color-panel);
     color: var(--color-primary);
     border-width: 2px;
     border-color: var(--color-border);
     -unity-font-style: bold;
-    font-size: 28px;
+    font-size: 26px;
     transition-property: scale;
     transition-duration: 0.1s;
 }
@@ -393,6 +393,26 @@
     background-color: rgb(210, 170, 40);
     color: var(--color-background);
     border-color: var(--color-primary);
+}
+
+#SkipLoginButton,
+.skip-button {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+#SkipLoginButton:hover,
+.skip-button:hover {
+    background-color: rgb(48, 76, 126);
+    color: rgb(255, 255, 255);
+    border-color: rgb(100, 140, 200);
+}
+
+#SkipLoginButton:active,
+.skip-button:active {
+    background-color: var(--color-panel);
+    color: var(--color-text);
 }
 
 #OpenRegisterButton,

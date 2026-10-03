@@ -31,6 +31,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="PlayButtonContainer" class="auth-button-container">
                 <ui:Button text="VOLTAR" name="PlayBackButton" class="play-screen-button back-button"/>
+                <ui:Button text="PULAR" name="SkipLoginButton" class="play-screen-button skip-button"/>
                 <ui:Button text="CADASTRO" name="OpenRegisterButton" class="play-screen-button middle-button"/>
                 <ui:Button text="ENTRAR" name="StartButton" class="play-screen-button primary-button"/>
             </ui:VisualElement>
