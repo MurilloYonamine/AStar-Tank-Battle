@@ -50,4 +50,25 @@
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
+    <ui:VisualElement name="SettingsScreen" style="display: none;">
+        <ui:Label text="OPÇÕES" name="SettingsTitle" class="title"/>
+        <ui:VisualElement name="SettingsForm" class="settings-form">
+            <ui:VisualElement class="slider-row">
+                <ui:Label text="MASTER" class="slider-label"/>
+                <ui:Slider name="MasterSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider"/>
+                <ui:Label text="100%" name="MasterValueLabel" class="slider-value-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="slider-row">
+                <ui:Label text="MÚSICA" class="slider-label"/>
+                <ui:Slider name="MusicSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider"/>
+                <ui:Label text="100%" name="MusicValueLabel" class="slider-value-label"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="slider-row">
+                <ui:Label text="SFX" class="slider-label"/>
+                <ui:Slider name="SFXSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider"/>
+                <ui:Label text="100%" name="SFXValueLabel" class="slider-value-label"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Button text="VOLTAR" name="SettingsBackButton"/>
+    </ui:VisualElement>
 </ui:UXML>
