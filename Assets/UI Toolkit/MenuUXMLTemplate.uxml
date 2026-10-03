@@ -22,53 +22,12 @@
         <ui:Button text="VOLTAR" name="BackButton"/>
     </ui:VisualElement>
     <ui:VisualElement name="PlayScreen" style="flex-grow: 1; display: none;">
-        <ui:VisualElement name="LoginContainer" class="auth-section">
-            <ui:Label text="LOGIN" name="LoginTitle" class="title auth-title"/>
-            <ui:VisualElement name="LoginForm" class="auth-form">
-                <ui:TextField label="E-MAIL" placeholder-text="Digite seu e-mail" name="LoginEmailField" class="auth-field"/>
-                <ui:TextField label="SENHA" password="true" placeholder-text="Digite sua senha" name="LoginPasswordField" class="auth-field"/>
-                <ui:Label text="" name="LoginError" class="input-error"/>
-            </ui:VisualElement>
-            <ui:VisualElement name="PlayButtonContainer" class="auth-button-container">
-                <ui:Button text="VOLTAR" name="PlayBackButton" class="play-screen-button back-button"/>
-                <ui:Button text="PULAR" name="SkipLoginButton" class="play-screen-button skip-button"/>
-                <ui:Button text="CADASTRO" name="OpenRegisterButton" class="play-screen-button middle-button"/>
-                <ui:Button text="ENTRAR" name="StartButton" class="play-screen-button primary-button"/>
-            </ui:VisualElement>
+        <ui:Label text="DIGITE O SEU NOME" name="PlayTitle" class="title"/>
+        <ui:TextField label="" placeholder-text="" name="PlayerNameField"/>
+        <ui:Label text="" name="PlayerNameError" class="input-error"/>
+        <ui:VisualElement name="PlayButtonContainer" style="flex-grow: 1;">
+            <ui:Button text="VOLTAR" name="PlayBackButton" class="play-screen-button"/>
+            <ui:Button text="COMEÇAR" name="StartButton" class="play-screen-button"/>
         </ui:VisualElement>
-        <ui:VisualElement name="RegisterContainer" class="auth-section" style="display: none;">
-            <ui:Label text="CADASTRO" name="RegisterTitle" class="title auth-title"/>
-            <ui:VisualElement name="RegisterForm" class="auth-form">
-                <ui:TextField label="NOME" placeholder-text="Digite seu nome" name="RegisterNameField" class="auth-field"/>
-                <ui:TextField label="E-MAIL" placeholder-text="Digite seu e-mail" name="RegisterEmailField" class="auth-field"/>
-                <ui:TextField label="SENHA" password="true" placeholder-text="Digite sua senha" name="RegisterPasswordField" class="auth-field"/>
-                <ui:Label text="" name="RegisterError" class="input-error"/>
-            </ui:VisualElement>
-            <ui:VisualElement name="RegisterButtonContainer" class="auth-button-container">
-                <ui:Button text="VOLTAR" name="RegisterBackButton" class="play-screen-button back-button"/>
-                <ui:Button text="CADASTRAR" name="RegisterSubmitButton" class="play-screen-button primary-button"/>
-            </ui:VisualElement>
-        </ui:VisualElement>
-    </ui:VisualElement>
-    <ui:VisualElement name="SettingsScreen" style="display: none;">
-        <ui:Label text="OPÇÕES" name="SettingsTitle" class="title"/>
-        <ui:VisualElement name="SettingsForm" class="settings-form">
-            <ui:VisualElement class="slider-row">
-                <ui:Label text="MASTER" class="slider-label"/>
-                <ui:Slider name="MasterSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider"/>
-                <ui:Label text="100%" name="MasterValueLabel" class="slider-value-label"/>
-            </ui:VisualElement>
-            <ui:VisualElement class="slider-row">
-                <ui:Label text="MÚSICA" class="slider-label"/>
-                <ui:Slider name="MusicSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider"/>
-                <ui:Label text="100%" name="MusicValueLabel" class="slider-value-label"/>
-            </ui:VisualElement>
-            <ui:VisualElement class="slider-row">
-                <ui:Label text="SFX" class="slider-label"/>
-                <ui:Slider name="SFXSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider"/>
-                <ui:Label text="100%" name="SFXValueLabel" class="slider-value-label"/>
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:Button text="VOLTAR" name="SettingsBackButton"/>
     </ui:VisualElement>
 </ui:UXML>
