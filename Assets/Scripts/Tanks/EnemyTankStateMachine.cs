@@ -5,7 +5,8 @@ public enum EnemyTankState
 {
     Patrol,
     Chase,
-    Attack
+    Attack,
+    Reposition
 }
 
 /// <summary>
@@ -174,16 +175,23 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
             }
         }
 
-        // Stay in Chase until the move finishes; visibility alone must not cancel the sidestep.
-        CurrentState = EnemyTankState.Chase;
+        if (best == null)
+        {
+            // Ordinary pursuit always targets the player's cell, never a speculative firing cell.
+            repathCooldownRemaining = 0f;
+            EnterChase();
+            return;
+        }
+
+        // A distinct tactical state keeps firing reposition separate from player-cell pursuit.
+        CurrentState = EnemyTankState.Reposition;
         movement.Stop();
         plannedTargetNode = null;
         isRepositioning = true;
-        hasFiringPosition = best != null;
+        hasFiringPosition = true;
         repositionRemaining = repositionDuration;
-        Vector3 destination = best != null ? best.WorldPosition : trackedTargetPosition;
+        Vector3 destination = best.WorldPosition;
         destination.y = transform.position.y;
-        // With no clear firing cell, approach along A* instead of repeating shots from the same spot.
         movement.SetDestination(destination);
     }
 
@@ -234,35 +242,36 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
                 }
                 break;
 
-            case EnemyTankState.Chase:
-                if (isRepositioning)
+            case EnemyTankState.Reposition:
+                if (targetMemoryRemaining <= 0f)
                 {
-                    if (targetMemoryRemaining <= 0f)
-                    {
-                        EnterPatrol();
-                    }
-                    else if (!movement.HasDestination && hasFiringPosition && !attack.HasClearShotFrom(transform.position))
-                    {
-                        isRepositioning = false;
-                        repositionCooldownRemaining = 0f;
-                        NotifyBlockedShot();
-                    }
-                    else if (!movement.HasDestination && hasFiringPosition && !targetVisible && repositionRemaining > 0f)
-                    {
-                        // Arriving sideways must not send the tank back toward the obstructed firing spot.
-                        movement.FaceTarget(target.transform.position);
-                    }
-                    else if (!movement.HasDestination || repositionRemaining <= 0f)
-                    {
-                        isRepositioning = false;
-                        plannedTargetNode = null;
-                        repathCooldownRemaining = 0f;
-                        if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider))
-                            EnterAttack();
-                        else RepathToTrackedCell();
-                    }
-                    break;
+                    EnterPatrol();
                 }
+                else if (!movement.HasDestination && hasFiringPosition && !attack.HasClearShotFrom(transform.position))
+                {
+                    isRepositioning = false;
+                    repositionCooldownRemaining = 0f;
+                    NotifyBlockedShot();
+                }
+                else if (!movement.HasDestination && hasFiringPosition && !targetVisible && repositionRemaining > 0f)
+                {
+                    // Arriving sideways must not send the tank back toward the obstructed firing spot.
+                    movement.FaceTarget(target.transform.position);
+                }
+                else if (!movement.HasDestination || repositionRemaining <= 0f)
+                {
+                    isRepositioning = false;
+                    plannedTargetNode = null;
+                    repathCooldownRemaining = 0f;
+                    if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider))
+                    {
+                        EnterAttack();
+                    }
+                    else EnterChase();
+                }
+                break;
+
+            case EnemyTankState.Chase:
                 if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider))
                 {
                     EnterAttack();

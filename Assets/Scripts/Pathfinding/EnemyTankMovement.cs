@@ -34,12 +34,11 @@ public sealed class EnemyTankMovement : MonoBehaviour
     private Vector3 progressPosition;
     private float blockedTime;
     private float retryRemaining;
-    private bool isYielding;
-    private Vector3 yieldPosition;
+    private bool isRecovering;
     private bool shouldFaceTarget;
     private Vector3 facingPosition;
 
-    public bool IsMoving => isYielding || currentNodeIndex < currentPath.Count;
+    public bool IsMoving => currentNodeIndex < currentPath.Count;
     public bool HasDestination { get; private set; }
     public IReadOnlyList<GridNode> CurrentPath => currentPath;
 
@@ -62,7 +61,7 @@ public sealed class EnemyTankMovement : MonoBehaviour
         retryRemaining = Mathf.Max(0f, retryRemaining - Time.fixedDeltaTime);
         if (HasDestination && !IsMoving && retryRemaining <= 0f)
         {
-            if (!RecalculatePath()) TryBeginYield();
+            if (!RecalculatePath()) TryBeginRecovery();
         }
 
         if (IsMoving)
@@ -80,20 +79,17 @@ public sealed class EnemyTankMovement : MonoBehaviour
 
             if (blockedTime >= blockedTimeout && retryRemaining <= 0f)
             {
-                GridNode blockedNode = isYielding
-                    ? grid.GetNodeFromWorldPosition(yieldPosition)
-                    : currentPath[currentNodeIndex];
+                GridNode blockedNode = currentPath[currentNodeIndex];
                 GridNode currentNode = grid.GetNodeFromWorldPosition(body.position);
                 if (blockedNode != currentNode)
                 {
                     avoidedCells[blockedNode] = Time.time + avoidanceDuration;
                 }
 
-                isYielding = false;
                 bool foundPath = RecalculatePath();
                 if (!foundPath || blockedNode == currentNode ||
                     blockedNode == grid.GetNodeFromWorldPosition(destination))
-                    TryBeginYield();
+                    TryBeginRecovery();
             }
         }
 
@@ -119,12 +115,13 @@ public sealed class EnemyTankMovement : MonoBehaviour
         this.destination = destination;
         shouldFaceTarget = false;
         HasDestination = true;
-        isYielding = false;
+        isRecovering = false;
         return RecalculatePath();
     }
 
     private bool RecalculatePath()
     {
+        isRecovering = false;
         ResolveGrid();
 
         if (grid == null || !grid.IsBuilt)
@@ -145,21 +142,17 @@ public sealed class EnemyTankMovement : MonoBehaviour
         retryRemaining = retryInterval + Mathf.Abs(GetInstanceID() % 7) * 0.08f;
         CollectTemporaryObstacles(startNode, destinationNode);
 
+        bool includeStart = startNode != null &&
+            Vector3.ProjectOnPlane(startNode.WorldPosition - body.position, Vector3.up).sqrMagnitude >
+            nodeReachDistance * nodeReachDistance;
         if (!pathfinder.TryFindPath(grid, startNode, destinationNode, out List<GridNode> newPath,
-                temporaryObstacles))
+                temporaryObstacles, includeStart))
         {
             // Keep the goal pending: a temporary tank blockage must never permanently stop pursuit.
             grid.SetDebugPath(null);
             return false;
         }
 
-        if (newPath.Count > 0 &&
-            Vector3.ProjectOnPlane(startNode.WorldPosition - body.position, Vector3.up).sqrMagnitude >
-            nodeReachDistance * nodeReachDistance)
-        {
-            // Return to the current cell's center before turning into the next orthogonal edge.
-            newPath.Insert(0, startNode);
-        }
         currentPath.AddRange(newPath);
         HasDestination = currentPath.Count > 0;
         grid.SetDebugPath(currentPath);
@@ -170,7 +163,7 @@ public sealed class EnemyTankMovement : MonoBehaviour
     {
         HasDestination = false;
         shouldFaceTarget = false;
-        isYielding = false;
+        isRecovering = false;
         blockedTime = 0f;
         retryRemaining = 0f;
         avoidedCells.Clear();
@@ -189,53 +182,59 @@ public sealed class EnemyTankMovement : MonoBehaviour
         shouldFaceTarget = true;
     }
 
-    private bool TryBeginYield()
+    private bool TryBeginRecovery()
     {
         if (grid == null || !grid.IsBuilt) return false;
         GridNode start = grid.GetNodeFromWorldPosition(body.position);
         GridNode goal = grid.GetNearestWalkableNode(destination);
-        if (start == null || goal == null) return false;
+        if (start == null || !start.IsWalkable || goal == null) return false;
         CollectTemporaryObstacles(start, goal);
         float bestScore = float.PositiveInfinity;
-        Vector3 bestPosition = Vector3.zero;
+        List<GridNode> bestRoute = null;
 
         foreach (GridNode neighbour in start.Neighbours)
         {
             if (!neighbour.IsWalkable || temporaryObstacles.Contains(neighbour)) continue;
-            // Back out or step sideways on one axis; never take a diagonal shortcut through the grid.
-            Vector3 direction = (neighbour.WorldPosition - start.WorldPosition).normalized;
-            Vector3 candidate = body.position + direction * grid.CellSize;
-            if (grid.GetNodeFromWorldPosition(candidate) != neighbour ||
-                !TankCollisionGuard.CanOccupy(hull, candidate, body.rotation, obstacleMask)) continue;
+            // Recovery destinations are actual grid nodes, never arbitrary world-space offsets.
+            Vector3 candidate = neighbour.WorldPosition;
+            candidate.y = body.position.y;
+            if (!TankCollisionGuard.CanOccupy(hull, candidate, body.rotation, obstacleMask) ||
+                !pathfinder.TryFindPath(grid, start, neighbour, out List<GridNode> escapeRoute,
+                    temporaryObstacles) || escapeRoute.Count == 0) continue;
+            Vector3 firstStep = escapeRoute[0].WorldPosition - body.position;
+            firstStep.y = 0f;
+            float distance = firstStep.magnitude;
+            Vector3 direction = firstStep.normalized;
             bool blocked = false;
-            foreach (RaycastHit hit in body.SweepTestAll(direction, grid.CellSize + collisionSkin,
+            foreach (RaycastHit hit in body.SweepTestAll(direction, distance + collisionSkin,
                          QueryTriggerInteraction.Ignore))
             {
                 if (TankCollisionGuard.IsBlocking(hit.collider, transform, obstacleMask) &&
-                    hit.distance < grid.CellSize + collisionSkin)
+                    hit.distance < distance + collisionSkin)
                 {
                     blocked = true;
                     break;
                 }
             }
             if (blocked) continue;
-            // The escape is useful even when a temporary blockage still prevents reaching the goal.
+            // Prefer a node with an onward route, but a valid A* retreat is useful while the goal is blocked.
             bool hasRoute = pathfinder.TryFindPath(grid, neighbour, goal, out List<GridNode> route,
                 temporaryObstacles);
             float score = (hasRoute ? route.Count : grid.Width + grid.Depth) +
                 (candidate - destination).sqrMagnitude * 0.001f;
             if (score >= bestScore) continue;
             bestScore = score;
-            bestPosition = candidate;
+            bestRoute = escapeRoute;
         }
-        if (float.IsPositiveInfinity(bestScore)) return false;
-        isYielding = true;
-        yieldPosition = bestPosition;
+        if (bestRoute == null) return false;
+        isRecovering = true;
         currentPath.Clear();
+        currentPath.AddRange(bestRoute);
         currentNodeIndex = 0;
         HasDestination = true;
         blockedTime = 0f;
         progressPosition = body.position;
+        grid.SetDebugPath(currentPath);
         return true;
     }
 
@@ -296,7 +295,7 @@ public sealed class EnemyTankMovement : MonoBehaviour
             return;
         }
 
-        Vector3 targetPosition = isYielding ? yieldPosition : currentPath[currentNodeIndex].WorldPosition;
+        Vector3 targetPosition = currentPath[currentNodeIndex].WorldPosition;
         targetPosition.y = body.position.y;
 
         Vector3 direction = targetPosition - body.position;
@@ -305,16 +304,15 @@ public sealed class EnemyTankMovement : MonoBehaviour
         float distance = direction.magnitude;
         if (distance <= nodeReachDistance)
         {
-            if (isYielding)
-            {
-                isYielding = false;
-                RecalculatePath();
-                return;
-            }
             currentNodeIndex++;
             if (!IsMoving)
             {
-                HasDestination = false;
+                if (isRecovering)
+                {
+                    // Only after traversing the recovery route, resume the original state-machine goal.
+                    RecalculatePath();
+                }
+                else HasDestination = false;
             }
             return;
         }
