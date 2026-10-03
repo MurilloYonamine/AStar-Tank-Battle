@@ -18,7 +18,8 @@
 
 #Background,
 #ScoreScreen,
-#PlayScreen {
+#PlayScreen,
+#SettingsScreen {
     position: absolute;
     left: 0;
     right: 0;
@@ -28,7 +29,8 @@
 
 #Background,
 #ScoreScreen,
-#PlayScreen {
+#PlayScreen,
+#SettingsScreen {
     background-color: var(--color-background);
 }
 
@@ -87,7 +89,8 @@
 #PlayTitle,
 .auth-title,
 #LoginTitle,
-#RegisterTitle {
+#RegisterTitle,
+#SettingsTitle {
     position: absolute;
     left: 0;
     right: 0;
@@ -106,7 +109,8 @@
 #PlayTitle,
 .auth-title,
 #LoginTitle,
-#RegisterTitle {
+#RegisterTitle,
+#SettingsTitle {
     font-size: 72px;
 }
 
@@ -164,7 +168,8 @@
     min-height: 70px;
 }
 
-#BackButton {
+#BackButton,
+#SettingsBackButton {
     position: absolute;
     width: 22%;
     max-width: 250px;
@@ -183,14 +188,16 @@
     transition-duration: 0.1s;
 }
 
-#BackButton:hover {
+#BackButton:hover,
+#SettingsBackButton:hover {
     background-color: var(--color-secondary);
     color: var(--color-primary);
     border-color: var(--color-primary);
     scale: 1.05 1.05;
 }
 
-#BackButton:active {
+#BackButton:active,
+#SettingsBackButton:active {
     background-color: var(--color-primary);
     color: var(--color-background);
     border-color: var(--color-primary);
@@ -458,4 +465,87 @@
     background-color: var(--color-danger-active);
     color: var(--color-text);
     border-color: var(--color-danger-border);
+}
+
+.settings-form {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    translate: -50% -50%;
+    width: 65%;
+    max-width: 800px;
+    min-width: 320px;
+    padding: 30px 40px;
+    background-color: var(--color-panel);
+    border-width: 2px;
+    border-color: var(--color-border);
+    flex-direction: column;
+}
+
+.slider-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    height: 70px;
+}
+
+.slider-label {
+    width: 170px;
+    min-width: 130px;
+    font-size: 32px;
+    color: var(--color-primary);
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+}
+
+.volume-slider {
+    flex-grow: 1;
+    margin-left: 20px;
+    margin-right: 20px;
+    height: 48px;
+    justify-content: center;
+}
+
+.volume-slider #unity-drag-container {
+    justify-content: center;
+}
+
+.volume-slider #unity-tracker {
+    height: 14px;
+    background-color: var(--color-secondary);
+    border-radius: 7px;
+    border-width: 2px;
+    border-color: var(--color-border);
+}
+
+.volume-slider #unity-dragger {
+    width: 32px;
+    height: 32px;
+    margin-top: -9px;
+    background-color: var(--color-primary);
+    border-radius: 16px;
+    border-width: 2px;
+    border-color: var(--color-background);
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.volume-slider #unity-dragger:hover {
+    background-color: rgb(255, 230, 120);
+    scale: 1.15 1.15;
+}
+
+.volume-slider #unity-dragger:active {
+    background-color: rgb(210, 170, 40);
+    scale: 0.95 0.95;
+}
+
+.slider-value-label {
+    width: 90px;
+    font-size: 28px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
 }
