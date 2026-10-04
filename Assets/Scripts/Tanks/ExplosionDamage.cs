@@ -19,6 +19,7 @@ public sealed class ExplosionDamage : MonoBehaviour
     private float activeRemaining;
     private float visualRemaining;
     private bool initialPulseApplied;
+    private BattleSessionController battleSession;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public sealed class ExplosionDamage : MonoBehaviour
         areaCollider.radius = radius;
         activeRemaining = activeDuration;
         visualRemaining = visualDuration;
+        battleSession = FindFirstObjectByType<BattleSessionController>();
     }
 
     private void Start()
@@ -50,7 +52,9 @@ public sealed class ExplosionDamage : MonoBehaviour
     private void Update()
     {
         // Own timers stop with battle pause; the global Unity clock remains untouched.
-        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        bool battlePaused = battleSession != null ? battleSession.IsBattlePaused :
+            PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        if (battlePaused) return;
         ApplyInitialPulse();
         activeRemaining -= Time.deltaTime;
         visualRemaining -= Time.deltaTime;
