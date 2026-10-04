@@ -52,8 +52,17 @@ public sealed class BattleSessionController : MonoBehaviour
     private Button returnButton;
     private VisualElement pauseScreen;
     private Button resumeButton;
-    private float timeScaleBeforePause;
     private readonly Dictionary<Animator, float> pausedAnimatorSpeeds = new();
+    private struct PausedBody
+    {
+        public RigidbodyConstraints Constraints;
+        public bool UseGravity;
+        public Vector3 Velocity;
+        public Vector3 AngularVelocity;
+    }
+    private readonly Dictionary<Rigidbody, PausedBody> pausedBodies = new();
+    private readonly List<Behaviour> pausedProjectiles = new();
+    private readonly List<ParticleSystem> pausedParticles = new();
     private bool roundActive;
     private VisualElement matchIntro;
     private VisualElement matchFade;
@@ -199,7 +208,7 @@ public sealed class BattleSessionController : MonoBehaviour
     }
 
     /// <summary>
-    /// Pauses only a live battle. Freezes physics and scaled timers without ending the run,
+    /// Pauses only a live battle. Suspends gameplay/physics without changing Time.timeScale,
     /// saving scores or changing the existing menu/selection pause state.
     /// </summary>
     public void SetBattlePaused(bool paused)
@@ -209,10 +218,36 @@ public sealed class BattleSessionController : MonoBehaviour
 
         if (paused)
         {
-            timeScaleBeforePause = Time.timeScale;
             IsBattlePaused = true;
             PauseManager.Instance?.SetPause(true);
-            Time.timeScale = 0f;
+            // Keep the global Unity clock running. Retain each dynamic body's original
+            // constraints, gravity and momentum so projectile trajectories can resume.
+            foreach (Rigidbody body in FindObjectsByType<Rigidbody>(FindObjectsSortMode.None))
+            {
+                if (body.isKinematic) continue;
+                pausedBodies.Add(body, new PausedBody
+                {
+                    Constraints = body.constraints,
+                    UseGravity = body.useGravity,
+                    Velocity = body.linearVelocity,
+                    AngularVelocity = body.angularVelocity
+                });
+                body.linearVelocity = Vector3.zero;
+                body.angularVelocity = Vector3.zero;
+                body.useGravity = false;
+                body.constraints = RigidbodyConstraints.FreezeAll;
+            }
+            // Prevent projectile FixedUpdate from replacing the saved momentum while paused.
+            foreach (Shell shell in FindObjectsByType<Shell>(FindObjectsSortMode.None))
+                SuspendProjectile(shell);
+            foreach (AIShell shell in FindObjectsByType<AIShell>(FindObjectsSortMode.None))
+                SuspendProjectile(shell);
+            foreach (ParticleSystem particles in FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None))
+            {
+                if (!particles.isPlaying) continue;
+                pausedParticles.Add(particles);
+                particles.Pause(false);
+            }
             // Battle models use unscaled animation for death/results; freeze them explicitly here.
             foreach (TankSpawn spawn in tankSpawns)
             {
@@ -241,7 +276,14 @@ public sealed class BattleSessionController : MonoBehaviour
         SetBattlePaused(false);
     }
 
-    /// <summary>Releases only time owned by this overlay, including scene unload and round end.</summary>
+    private void SuspendProjectile(Behaviour projectile)
+    {
+        if (!projectile.enabled) return;
+        pausedProjectiles.Add(projectile);
+        projectile.enabled = false;
+    }
+
+    /// <summary>Restores only state owned by this overlay, including scene unload and round end.</summary>
     private void ClearBattlePause()
     {
         if (IsBattlePaused)
@@ -249,7 +291,25 @@ public sealed class BattleSessionController : MonoBehaviour
             foreach (KeyValuePair<Animator, float> entry in pausedAnimatorSpeeds)
                 if (entry.Key != null) entry.Key.speed = entry.Value;
             pausedAnimatorSpeeds.Clear();
-            Time.timeScale = timeScaleBeforePause;
+            foreach (KeyValuePair<Rigidbody, PausedBody> entry in pausedBodies)
+            {
+                if (entry.Key == null) continue;
+                Rigidbody body = entry.Key;
+                body.constraints = entry.Value.Constraints;
+                body.useGravity = entry.Value.UseGravity;
+                if (!body.isKinematic)
+                {
+                    body.linearVelocity = entry.Value.Velocity;
+                    body.angularVelocity = entry.Value.AngularVelocity;
+                }
+            }
+            pausedBodies.Clear();
+            foreach (Behaviour projectile in pausedProjectiles)
+                if (projectile != null) projectile.enabled = true;
+            pausedProjectiles.Clear();
+            foreach (ParticleSystem particles in pausedParticles)
+                if (particles != null) particles.Play(false);
+            pausedParticles.Clear();
             IsBattlePaused = false;
             PauseManager.Instance?.SetPause(false);
         }

@@ -16,16 +16,28 @@ public sealed class ExplosionDamage : MonoBehaviour
     private SphereCollider areaCollider;
     private GameObject source;
     private TankHealth sourceTank;
+    private float activeRemaining;
+    private float visualRemaining;
+    private bool initialPulseApplied;
 
     private void Awake()
     {
         areaCollider = GetComponent<SphereCollider>();
         areaCollider.isTrigger = true;
         areaCollider.radius = radius;
+        activeRemaining = activeDuration;
+        visualRemaining = visualDuration;
     }
 
     private void Start()
     {
+        ApplyInitialPulse();
+    }
+
+    private void ApplyInitialPulse()
+    {
+        if (initialPulseApplied || (PauseManager.Instance != null && PauseManager.Instance.IsPaused)) return;
+        initialPulseApplied = true;
         // A newly created trigger can already overlap a tank before OnTriggerEnter runs.
         foreach (Collider other in Physics.OverlapSphere(
                      transform.position, radius, Physics.AllLayers, QueryTriggerInteraction.Ignore))
@@ -33,13 +45,17 @@ public sealed class ExplosionDamage : MonoBehaviour
             TryDamage(other);
         }
 
-        Invoke(nameof(DisableAreaCollider), activeDuration);
-        Destroy(gameObject, visualDuration);
     }
 
-    private void DisableAreaCollider()
+    private void Update()
     {
-        areaCollider.enabled = false;
+        // Own timers stop with battle pause; the global Unity clock remains untouched.
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        ApplyInitialPulse();
+        activeRemaining -= Time.deltaTime;
+        visualRemaining -= Time.deltaTime;
+        if (activeRemaining <= 0f) areaCollider.enabled = false;
+        if (visualRemaining <= 0f) Destroy(gameObject);
     }
 
     public void SetSource(GameObject damageSource)
@@ -55,7 +71,7 @@ public sealed class ExplosionDamage : MonoBehaviour
 
     private void TryDamage(Collider other)
     {
-        if (!areaCollider.enabled)
+        if (!areaCollider.enabled || (PauseManager.Instance != null && PauseManager.Instance.IsPaused))
         {
             return;
         }

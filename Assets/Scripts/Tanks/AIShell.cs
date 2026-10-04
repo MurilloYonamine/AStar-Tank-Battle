@@ -73,7 +73,8 @@ public class AIShell : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (exploded || owner != null && collision.transform.IsChildOf(owner.transform))
+        if (exploded || (PauseManager.Instance != null && PauseManager.Instance.IsPaused) ||
+            owner != null && collision.transform.IsChildOf(owner.transform))
         {
             return;
         }
