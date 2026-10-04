@@ -164,6 +164,7 @@ public sealed class BattleSessionController : MonoBehaviour
             battleOverlay.style.display = DisplayStyle.None;
             defeatScreen.style.display = DisplayStyle.None;
             menuDocument.rootVisualElement.style.display = DisplayStyle.None;
+            BattleAudioController.StopMusic();
             if (characterSelection != null)
             {
                 roundActive = false;
@@ -283,7 +284,7 @@ public sealed class BattleSessionController : MonoBehaviour
         for (int number = 1; number <= 3; number++)
         {
             countdownLabel.text = number.ToString();
-            BattleAudioController.PlayCountdown();
+            BattleAudioController.PlayCountdown(number);
             yield return new WaitForSecondsRealtime(countdownStepDuration);
         }
         countdownLabel.text = "JÁ!";
@@ -396,6 +397,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void StartCombat()
     {
+        BattleAudioController.PlayGameplayMusic();
         GameManager.Instance.enabled = true;
         if (PauseManager.Instance != null) PauseManager.Instance.SetPause(false);
         roundActive = true;
@@ -412,6 +414,9 @@ public sealed class BattleSessionController : MonoBehaviour
 
         GameManager.Instance.AddScore(pointsPerEnemy);
         RefreshHud();
+        if (!playerHealth.IsDead && characterSelection != null &&
+            selectedCharacterIndex >= 0 && selectedCharacterIndex < characterSelection.CharacterCount)
+            BattleAudioController.TryPlayEliminationVoice(characterSelection.GetCharacter(selectedCharacterIndex).VoiceClip);
     }
 
     private void OnPlayerDied(TankHealth health, GameObject source)
@@ -424,6 +429,8 @@ public sealed class BattleSessionController : MonoBehaviour
         roundActive = false;
         enemySpawner?.StopSpawning();
         StopCombatDamage();
+        BattleAudioController.StopMusic();
+        BattleAudioController.StopCharacterVoice();
 
         if (PauseManager.Instance != null)
         {
@@ -486,6 +493,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void ShowMainMenu()
     {
+        BattleAudioController.PlayMenuMusic();
         menuDocument.rootVisualElement.style.display = DisplayStyle.Flex;
         // Use the public navigation API so login, score and settings are closed too.
         MenuManager menu = menuManager != null ? menuManager : MenuManager.Instance;

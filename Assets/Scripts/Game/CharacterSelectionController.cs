@@ -14,6 +14,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
     {
         public string DisplayName;
         public GameObject ModelPrefab;
+        [Tooltip("Spoken cue played when this character is shown in selection, not during combat or results.")]
+        public AudioClip VoiceClip;
     }
 
     [SerializeField] private UIDocument document;
@@ -55,11 +57,13 @@ public sealed class CharacterSelectionController : MonoBehaviour
         screen.style.display = DisplayStyle.Flex;
         previewCamera.enabled = true;
         ShowCharacter(selectedIndex);
+        BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceClip);
         confirmButton.Focus();
     }
 
     public void Close()
     {
+        BattleAudioController.StopCharacterVoice();
         IsOpen = false;
         if (screen != null) screen.style.display = DisplayStyle.None;
         if (document != null) document.rootVisualElement.pickingMode = PickingMode.Ignore;
@@ -85,11 +89,13 @@ public sealed class CharacterSelectionController : MonoBehaviour
         selectedIndex = (selectedIndex + direction % CharacterCount + CharacterCount) % CharacterCount;
         ShowCharacter(selectedIndex);
         BattleAudioController.PlaySelectionChange();
+        BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceClip);
     }
 
     public void ConfirmSelection()
     {
         if (!IsOpen) return;
+        BattleAudioController.StopCharacterVoice();
         BattleAudioController.PlayButtonClick();
         // Keep the visual preview visible until the session fade covers it.
         IsOpen = false;
@@ -221,6 +227,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (IsOpen) BattleAudioController.StopCharacterVoice();
         if (previousButton != null) previousButton.clicked -= PreviousCharacter;
         if (nextButton != null) nextButton.clicked -= NextCharacter;
         if (confirmButton != null) confirmButton.clicked -= ConfirmSelection;

@@ -45,6 +45,9 @@
 }
 .selection-name {
     font-size: 32px;
+    max-width: 90%;
+    white-space: normal;
+    -unity-text-align: middle-center;
     color: var(--color-text);
     -unity-font-style: bold;
 }

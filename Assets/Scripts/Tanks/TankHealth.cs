@@ -62,6 +62,7 @@ public sealed class TankHealth : MonoBehaviour
         }
 
         IsDead = true;
+        BattleAudioController.PlayDeath();
         TankCharacterAnimation animation = GetComponent<TankAppearance>()?.CharacterAnimation;
         DeathAnimationDuration = animation != null ? animation.PlayDeath() : 0f;
         SpawnDeathSmoke();

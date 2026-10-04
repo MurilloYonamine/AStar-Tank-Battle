@@ -9,3 +9,4 @@ EditorBuildSettings:
     path: Assets/Scenes/UmaTank.unity
     guid: 14cc1019bac87dc48a714ab6c959d49d
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

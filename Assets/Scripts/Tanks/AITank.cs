@@ -201,5 +201,6 @@ public class AITank : MonoBehaviour
         {
             body.linearVelocity = projectileSpeed * direction;
         }
+        BattleAudioController.PlayShot(true);
     }
 }

@@ -7,7 +7,7 @@
             <ui:VisualElement name="CharacterPreview" class="selection-preview" picking-mode="Ignore" />
             <ui:Button name="NextCharacterButton" text="›" class="selection-arrow battle-ui-button" />
         </ui:VisualElement>
-        <ui:Label name="CharacterName" text="DOTO" class="selection-name" />
+        <ui:Label name="CharacterName" text="MEISHO DOTO" class="selection-name" />
         <ui:Label name="CharacterIndex" text="1 / 5" class="selection-index" />
         <ui:VisualElement class="selection-actions">
             <ui:Button name="CharacterBackButton" text="VOLTAR" class="selection-button selection-back battle-ui-button battle-ui-back" />
