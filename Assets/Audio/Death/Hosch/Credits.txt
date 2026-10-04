@@ -1,0 +1,16 @@
+8 Bit Sound Effects - sfx_death.ogg
+Author: hosch
+Author page: https://hosch.itch.io
+Source: https://opengameart.org/content/8-bit-sound-effects-2
+License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+License link: https://creativecommons.org/licenses/by-sa/4.0/
+
+Original audio extracted unchanged from the supplied sfx_ssad.zip.
+Use: tank death sound, played once when a tank reaches zero HP.
+If the audio is adapted, preserve attribution, indicate changes and comply with ShareAlike.
+
+Suggested game credit:
+Death sound: "8 Bit Sound Effects" by hosch (https://hosch.itch.io).
+Source: https://opengameart.org/content/8-bit-sound-effects-2
+Licensed under CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+Original audio unchanged.

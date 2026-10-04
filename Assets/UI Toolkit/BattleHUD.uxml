@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="BattleHUD.uss" />
+    <ui:VisualElement name="BattleOverlay" class="battle-overlay" style="display: none;">
+        <ui:VisualElement name="BattleHud" class="battle-hud">
+            <ui:VisualElement class="hud-card">
+                <ui:Label text="VIDA" class="hud-caption" />
+                <ui:Label name="HealthLabel" text="100 / 100" class="hud-value" />
+                <ui:VisualElement class="health-track">
+                    <ui:VisualElement name="HealthFill" class="health-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-card score-card">
+                <ui:Label text="PONTOS" class="hud-caption" />
+                <ui:Label name="ScoreLabel" text="0" class="hud-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="DefeatScreen" class="defeat-screen">
+            <ui:VisualElement class="defeat-card">
+                <ui:Label text="PONTUAÇÃO FINAL" class="result-score-caption" />
+                <ui:Label name="FinalScoreLabel" text="0" class="defeat-score battle-ui-title" />
+                <ui:VisualElement name="ResultCharacterPreview" class="result-character-preview" picking-mode="Ignore" />
+                <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button battle-ui-button battle-ui-primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="PauseScreen" class="pause-screen" style="display: none;">
+            <ui:VisualElement class="pause-card">
+                <ui:Label text="PAUSE" class="pause-title battle-ui-title" />
+                <ui:Button name="ResumeButton" text="CONTINUAR" class="pause-button battle-ui-button battle-ui-primary" />
+                <ui:Label text="ESC para continuar" class="pause-hint" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="MatchIntro" class="match-intro" style="display: none;">
+        <ui:VisualElement name="MatchFade" class="match-fade" />
+        <ui:Label name="CountdownLabel" text="1" class="match-countdown battle-ui-title" style="display: none;" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -10,7 +10,7 @@ using UnityEngine;
 [InitializeOnLoad]
 public class ProjectWelcomeWindow : EditorWindow
 {
-    private const string SCENE_PATH = "Assets/Scenes/Tanks.unity";
+    private const string SCENE_PATH = "Assets/Scenes/UmaTank.unity";
     private const string BACKEND_FOLDER_PATH = "Assets/Backend";
     private static string ShowAtStartupKey => "ShowWelcomeAtStartup_" + Application.dataPath.GetHashCode();
 
@@ -48,7 +48,7 @@ public class ProjectWelcomeWindow : EditorWindow
         EditorGUILayout.Space(12);
 
         // Cabeçalho
-        EditorGUILayout.LabelField("Bem-vindo ao Projeto Batalha de Tanques", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Bem-vindo ao Projeto UmaTank", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox("Os arquivos do servidor PHP e o banco de dados estão na pasta 'Assets/Backend'. Siga as instruções abaixo para preparar o ambiente local antes de jogar:", MessageType.Info);
 
         EditorGUILayout.Space(12);
@@ -77,7 +77,7 @@ public class ProjectWelcomeWindow : EditorWindow
 
         // Botão para carregar a cena principal
         GUI.backgroundColor = new Color(0.2f, 0.6f, 0.9f);
-        if (GUILayout.Button("Abrir Cena Principal (Tanks.unity)", GUILayout.Height(38)))
+        if (GUILayout.Button("Abrir Cena Principal (UmaTank.unity)", GUILayout.Height(38)))
         {
             AbrirCenaPrincipal();
         }

@@ -1,0 +1,10 @@
+Sounds by Michel Baradari (apollo-music.de).
+License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+License link: https://creativecommons.org/licenses/by/3.0/
+Distribution site cited by the supplied info.txt: https://opengameart.org
+Original attribution is preserved in info.txt alongside the audio.
+
+Audio files extracted unchanged from the team's supplied explosions.7z:
+explode.wav and explodemini.wav.
+explodemini.wav is used for player and enemy shots; enemy playback is quieter.
+explode.wav is retained as an optional alternative that can be assigned in the Inspector.

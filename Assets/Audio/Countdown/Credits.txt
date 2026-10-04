@@ -1,0 +1,8 @@
+Race Start Countdown Sound effect - Racing
+Source provided by the team: https://www.youtube.com/watch?v=q_jtMhL-rm8
+
+Audio extracted from the supplied local video and split into four cues:
+RaceCountdown1.wav, RaceCountdown2.wav, RaceCountdown3.wav, RaceCountdownGo.wav.
+The cues play with the 1, 2, 3 and JA! labels respectively.
+Original source attribution retained for the final game credits.
+Usage license has not been verified; attribution alone does not grant permission.

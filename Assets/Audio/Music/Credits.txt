@@ -1,0 +1,23 @@
+MENU MUSIC
+Local file: Dam dam didi didi.mp3
+Extracted excerpt source: https://www.youtube.com/shorts/p6sZEQbwN4E
+Short title: Kitasan Black Dam Dam Dudi Dudi meowpin cat
+Short uploader: Nizura Rynn (https://www.youtube.com/@Nizu_Zura)
+Full track supplied as reference: Terranova (Pandera Airplay edit) - Janina
+Full track URL: https://www.youtube.com/watch?v=au2BMwKcJTw
+Composers credited by the full track: Luca Barro; Bernhard von Webenau
+Full recording notice: (P) 1997 Maretimo Records GmbH
+Permission to incorporate this excerpt into a game has NOT been confirmed.
+The short uploader is not being credited as the composer or recording rights holder.
+
+GAMEPLAY MUSIC
+Local file: WAN WAN.mp3
+Extracted excerpt source: https://www.youtube.com/shorts/dlwTd7LPBT8
+Short title: Super Creek Spin
+Short uploader: Nizura Rynn (https://www.youtube.com/@Nizu_Zura)
+Original music title, composer and license: not confirmed.
+Permission to incorporate this excerpt into a game has NOT been confirmed.
+
+Both local audio files are copied unchanged from the team's extracted audio.
+The team requested these menu/gameplay assignments after the licensing uncertainty was explained.
+These source notes are attribution records, not proof of permission or a license.

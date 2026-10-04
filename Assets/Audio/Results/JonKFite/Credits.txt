@@ -1,0 +1,16 @@
+Victory!
+Composed by: Jon K. Fite
+Uploader: jkfite01
+Source: https://opengameart.org/content/victory-2
+License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+License link: https://creativecommons.org/licenses/by/3.0/
+
+Original Victory!.wav supplied by the team, copied unchanged.
+Intended use: fanfare when the final score screen appears at the end of a run.
+Plays once when the final score screen appears.
+
+Suggested game credit:
+"Victory!" - Composed by: Jon K. Fite.
+Source: https://opengameart.org/content/victory-2
+Licensed under CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+Original audio unchanged.

@@ -1,0 +1,76 @@
+/* Inherit Murilo's palette and Roboto font without changing his menu stylesheet. */
+@import url("MainMenu.uss");
+
+:root {
+    --battle-color-muted: rgb(196, 209, 232);
+    --battle-color-hover: rgb(255, 220, 110);
+    --battle-color-active: rgb(210, 170, 40);
+    --battle-color-health: rgb(91, 205, 113);
+}
+
+.battle-ui-title {
+    color: var(--color-primary);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: var(--color-background);
+}
+
+.battle-ui-button {
+    background-color: var(--color-panel);
+    color: var(--color-primary);
+    border-width: 2px;
+    border-color: var(--color-border);
+    border-radius: 6px;
+    -unity-font-style: bold;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.battle-ui-button:hover,
+.battle-ui-button:focus {
+    background-color: var(--color-secondary);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    scale: 1.03 1.03;
+}
+
+.battle-ui-button:active {
+    scale: 0.97 0.97;
+}
+
+.battle-ui-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-background);
+}
+
+.battle-ui-primary:hover,
+.battle-ui-primary:focus {
+    background-color: var(--battle-color-hover);
+    color: var(--color-background);
+}
+
+.battle-ui-primary:active {
+    background-color: var(--battle-color-active);
+    color: var(--color-background);
+}
+
+.battle-ui-back {
+    background-color: var(--color-danger);
+    border-color: var(--color-danger-border);
+    color: var(--color-text);
+}
+
+.battle-ui-back:hover,
+.battle-ui-back:focus {
+    background-color: var(--color-danger-hover);
+    border-color: var(--color-danger-hover-border);
+    color: var(--color-text);
+}
+
+.battle-ui-back:active {
+    background-color: var(--color-danger-active);
+    border-color: var(--color-danger-border);
+    color: var(--color-text);
+}
