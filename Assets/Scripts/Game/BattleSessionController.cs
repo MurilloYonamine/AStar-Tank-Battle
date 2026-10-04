@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -48,6 +50,10 @@ public sealed class BattleSessionController : MonoBehaviour
     private Label scoreLabel;
     private Label finalScoreLabel;
     private Button returnButton;
+    private VisualElement pauseScreen;
+    private Button resumeButton;
+    private float timeScaleBeforePause;
+    private readonly Dictionary<Animator, float> pausedAnimatorSpeeds = new();
     private bool roundActive;
     private VisualElement matchIntro;
     private VisualElement matchFade;
@@ -59,6 +65,7 @@ public sealed class BattleSessionController : MonoBehaviour
     private float hudSortingOrder;
 
     public bool IsRoundActive => roundActive;
+    public bool IsBattlePaused { get; private set; }
     public bool IsStartingRound { get; private set; }
     public int RoundScore => observedPlayerData != null ? observedPlayerData.pontos : 0;
 
@@ -113,11 +120,15 @@ public sealed class BattleSessionController : MonoBehaviour
         scoreLabel = hudRoot.Q<Label>("ScoreLabel");
         finalScoreLabel = hudRoot.Q<Label>("FinalScoreLabel");
         returnButton = hudRoot.Q<Button>("ReturnToMenuButton");
+        pauseScreen = hudRoot.Q<VisualElement>("PauseScreen");
+        resumeButton = hudRoot.Q<Button>("ResumeButton");
         matchIntro = hudRoot.Q<VisualElement>("MatchIntro");
         matchFade = hudRoot.Q<VisualElement>("MatchFade");
         countdownLabel = hudRoot.Q<Label>("CountdownLabel");
         hudSortingOrder = hudDocument.sortingOrder;
         returnButton.clicked += ReturnToMenu;
+        if (resumeButton != null) resumeButton.clicked += ResumeFromButton;
+        if (pauseScreen != null) pauseScreen.style.display = DisplayStyle.None;
         battleOverlay.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.None;
         HideMatchIntro();
@@ -128,9 +139,9 @@ public sealed class BattleSessionController : MonoBehaviour
             characterSelection.Cancelled += CancelCharacterSelection;
         }
 
-        // The existing menu starts the session through StartGame even while Update is disabled.
-        // This prevents Escape in the menu from submitting an unfinished score.
-        if (GameManager.Instance != null && GameManager.Instance.PlayerData == null)
+        // Keep Murilo's StartGame/score API, but let this scene own Escape navigation.
+        // GameManager's legacy Update would end/save the round and quit instead of resuming.
+        if (GameManager.Instance != null)
         {
             GameManager.Instance.enabled = false;
         }
@@ -151,6 +162,7 @@ public sealed class BattleSessionController : MonoBehaviour
         if (currentData != null &&
             (!ReferenceEquals(currentData, observedPlayerData) || startRequested))
         {
+            ClearBattlePause();
             StopRoundIntro();
             StopRoundResult();
             roundActive = false;
@@ -180,12 +192,74 @@ public sealed class BattleSessionController : MonoBehaviour
 
         if (roundActive)
         {
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+                SetBattlePaused(!IsBattlePaused);
             RefreshHud();
         }
     }
 
+    /// <summary>
+    /// Pauses only a live battle. Freezes physics and scaled timers without ending the run,
+    /// saving scores or changing the existing menu/selection pause state.
+    /// </summary>
+    public void SetBattlePaused(bool paused)
+    {
+        if (!roundActive || IsStartingRound || playerHealth.IsDead ||
+            pauseScreen == null || paused == IsBattlePaused) return;
+
+        if (paused)
+        {
+            timeScaleBeforePause = Time.timeScale;
+            IsBattlePaused = true;
+            PauseManager.Instance?.SetPause(true);
+            Time.timeScale = 0f;
+            // Battle models use unscaled animation for death/results; freeze them explicitly here.
+            foreach (TankSpawn spawn in tankSpawns)
+            {
+                if (spawn.Health == null) continue;
+                foreach (Animator animator in spawn.Health.GetComponentsInChildren<Animator>(true))
+                {
+                    if (pausedAnimatorSpeeds.ContainsKey(animator)) continue;
+                    pausedAnimatorSpeeds.Add(animator, animator.speed);
+                    animator.speed = 0f;
+                }
+            }
+            pauseScreen.style.display = DisplayStyle.Flex;
+            hudRoot.pickingMode = PickingMode.Position;
+            resumeButton?.Focus();
+        }
+        else
+        {
+            ClearBattlePause();
+        }
+    }
+
+    private void ResumeFromButton()
+    {
+        if (!IsBattlePaused) return;
+        BattleAudioController.PlayButtonClick();
+        SetBattlePaused(false);
+    }
+
+    /// <summary>Releases only time owned by this overlay, including scene unload and round end.</summary>
+    private void ClearBattlePause()
+    {
+        if (IsBattlePaused)
+        {
+            foreach (KeyValuePair<Animator, float> entry in pausedAnimatorSpeeds)
+                if (entry.Key != null) entry.Key.speed = entry.Value;
+            pausedAnimatorSpeeds.Clear();
+            Time.timeScale = timeScaleBeforePause;
+            IsBattlePaused = false;
+            PauseManager.Instance?.SetPause(false);
+        }
+        if (pauseScreen != null) pauseScreen.style.display = DisplayStyle.None;
+        if (hudRoot != null) hudRoot.pickingMode = PickingMode.Ignore;
+    }
+
     private void OnDestroy()
     {
+        ClearBattlePause();
         if (characterSelection != null)
         {
             characterSelection.Selected -= BeginSelectedRound;
@@ -211,10 +285,12 @@ public sealed class BattleSessionController : MonoBehaviour
         {
             returnButton.clicked -= ReturnToMenu;
         }
+        if (resumeButton != null) resumeButton.clicked -= ResumeFromButton;
     }
 
     private void OnDisable()
     {
+        ClearBattlePause();
         enemySpawner?.StopSpawning();
         StopRoundIntro();
         StopRoundResult();
@@ -343,6 +419,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void PrepareRound()
     {
+        ClearBattlePause();
         ClearCombatObjects();
 
         foreach (TankSpawn spawn in tankSpawns)
@@ -398,7 +475,8 @@ public sealed class BattleSessionController : MonoBehaviour
     private void StartCombat()
     {
         BattleAudioController.PlayGameplayMusic();
-        GameManager.Instance.enabled = true;
+        // StartGame, AddScore and EndGame remain callable; only the legacy Escape Update is disabled.
+        GameManager.Instance.enabled = false;
         if (PauseManager.Instance != null) PauseManager.Instance.SetPause(false);
         roundActive = true;
         enemySpawner?.StartSpawning();
@@ -427,6 +505,7 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         roundActive = false;
+        ClearBattlePause();
         enemySpawner?.StopSpawning();
         StopCombatDamage();
         BattleAudioController.StopMusic();
@@ -479,6 +558,7 @@ public sealed class BattleSessionController : MonoBehaviour
     {
         BattleAudioController.PlayButtonClick();
         roundActive = false;
+        ClearBattlePause();
         enemySpawner?.StopSpawning(true);
         StopRoundIntro();
         StopRoundResult();
