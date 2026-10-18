@@ -28,6 +28,10 @@ public sealed class CharacterSelectionController : MonoBehaviour
     [SerializeField, Min(0f)] private float selectionCharacterHeightOffset = 0.15f;
 
     private VisualElement screen;
+    private VisualElement infoScreen;
+    private Button infoContinueButton;
+    private Button infoBackButton;
+    private bool showingInstructions;
     private VisualElement previewImage;
     private Label nameLabel;
     private Label indexLabel;
@@ -53,7 +57,20 @@ public sealed class CharacterSelectionController : MonoBehaviour
         EnsureUI();
         SetControlsEnabled(true);
         IsOpen = true;
+        showingInstructions = true;
         document.rootVisualElement.pickingMode = PickingMode.Position;
+        screen.style.display = DisplayStyle.None;
+        infoScreen.style.display = DisplayStyle.Flex;
+        previewCamera.enabled = false;
+        infoContinueButton.Focus();
+    }
+
+    private void ContinueToSelection()
+    {
+        if (!IsOpen || !showingInstructions) return;
+        BattleAudioController.PlayButtonClick();
+        showingInstructions = false;
+        infoScreen.style.display = DisplayStyle.None;
         screen.style.display = DisplayStyle.Flex;
         previewCamera.enabled = true;
         ShowCharacter(selectedIndex);
@@ -65,6 +82,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
     {
         BattleAudioController.StopCharacterVoice();
         IsOpen = false;
+        showingInstructions = false;
+        if (infoScreen != null) infoScreen.style.display = DisplayStyle.None;
         if (screen != null) screen.style.display = DisplayStyle.None;
         if (document != null) document.rootVisualElement.pickingMode = PickingMode.Ignore;
         if (previewCamera != null) previewCamera.enabled = false;
@@ -85,7 +104,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
     public void StepSelection(int direction)
     {
-        if (!IsOpen || CharacterCount == 0) return;
+        if (!IsOpen || showingInstructions || CharacterCount == 0) return;
         selectedIndex = (selectedIndex + direction % CharacterCount + CharacterCount) % CharacterCount;
         ShowCharacter(selectedIndex);
         BattleAudioController.PlaySelectionChange();
@@ -94,7 +113,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
     public void ConfirmSelection()
     {
-        if (!IsOpen) return;
+        if (!IsOpen || showingInstructions) return;
         BattleAudioController.StopCharacterVoice();
         BattleAudioController.PlayButtonClick();
         // Keep the visual preview visible until the session fade covers it.
@@ -131,6 +150,11 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null) return;
+        if (showingInstructions)
+        {
+            if (keyboard.escapeKey.wasPressedThisFrame) CancelSelection();
+            return;
+        }
         if (keyboard.leftArrowKey.wasPressedThisFrame) StepSelection(-1);
         else if (keyboard.rightArrowKey.wasPressedThisFrame) StepSelection(1);
         // UI Toolkit handles Enter/Space on focused buttons, avoiding a duplicate submit here.
@@ -143,6 +167,9 @@ public sealed class CharacterSelectionController : MonoBehaviour
         var root = document.rootVisualElement;
         if (styleSheet != null && !root.styleSheets.Contains(styleSheet)) root.styleSheets.Add(styleSheet);
         screen = root.Q<VisualElement>("CharacterSelection");
+        infoScreen = root.Q<VisualElement>("GameInfoScreen");
+        infoContinueButton = root.Q<Button>("GameInfoContinueButton");
+        infoBackButton = root.Q<Button>("GameInfoBackButton");
         previewImage = root.Q<VisualElement>("CharacterPreview");
         nameLabel = root.Q<Label>("CharacterName");
         indexLabel = root.Q<Label>("CharacterIndex");
@@ -154,6 +181,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         nextButton.clicked += NextCharacter;
         confirmButton.clicked += ConfirmSelection;
         backButton.clicked += CancelSelection;
+        infoContinueButton.clicked += ContinueToSelection;
+        infoBackButton.clicked += CancelSelection;
 
         previewTexture = new RenderTexture(960, 720, 24, RenderTextureFormat.ARGB32);
         previewTexture.name = "Character Preview";
@@ -232,6 +261,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         if (nextButton != null) nextButton.clicked -= NextCharacter;
         if (confirmButton != null) confirmButton.clicked -= ConfirmSelection;
         if (backButton != null) backButton.clicked -= CancelSelection;
+        if (infoContinueButton != null) infoContinueButton.clicked -= ContinueToSelection;
+        if (infoBackButton != null) infoBackButton.clicked -= CancelSelection;
         if (previewCamera != null) previewCamera.targetTexture = null;
         if (previewTexture != null)
         {

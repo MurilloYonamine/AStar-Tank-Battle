@@ -12,6 +12,46 @@
     padding-top: 16px;
     padding-bottom: 16px;
 }
+.game-info-screen {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-background);
+}
+.game-info-card {
+    width: 85%;
+    max-width: 980px;
+    height: 85%;
+    padding: 32px;
+    background-color: rgba(24, 36, 61, 0.96);
+    border-width: 2px;
+    border-color: var(--color-primary);
+    border-radius: 12px;
+    align-items: center;
+}
+.game-info-scroll {
+    width: 100%;
+    flex-grow: 1;
+    margin-top: 20px;
+    margin-bottom: 18px;
+}
+.game-info-heading {
+    color: var(--color-primary);
+    font-size: 29px;
+    -unity-font-style: bold;
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+.game-info-text {
+    color: var(--color-text);
+    font-size: 25px;
+    white-space: normal;
+    margin-bottom: 12px;
+}
 .selection-title {
     font-size: 44px;
     flex-shrink: 0;
@@ -69,4 +109,14 @@
 }
 .selection-back {
     width: 170px;
+}
+.game-info-actions {
+    width: 100%;
+}
+.game-info-button {
+    width: 210px;
+    min-width: 180px;
+    height: 66px;
+    flex-shrink: 1;
+    -unity-text-align: middle-center;
 }

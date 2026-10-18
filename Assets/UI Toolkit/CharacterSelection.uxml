@@ -1,5 +1,22 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="CharacterSelection.uss" />
+    <ui:VisualElement name="GameInfoScreen" class="game-info-screen" style="display: none;">
+        <ui:VisualElement class="game-info-card">
+            <ui:Label text="ANTES DE JOGAR" class="selection-title battle-ui-title" />
+            <ui:ScrollView class="game-info-scroll">
+                <ui:Label text="COMO JOGAR" class="game-info-heading" />
+                <ui:Label text="Movimente o tanque com W, A, S, D ou as setas. Ajuste a mira com Q e E. Atire com espaço ou botão esquerdo do mouse. Use ESC para pausar durante a partida." class="game-info-text" />
+                <ui:Label text="Destrua tanques inimigos para marcar pontos e mantenha seu tanque vivo. Se a vida chegar a zero, a partida termina em derrota. As condições de vitória e empate ainda serão implementadas." class="game-info-text" />
+                <ui:Label text="DADOS DA PARTIDA" class="game-info-heading" />
+                <ui:Label text="Coletamos a identificação do jogador, horários de início e término, duração, resultado, pontuação e número de inimigos eliminados. Esses dados são usados para histórico, ranking e análise do gameplay." class="game-info-text" />
+                <ui:Label text="Os dados são enviados à API PHP e armazenados no MySQL configurado para este projeto (XAMPP nesta instalação) por tempo indeterminado. O token usado para autenticação expira após um dia." class="game-info-text" />
+            </ui:ScrollView>
+            <ui:VisualElement class="selection-actions game-info-actions">
+                <ui:Button name="GameInfoBackButton" text="VOLTAR AO MENU" class="selection-button game-info-button battle-ui-button battle-ui-back" />
+                <ui:Button name="GameInfoContinueButton" text="LI E CONTINUAR" class="selection-button game-info-button battle-ui-button battle-ui-primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
     <ui:VisualElement name="CharacterSelection" class="selection-screen" style="display: none;">
         <ui:Label text="SELEÇÃO DE PERSONAGEM" class="selection-title battle-ui-title" />
         <ui:VisualElement class="selection-carousel">
