@@ -40,7 +40,6 @@ public class SettingsMenu : IMenu
         _musicSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
         _sfxSlider.RegisterValueChangedCallback(OnSFXVolumeChanged);
 
-        InitAudioSettings();
     }
 
     public void Dispose()
@@ -85,7 +84,7 @@ public class SettingsMenu : IMenu
         _sfxValueLabel.text = Mathf.RoundToInt(evt.newValue * 100f) + "%";
     }
 
-    private void InitAudioSettings()
+    public void InitAudioSettings()
     {
         float masterVal = AudioManager.Instance.GetSavedVolume(AudioManager.MASTER_VOLUME_PARAM);
         float musicVal = AudioManager.Instance.GetSavedVolume(AudioManager.MUSIC_VOLUME_PARAM);

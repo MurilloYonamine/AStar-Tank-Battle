@@ -87,6 +87,5 @@ public class ScoreMenu : IMenu
         _scoreListView.itemsSource = _players;
         _scoreListView.Rebuild();
 
-        _menuManager.UpdatePlayers(_players);
     }
 }
