@@ -166,6 +166,8 @@ public class AuthMenu : IMenu
         _startButton.SetEnabled(false);
         _loginError.text = "Autenticando...";
         _loginError.style.display = DisplayStyle.Flex;
+        // A lista local de jogadores não autentica: aguardamos a API validar a senha
+        // e associar o token antes de iniciar a partida.
         _dataManager.Login(email, password, (player, error) =>
         {
             if (!_loginPending) return;
@@ -223,6 +225,7 @@ public class AuthMenu : IMenu
         _registerBackButton.SetEnabled(false);
         _registerError.text = "Cadastrando...";
         _registerError.style.display = DisplayStyle.Flex;
+        // O cadastro também é assíncrono; não mostrar sucesso se o PHP falhar.
         _dataManager.SaveData(name, email, password, 0, (success, error) =>
         {
             _registerPending = false;

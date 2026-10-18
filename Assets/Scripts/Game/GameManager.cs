@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DataManager _dataManager;
 
     public PlayerData PlayerData { get; private set; }
+    public DataManager DataManager => _dataManager;
 
     private void Awake()
     {
@@ -62,6 +63,8 @@ public class GameManager : MonoBehaviour
 
     public void EndGame()
     {
+        // Fluxo legado de pontos por jogador. A batalha atual salva cada derrota
+        // separadamente por DataManager.SaveMatch, sem chamar este método.
         Debug.Log("Fim de jogo. Pontuação final: " + PlayerData.pontos);
 
         if (PlayerData.id > 0)

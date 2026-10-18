@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 03/10/2026 às 02:23
+-- Tempo de geração: 18/10/2026 às 22:27
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -20,9 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Banco de dados: `tank_gamers`
 --
-
-CREATE DATABASE IF NOT EXISTS `tank_gamers` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `tank_gamers`;
 
 -- --------------------------------------------------------
 
@@ -45,7 +42,54 @@ CREATE TABLE `jogadores` (
 --
 
 INSERT INTO `jogadores` (`id`, `name`, `email`, `password`, `pontos`, `created_at`, `updated_at`) VALUES
-(1, 'Eduardo2', 'edu@edu.com', '123456', 7, '2026-10-02 20:45:47', '2026-10-02 21:58:07');
+(1, 'Eduardo2', 'edu@edu.com', '$2y$10$b7vTBDE1isHlpy681YQ0aOv4rlTCx9n6P1aNmhqhz1buNywZ2OG16', 0, '2026-10-02 20:45:47', '2026-10-18 17:35:35');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `partidas`
+--
+
+CREATE TABLE `partidas` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `jogador_id` int(10) UNSIGNED NOT NULL,
+  `partida_uuid` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `inicio_utc` datetime(3) NOT NULL,
+  `fim_utc` datetime(3) NOT NULL,
+  `duracao_segundos` decimal(10,3) NOT NULL,
+  `resultado` enum('vitoria','derrota','empate') NOT NULL,
+  `pontuacao` int(10) UNSIGNED NOT NULL,
+  `inimigos_eliminados` int(10) UNSIGNED NOT NULL
+) ;
+
+--
+-- Despejando dados para a tabela `partidas`
+--
+
+INSERT INTO `partidas` (`id`, `jogador_id`, `partida_uuid`, `inicio_utc`, `fim_utc`, `duracao_segundos`, `resultado`, `pontuacao`, `inimigos_eliminados`) VALUES
+(1, 1, '9504b698-4c05-44ad-b073-e8ce529df711', '2026-10-18 17:52:49.000', '2026-10-18 17:52:59.000', 10.548, 'derrota', 0, 0),
+(2, 1, '0634af7d-9743-4ceb-a981-c2adbd30c6eb', '2026-10-18 20:15:29.000', '2026-10-18 20:15:49.000', 18.983, 'derrota', 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `tokens`
+--
+
+CREATE TABLE `tokens` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `jogador_id` int(10) UNSIGNED NOT NULL,
+  `token` varchar(200) NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `expiration_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `tokens`
+--
+
+INSERT INTO `tokens` (`id`, `jogador_id`, `token`, `updated_at`, `expiration_at`) VALUES
+(1, 1, 'd1fdd5d4086f46529b60d1ece00dbd50', '2026-10-18 17:15:20', '2026-10-19 17:15:20');
 
 --
 -- Índices para tabelas despejadas
@@ -55,7 +99,24 @@ INSERT INTO `jogadores` (`id`, `name`, `email`, `password`, `pontos`, `created_a
 -- Índices de tabela `jogadores`
 --
 ALTER TABLE `jogadores`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_jogadores_email` (`email`);
+
+--
+-- Índices de tabela `partidas`
+--
+ALTER TABLE `partidas`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_partida_jogador` (`jogador_id`,`partida_uuid`),
+  ADD KEY `idx_partidas_ranking` (`resultado`,`jogador_id`,`pontuacao`),
+  ADD KEY `idx_partidas_historico` (`jogador_id`,`inicio_utc`);
+
+--
+-- Índices de tabela `tokens`
+--
+ALTER TABLE `tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `jogador_id` (`jogador_id`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
@@ -66,6 +127,34 @@ ALTER TABLE `jogadores`
 --
 ALTER TABLE `jogadores`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de tabela `partidas`
+--
+ALTER TABLE `partidas`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `tokens`
+--
+ALTER TABLE `tokens`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Restrições para tabelas despejadas
+--
+
+--
+-- Restrições para tabelas `partidas`
+--
+ALTER TABLE `partidas`
+  ADD CONSTRAINT `fk_partidas_jogador` FOREIGN KEY (`jogador_id`) REFERENCES `jogadores` (`id`);
+
+--
+-- Restrições para tabelas `tokens`
+--
+ALTER TABLE `tokens`
+  ADD CONSTRAINT `fk_tokens_jogador` FOREIGN KEY (`jogador_id`) REFERENCES `jogadores` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

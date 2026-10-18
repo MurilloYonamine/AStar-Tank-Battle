@@ -14,7 +14,11 @@
         <div class="container">
             <a href="?action=home"><img src="img/logo.png" title="Logo" alt="Logo"></a>
             <div id="menu">
-                <a href="?action=listar">Jogadores</a>
+                <?php if (isset($_SESSION['web_jogador_id'])): ?>
+                    <a href="?action=listar">Jogadores</a>
+                    <a href="?action=partidas">Histórico de partidas</a>
+                    <a href="?action=sair">Sair</a>
+                <?php endif; ?>
             </div>
         </div>
     </header>
