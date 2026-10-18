@@ -6,7 +6,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Connects the battle HUD and round lifecycle to the match API.
+/// Controla a batalha e envia a derrota ao middleware PHP por DataManager.
+/// Começa a medir após a seleção e a contagem regressiva; ainda não há lógica
+/// de vitória ou empate nesta classe.
 /// </summary>
 public sealed class BattleSessionController : MonoBehaviour
 {
@@ -571,7 +573,8 @@ public sealed class BattleSessionController : MonoBehaviour
     private void StartCombat()
     {
         BattleAudioController.PlayGameplayMusic();
-        // A partida comeca apos a contagem regressiva; intro e selecao nao entram na duracao.
+        // Este é o início real da partida. O UUID identifica uma tentativa no MySQL;
+        // seleção de personagem e contagem regressiva não entram na duração.
         GameManager.Instance.enabled = false;
         roundId = Guid.NewGuid().ToString("D");
         roundStartedUtc = DateTime.UtcNow;
@@ -612,6 +615,8 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         roundActive = false;
+        // O timestamp é UTC; a duração vem do relógio real descontando pausas.
+        // Isso mantém os horários comparáveis sem alterar Time.timeScale.
         roundFinishedUtc = DateTime.UtcNow;
         roundDurationSeconds = Math.Max(0.001, Time.realtimeSinceStartupAsDouble -
             roundStartedRealtime - pausedSeconds);
@@ -633,6 +638,8 @@ public sealed class BattleSessionController : MonoBehaviour
         finalRoundScore = finalScore;
         finalScoreLabel.text = finalScore.ToString();
         resultDurationLabel.text = $"DURAÇÃO: {roundDurationSeconds:F1} s";
+        // A morte encerra a partida uma vez. A tela só indicará "salva" após o JSON
+        // de sucesso; GameManager.EndGame não é chamado, pois alterava apenas pontos.
         RetrySaveMatch();
         RefreshHud();
         if (health.DeathAnimationDuration > 0f)
@@ -664,7 +671,7 @@ public sealed class BattleSessionController : MonoBehaviour
         retrySaveButton.style.display = DisplayStyle.None;
         returnButton.SetEnabled(false);
 
-        // Repetir usa o mesmo UUID e os mesmos dados; a Model nao cria outra partida.
+        // Repetir usa o mesmo UUID e os mesmos dados; a Model não cria outra partida.
         string submittedId = roundId;
         GameManager.Instance.DataManager.SaveMatch(observedPlayerData.id, submittedId,
             roundStartedUtc, roundFinishedUtc, roundDurationSeconds, finalRoundScore, enemiesKilled,

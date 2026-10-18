@@ -7,6 +7,11 @@ using System.Globalization;
 using UnityEngine;
 using UnityEngine.Networking;
 
+/// <summary>
+/// Comunica a Unity com o middleware PHP por UnityWebRequest e interpreta respostas JSON.
+/// A Unity nunca acessa o MySQL diretamente: index.php -> Controller -> Model -> banco.
+/// URL_BASE aponta para o XAMPP local; ao mudar de servidor, configure o endereço aqui.
+/// </summary>
 public class DataManager : MonoBehaviour
 {
     private const string URL_BASE = "http://localhost/gsd";
@@ -16,8 +21,8 @@ public class DataManager : MonoBehaviour
     private const string URL_LOGIN = URL_BASE + "/?action=api_login";
     private const string URL_MATCH = URL_BASE + "/?action=api_salvar_partida";
 
-    // Como no exemplo da aula, a Unity envia o token ao login e o PHP o associa ao jogador.
-    // Mantido apenas na memória; não é salvo em disco nem enviado no placar.
+    // Como no exemplo da aula, a Unity cria o token no login e o PHP o associa ao jogador
+    // por um dia. Guardamos o token só em memória para enviá-lo nas rotas protegidas.
     public string Token { get; private set; }
     private int _loginRequestId;
 
@@ -45,7 +50,13 @@ public class DataManager : MonoBehaviour
         public string error = "";
     }
 
-    // Os campos devem corresponder a api_salvar_partida no MVC; mesmo UUID em reenvios.
+    /// <summary>
+    /// POST api_salvar_partida: jogador_id, token, partida_uuid, inicio_utc, fim_utc,
+    /// duracao_segundos, resultado, pontuacao e inimigos_eliminados. A API responde
+    /// {success, partida_id, repetida} ou {error}. Nesta etapa só enviamos "derrota";
+    /// vitória e empate serão integrados quando suas regras estiverem prontas.
+    /// O mesmo matchId é reutilizado ao tentar novamente para não criar outra linha.
+    /// </summary>
     public void SaveMatch(int playerId, string matchId, DateTime startedUtc, DateTime finishedUtc,
         double durationSeconds, int score, int enemiesKilled, Action<bool, string> completed)
     {
@@ -66,6 +77,8 @@ public class DataManager : MonoBehaviour
         form.AddField("jogador_id", playerId);
         form.AddField("token", Token);
         form.AddField("partida_uuid", matchId);
+        // O PHP espera datas UTC nesse formato e a duração numérica em segundos.
+        // Ela pode ser menor que fim - início porque a pausa não entra na duração.
         form.AddField("inicio_utc", startedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         form.AddField("fim_utc", finishedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         form.AddField("duracao_segundos", durationSeconds.ToString("F3", CultureInfo.InvariantCulture));
@@ -92,6 +105,7 @@ public class DataManager : MonoBehaviour
                 yield break;
             }
 
+            // Falha HTTP, timeout ou JSON inesperado não autorizam confirmar o salvamento.
             string error = "Não foi possível salvar a partida. Verifique a conexão e tente novamente.";
             if (response != null && !string.IsNullOrEmpty(response.error)) error = response.error;
             completed(false, error);
@@ -108,8 +122,11 @@ public class DataManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // POST api_login: email/password/token -> {id,name,email} ou {error}.
-    // O PHP confere a senha; a Unity só libera o gameplay depois da resposta válida.
+    /// <summary>
+    /// POST api_login: email/password/token -> {id,name,email} ou {error}.
+    /// Somente o PHP confere a senha; a resposta não contém senha nem devolve o token.
+    /// O menu só libera o gameplay após receber o jogador autenticado.
+    /// </summary>
     public void Login(string email, string password, Action<PlayerData, string> completed)
     {
         _loginRequestId++;
@@ -133,6 +150,7 @@ public class DataManager : MonoBehaviour
         using (UnityWebRequest www = UnityWebRequest.Post(URL_LOGIN, form))
         {
             yield return www.SendWebRequest();
+            // Ignora resposta atrasada se o usuário cancelou ou iniciou outro login.
             if (requestId != _loginRequestId) yield break;
 
             AuthResponse response = null;
@@ -182,6 +200,8 @@ public class DataManager : MonoBehaviour
         StartCoroutine(nameof(LoadDataFromJson));
     }
 
+    // POST api_listar: lista pública do placar antigo de jogadores, não o ranking de
+    // melhores partidas. O ScoreMenu ainda usa essa rota enquanto a UI não for migrada.
     private IEnumerator LoadDataFromJson()
     {
         WWWForm form = new WWWForm();
@@ -202,7 +222,8 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    // POST api_inserir: name/email/password só confirma cadastro após {success:true}.
+    // POST api_inserir: name/email/password/pontos; PHP salva senha com hash e responde
+    // {success:true} ou {error}. A UI só confirma o cadastro após o retorno de sucesso.
     private IEnumerator InsertNewData(string playerName, string email, string password, int score, Action<bool, string> completed)
     {
         WWWForm form = new WWWForm();
@@ -229,6 +250,8 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    // POST api_atualizar: id/token/pontos atualiza o placar antigo do jogador autenticado.
+    // Não cria registros em partidas; BattleSessionController usa SaveMatch ao morrer.
     private IEnumerator UpdateData(int id, string playerName, string email, string password, int score)
     {
         WWWForm form = new WWWForm();
