@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -13,6 +14,7 @@ public class DataManager : MonoBehaviour
     private const string URL_POST = URL_BASE + "/?action=api_inserir";
     private const string URL_UPDATE = URL_BASE + "/?action=api_atualizar";
     private const string URL_LOGIN = URL_BASE + "/?action=api_login";
+    private const string URL_MATCH = URL_BASE + "/?action=api_salvar_partida";
 
     // Como no exemplo da aula, a Unity envia o token ao login e o PHP o associa ao jogador.
     // Mantido apenas na memória; não é salvo em disco nem enviado no placar.
@@ -33,6 +35,67 @@ public class DataManager : MonoBehaviour
     {
         public bool success = false;
         public string error = "";
+    }
+
+    [Serializable]
+    private class MatchResponse
+    {
+        public bool success = false;
+        public int partida_id = 0;
+        public string error = "";
+    }
+
+    // Os campos devem corresponder a api_salvar_partida no MVC; mesmo UUID em reenvios.
+    public void SaveMatch(int playerId, string matchId, DateTime startedUtc, DateTime finishedUtc,
+        double durationSeconds, int score, int enemiesKilled, Action<bool, string> completed)
+    {
+        StartCoroutine(SaveMatchRequest(playerId, matchId, startedUtc, finishedUtc,
+            durationSeconds, score, enemiesKilled, completed));
+    }
+
+    private IEnumerator SaveMatchRequest(int playerId, string matchId, DateTime startedUtc, DateTime finishedUtc,
+        double durationSeconds, int score, int enemiesKilled, Action<bool, string> completed)
+    {
+        if (string.IsNullOrEmpty(Token))
+        {
+            completed(false, "Sessão inválida. Entre novamente para salvar a partida.");
+            yield break;
+        }
+
+        WWWForm form = new WWWForm();
+        form.AddField("jogador_id", playerId);
+        form.AddField("token", Token);
+        form.AddField("partida_uuid", matchId);
+        form.AddField("inicio_utc", startedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+        form.AddField("fim_utc", finishedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+        form.AddField("duracao_segundos", durationSeconds.ToString("F3", CultureInfo.InvariantCulture));
+        form.AddField("resultado", "derrota");
+        form.AddField("pontuacao", score);
+        form.AddField("inimigos_eliminados", enemiesKilled);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(URL_MATCH, form))
+        {
+            www.timeout = 10;
+            yield return www.SendWebRequest();
+
+            MatchResponse response = null;
+            if (!string.IsNullOrEmpty(www.downloadHandler.text))
+            {
+                try { response = JsonUtility.FromJson<MatchResponse>(www.downloadHandler.text); }
+                catch (ArgumentException) { /* Resposta inesperada nao confirma salvamento. */ }
+            }
+
+            if (www.result == UnityWebRequest.Result.Success && response != null &&
+                response.success && response.partida_id > 0)
+            {
+                completed(true, null);
+                yield break;
+            }
+
+            string error = "Não foi possível salvar a partida. Verifique a conexão e tente novamente.";
+            if (response != null && !string.IsNullOrEmpty(response.error)) error = response.error;
+            completed(false, error);
+        }
     }
 
     public string jsonData; // vai receber os dados no formato JSON

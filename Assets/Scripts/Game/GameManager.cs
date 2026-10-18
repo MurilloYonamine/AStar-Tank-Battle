@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DataManager _dataManager;
 
     public PlayerData PlayerData { get; private set; }
+    public DataManager DataManager => _dataManager;
 
     private void Awake()
     {
