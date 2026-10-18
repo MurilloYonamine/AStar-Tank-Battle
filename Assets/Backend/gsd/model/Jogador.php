@@ -18,8 +18,16 @@ class Jogador
     }
     function listar_jogadores()
     {
-        $query = "SELECT * FROM " . $this->table_name;
+        $query = "SELECT id, name, email, pontos, created_at, updated_at FROM " . $this->table_name;
         $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    function listar_placar()
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT id, name, pontos, created_at FROM jogadores ORDER BY pontos DESC, id ASC'
+        );
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -28,7 +36,7 @@ class Jogador
         // recebe os dados do jogador via post e trata-os
         $this->nome = $data['name'];
         $this->email = $data['email'];
-        $this->password = $data['password'];
+        $this->password = password_hash($data['password'], PASSWORD_DEFAULT);
         $this->pontos = $data['pontos'];
         $this->created_at = date('Y-m-d H:i:s');
         $this->updated_at = date('Y-m-d H:i:s');
@@ -121,6 +129,38 @@ class Jogador
         }
 
         return false;
+    }
+    // Aceita uma senha antiga em texto puro apenas uma vez e migra para hash ao autenticar.
+    function autenticar($email, $password)
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT id, name, email, password FROM jogadores WHERE email = :email LIMIT 1'
+        );
+        $stmt->execute([':email' => $email]);
+        $jogador = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$jogador) {
+            return false;
+        }
+
+        $hash = $jogador['password'];
+        if (!password_verify($password, $hash)) {
+            if (password_get_info($hash)['algo'] !== null || !hash_equals($hash, $password)) {
+                return false;
+            }
+        }
+
+        if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+            $stmt = $this->conn->prepare('UPDATE jogadores SET password = :password WHERE id = :id');
+            $stmt->execute([':password' => password_hash($password, PASSWORD_DEFAULT), ':id' => $jogador['id']]);
+        }
+        unset($jogador['password']);
+        return $jogador;
+    }
+    function email_existe($email)
+    {
+        $stmt = $this->conn->prepare('SELECT id FROM jogadores WHERE email = :email LIMIT 1');
+        $stmt->execute([':email' => $email]);
+        return (bool)$stmt->fetch(PDO::FETCH_ASSOC);
     }
     // metodo para deletar um jogador contendo (id)
     function deletar_jogador($id)

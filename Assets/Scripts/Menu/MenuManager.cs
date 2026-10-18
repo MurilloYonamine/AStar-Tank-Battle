@@ -108,11 +108,6 @@ public class MenuManager : MonoBehaviour
     public void PlayButtonClickSound() => AudioManager.Instance.PlaySFX(_buttonClickClip);
     public void PlayErrorSound() => AudioManager.Instance.PlaySFX(_errorClip);
 
-    public void UpdatePlayers(PlayerData[] players)
-    {
-        _authMenu.SetPlayers(players);
-    }
-
     private void OnExitClicked()
     {
 #if UNITY_EDITOR

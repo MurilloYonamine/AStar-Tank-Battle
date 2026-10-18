@@ -1,7 +1,6 @@
 // Autor: Murillo Gomes Yonamine
 // Data: 02/10/2026
 
-using System;
 using UnityEngine.UIElements;
 
 public class AuthMenu : IMenu
@@ -28,7 +27,8 @@ public class AuthMenu : IMenu
 
     private MenuManager _menuManager;
     private DataManager _dataManager;
-    private PlayerData[] _players;
+    private bool _loginPending;
+    private bool _registerPending;
 
     public void Initialize(VisualElement root, MenuManager menuManager, DataManager dataManager)
     {
@@ -57,7 +57,8 @@ public class AuthMenu : IMenu
         _registerSubmitButton = root.Q<Button>("RegisterSubmitButton");
 
         _playBackButton.clicked += OnPlayBackClicked;
-        _skipLoginButton.clicked += OnSkipLoginClicked;
+        // Não há modo convidado: o jogo só começa após o login no PHP.
+        _skipLoginButton.style.display = DisplayStyle.None;
         _openRegisterButton.clicked += OnOpenRegisterClicked;
         _startButton.clicked += OnStartClicked;
 
@@ -74,7 +75,6 @@ public class AuthMenu : IMenu
     public void Dispose()
     {
         _playBackButton.clicked -= OnPlayBackClicked;
-        _skipLoginButton.clicked -= OnSkipLoginClicked;
         _openRegisterButton.clicked -= OnOpenRegisterClicked;
         _startButton.clicked -= OnStartClicked;
 
@@ -105,13 +105,14 @@ public class AuthMenu : IMenu
         _registerError.style.display = DisplayStyle.None;
     }
 
-    public void SetPlayers(PlayerData[] players)
-    {
-        _players = players;
-    }
-
     private void OnOpenRegisterClicked()
     {
+        if (_loginPending)
+        {
+            _loginPending = false;
+            _startButton.SetEnabled(true);
+            _dataManager.CancelLogin();
+        }
         _loginContainer.style.display = DisplayStyle.None;
         _registerContainer.style.display = DisplayStyle.Flex;
         _registerError.style.display = DisplayStyle.None;
@@ -121,6 +122,7 @@ public class AuthMenu : IMenu
 
     private void OnRegisterBackClicked()
     {
+        if (_registerPending) return;
         _registerContainer.style.display = DisplayStyle.None;
         _loginContainer.style.display = DisplayStyle.Flex;
         _loginError.style.display = DisplayStyle.None;
@@ -130,17 +132,15 @@ public class AuthMenu : IMenu
 
     private void OnPlayBackClicked()
     {
+        _loginPending = false;
+        _dataManager.CancelLogin();
+        _startButton.SetEnabled(true);
         _menuManager.OpenMainMenu();
-    }
-
-    private void OnSkipLoginClicked()
-    {
-        Hide();
-        GameManager.Instance.StartGame("Convidado");
     }
 
     private void OnStartClicked()
     {
+        if (_loginPending) return;
         string email = _loginEmailField.value.Trim();
         string password = _loginPasswordField.value;
 
@@ -162,39 +162,33 @@ public class AuthMenu : IMenu
             return;
         }
 
-        if (_players != null && _players.Length > 0)
+        _loginPending = true;
+        _startButton.SetEnabled(false);
+        _loginError.text = "Autenticando...";
+        _loginError.style.display = DisplayStyle.Flex;
+        // A lista local de jogadores não autentica: aguardamos a API validar a senha
+        // e associar o token antes de iniciar a partida.
+        _dataManager.Login(email, password, (player, error) =>
         {
-            PlayerData matched = Array.Find(_players, p => string.Equals(p.email, email, StringComparison.OrdinalIgnoreCase));
-
-            if (matched == null)
+            if (!_loginPending) return;
+            _loginPending = false;
+            _startButton.SetEnabled(true);
+            if (player == null)
             {
                 _menuManager.PlayErrorSound();
-                _loginError.text = "Usuário não encontrado. Realize o cadastro primeiro.";
+                _loginError.text = error;
                 _loginError.style.display = DisplayStyle.Flex;
                 return;
             }
-
-            if (matched.password != password)
-            {
-                _menuManager.PlayErrorSound();
-                _loginError.text = "Senha incorreta.";
-                _loginError.style.display = DisplayStyle.Flex;
-                _loginPasswordField.Focus();
-                return;
-            }
-
             Hide();
-            GameManager.Instance.StartGame(matched);
-            return;
-        }
-
-        Hide();
-        string fallbackName = email.Contains("@") ? email.Split('@')[0] : email;
-        GameManager.Instance.StartGame(fallbackName, email, password);
+            _loginPasswordField.value = "";
+            GameManager.Instance.StartGame(player);
+        });
     }
 
     private void OnRegisterSubmitClicked()
     {
+        if (_registerPending) return;
         string name = _registerNameField.value.Trim();
         string email = _registerEmailField.value.Trim();
         string password = _registerPasswordField.value;
@@ -226,28 +220,35 @@ public class AuthMenu : IMenu
             return;
         }
 
-        if (_players != null && Array.Exists(_players, p => string.Equals(p.email, email, StringComparison.OrdinalIgnoreCase)))
+        _registerPending = true;
+        _registerSubmitButton.SetEnabled(false);
+        _registerBackButton.SetEnabled(false);
+        _registerError.text = "Cadastrando...";
+        _registerError.style.display = DisplayStyle.Flex;
+        // O cadastro também é assíncrono; não mostrar sucesso se o PHP falhar.
+        _dataManager.SaveData(name, email, password, 0, (success, error) =>
         {
-            _menuManager.PlayErrorSound();
-            _registerError.text = "Este e-mail já está cadastrado.";
-            _registerError.style.display = DisplayStyle.Flex;
-            _registerEmailField.Focus();
-            return;
-        }
-
-        _dataManager.SaveData(name, email, password, 0);
-        _dataManager.LoadData();
-
-        _registerError.style.display = DisplayStyle.None;
-        _registerContainer.style.display = DisplayStyle.None;
-        _loginContainer.style.display = DisplayStyle.Flex;
-
-        _loginEmailField.value = email;
-        _loginPasswordField.value = "";
-
-        _loginError.text = "<color=#70FF70>Cadastro realizado! Digite a senha para entrar.</color>";
-        _loginError.style.display = DisplayStyle.Flex;
-        _loginPasswordField.schedule.Execute(() => _loginPasswordField.Focus()).StartingIn(100);
+            _registerPending = false;
+            _registerSubmitButton.SetEnabled(true);
+            _registerBackButton.SetEnabled(true);
+            if (!success)
+            {
+                _menuManager.PlayErrorSound();
+                _registerError.text = error;
+                _registerError.style.display = DisplayStyle.Flex;
+                return;
+            }
+            _dataManager.LoadData();
+            _registerPasswordField.value = "";
+            _registerError.style.display = DisplayStyle.None;
+            _registerContainer.style.display = DisplayStyle.None;
+            _loginContainer.style.display = DisplayStyle.Flex;
+            _loginEmailField.value = email;
+            _loginPasswordField.value = "";
+            _loginError.text = "<color=#70FF70>Cadastro realizado! Digite a senha para entrar.</color>";
+            _loginError.style.display = DisplayStyle.Flex;
+            _loginPasswordField.schedule.Execute(() => _loginPasswordField.Focus()).StartingIn(100);
+        });
     }
 
     private void OnFieldValueChanged(ChangeEvent<string> evt)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Connects the battle HUD and round lifecycle to the existing menu and score API.
+/// Controla a batalha e envia a derrota ao middleware PHP por DataManager.
+/// Começa a medir após a seleção e a contagem regressiva; ainda não há lógica
+/// de vitória ou empate nesta classe.
 /// </summary>
 public sealed class BattleSessionController : MonoBehaviour
 {
@@ -49,7 +52,10 @@ public sealed class BattleSessionController : MonoBehaviour
     private Label healthLabel;
     private Label scoreLabel;
     private Label finalScoreLabel;
+    private Label resultDurationLabel;
+    private Label saveStatusLabel;
     private Button returnButton;
+    private Button retrySaveButton;
     private VisualElement pauseScreen;
     private Button resumeButton;
     private readonly Dictionary<Animator, float> pausedAnimatorSpeeds = new();
@@ -72,6 +78,17 @@ public sealed class BattleSessionController : MonoBehaviour
     private VisualElement resultCharacterPreview;
     private int selectedCharacterIndex;
     private float hudSortingOrder;
+    private DateTime roundStartedUtc;
+    private DateTime roundFinishedUtc;
+    private double roundStartedRealtime;
+    private double pausedSeconds;
+    private double pausedAtRealtime;
+    private double roundDurationSeconds;
+    private string roundId;
+    private int enemiesKilled;
+    private int finalRoundScore;
+    private bool saveInProgress;
+    private bool matchSaved;
 
     public bool IsRoundActive => roundActive;
     public bool IsBattlePaused { get; private set; }
@@ -128,7 +145,10 @@ public sealed class BattleSessionController : MonoBehaviour
         healthLabel = hudRoot.Q<Label>("HealthLabel");
         scoreLabel = hudRoot.Q<Label>("ScoreLabel");
         finalScoreLabel = hudRoot.Q<Label>("FinalScoreLabel");
+        resultDurationLabel = hudRoot.Q<Label>("ResultDurationLabel");
+        saveStatusLabel = hudRoot.Q<Label>("SaveStatusLabel");
         returnButton = hudRoot.Q<Button>("ReturnToMenuButton");
+        retrySaveButton = hudRoot.Q<Button>("RetrySaveButton");
         pauseScreen = hudRoot.Q<VisualElement>("PauseScreen");
         resumeButton = hudRoot.Q<Button>("ResumeButton");
         matchIntro = hudRoot.Q<VisualElement>("MatchIntro");
@@ -136,6 +156,8 @@ public sealed class BattleSessionController : MonoBehaviour
         countdownLabel = hudRoot.Q<Label>("CountdownLabel");
         hudSortingOrder = hudDocument.sortingOrder;
         returnButton.clicked += ReturnToMenu;
+        retrySaveButton.clicked += RetrySaveMatch;
+        retrySaveButton.style.display = DisplayStyle.None;
         if (resumeButton != null) resumeButton.clicked += ResumeFromButton;
         if (pauseScreen != null) pauseScreen.style.display = DisplayStyle.None;
         battleOverlay.style.display = DisplayStyle.None;
@@ -219,6 +241,7 @@ public sealed class BattleSessionController : MonoBehaviour
         if (paused)
         {
             IsBattlePaused = true;
+            StartPauseTimer();
             PauseManager.Instance?.SetPause(true);
             // Keep the global Unity clock running. Retain each dynamic body's original
             // constraints, gravity and momentum so projectile trajectories can resume.
@@ -288,6 +311,7 @@ public sealed class BattleSessionController : MonoBehaviour
     {
         if (IsBattlePaused)
         {
+            FinishPauseTimer();
             foreach (KeyValuePair<Animator, float> entry in pausedAnimatorSpeeds)
                 if (entry.Key != null) entry.Key.speed = entry.Value;
             pausedAnimatorSpeeds.Clear();
@@ -315,6 +339,19 @@ public sealed class BattleSessionController : MonoBehaviour
         }
         if (pauseScreen != null) pauseScreen.style.display = DisplayStyle.None;
         if (hudRoot != null) hudRoot.pickingMode = PickingMode.Ignore;
+    }
+
+    // O relogio real segue em Time.timeScale = 1; descontamos somente pausas da batalha.
+    private void StartPauseTimer()
+    {
+        if (roundActive) pausedAtRealtime = Time.realtimeSinceStartupAsDouble;
+    }
+
+    private void FinishPauseTimer()
+    {
+        if (pausedAtRealtime <= 0) return;
+        pausedSeconds += Time.realtimeSinceStartupAsDouble - pausedAtRealtime;
+        pausedAtRealtime = 0;
     }
 
     private void OnDestroy()
@@ -345,6 +382,7 @@ public sealed class BattleSessionController : MonoBehaviour
         {
             returnButton.clicked -= ReturnToMenu;
         }
+        if (retrySaveButton != null) retrySaveButton.clicked -= RetrySaveMatch;
         if (resumeButton != null) resumeButton.clicked -= ResumeFromButton;
     }
 
@@ -535,8 +573,19 @@ public sealed class BattleSessionController : MonoBehaviour
     private void StartCombat()
     {
         BattleAudioController.PlayGameplayMusic();
-        // StartGame, AddScore and EndGame remain callable; only the legacy Escape Update is disabled.
+        // Este é o início real da partida. O UUID identifica uma tentativa no MySQL;
+        // seleção de personagem e contagem regressiva não entram na duração.
         GameManager.Instance.enabled = false;
+        roundId = Guid.NewGuid().ToString("D");
+        roundStartedUtc = DateTime.UtcNow;
+        roundStartedRealtime = Time.realtimeSinceStartupAsDouble;
+        pausedSeconds = 0;
+        pausedAtRealtime = 0;
+        enemiesKilled = 0;
+        saveInProgress = false;
+        matchSaved = false;
+        saveStatusLabel.text = "";
+        retrySaveButton.style.display = DisplayStyle.None;
         if (PauseManager.Instance != null) PauseManager.Instance.SetPause(false);
         roundActive = true;
         enemySpawner?.StartSpawning();
@@ -551,6 +600,7 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         GameManager.Instance.AddScore(pointsPerEnemy);
+        enemiesKilled++;
         RefreshHud();
         if (!playerHealth.IsDead && characterSelection != null &&
             selectedCharacterIndex >= 0 && selectedCharacterIndex < characterSelection.CharacterCount)
@@ -565,6 +615,11 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         roundActive = false;
+        // O timestamp é UTC; a duração vem do relógio real descontando pausas.
+        // Isso mantém os horários comparáveis sem alterar Time.timeScale.
+        roundFinishedUtc = DateTime.UtcNow;
+        roundDurationSeconds = Math.Max(0.001, Time.realtimeSinceStartupAsDouble -
+            roundStartedRealtime - pausedSeconds);
         ClearBattlePause();
         enemySpawner?.StopSpawning();
         StopCombatDamage();
@@ -578,13 +633,14 @@ public sealed class BattleSessionController : MonoBehaviour
 
         GameManager manager = GameManager.Instance;
         int finalScore = RoundScore;
-        if (manager != null && manager.PlayerData != null)
-        {
-            manager.EndGame();
-            manager.enabled = false;
-        }
+        manager.enabled = false;
 
+        finalRoundScore = finalScore;
         finalScoreLabel.text = finalScore.ToString();
+        resultDurationLabel.text = $"DURAÇÃO: {roundDurationSeconds:F1} s";
+        // A morte encerra a partida uma vez. A tela só indicará "salva" após o JSON
+        // de sucesso; GameManager.EndGame não é chamado, pois alterava apenas pontos.
+        RetrySaveMatch();
         RefreshHud();
         if (health.DeathAnimationDuration > 0f)
             roundResult = StartCoroutine(WaitForDeathThenShowResult(health.DeathAnimationDuration));
@@ -605,6 +661,36 @@ public sealed class BattleSessionController : MonoBehaviour
         battleHud.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.Flex;
         characterSelection?.ShowResultPreview(selectedCharacterIndex, resultCharacterPreview);
+    }
+
+    private void RetrySaveMatch()
+    {
+        if (saveInProgress || matchSaved) return;
+        saveInProgress = true;
+        saveStatusLabel.text = "Salvando partida...";
+        retrySaveButton.style.display = DisplayStyle.None;
+        returnButton.SetEnabled(false);
+
+        // Repetir usa o mesmo UUID e os mesmos dados; a Model não cria outra partida.
+        string submittedId = roundId;
+        GameManager.Instance.DataManager.SaveMatch(observedPlayerData.id, submittedId,
+            roundStartedUtc, roundFinishedUtc, roundDurationSeconds, finalRoundScore, enemiesKilled,
+            (success, error) =>
+            {
+                if (this == null || submittedId != roundId) return;
+                saveInProgress = false;
+                returnButton.SetEnabled(true);
+                if (success)
+                {
+                    matchSaved = true;
+                    saveStatusLabel.text = "Partida salva com sucesso.";
+                }
+                else
+                {
+                    saveStatusLabel.text = error + " Você pode tentar novamente ou voltar sem salvar.";
+                    retrySaveButton.style.display = DisplayStyle.Flex;
+                }
+            });
     }
 
     private void StopRoundResult()

@@ -111,6 +111,19 @@
     -unity-text-align: middle-center;
 }
 
+.result-duration, .save-status {
+    color: var(--color-text);
+    font-size: 20px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+}
+
+.save-status {
+    min-height: 28px;
+    white-space: normal;
+}
+
 .defeat-button {
     width: 360px;
     max-width: 100%;

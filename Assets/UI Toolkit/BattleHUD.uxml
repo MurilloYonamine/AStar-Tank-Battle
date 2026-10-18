@@ -18,7 +18,10 @@
             <ui:VisualElement class="defeat-card">
                 <ui:Label text="PONTUAÇÃO FINAL" class="result-score-caption" />
                 <ui:Label name="FinalScoreLabel" text="0" class="defeat-score battle-ui-title" />
+                <ui:Label name="ResultDurationLabel" text="DURAÇÃO: 0 s" class="result-duration" />
                 <ui:VisualElement name="ResultCharacterPreview" class="result-character-preview" picking-mode="Ignore" />
+                <ui:Label name="SaveStatusLabel" text="" class="save-status" />
+                <ui:Button name="RetrySaveButton" text="TENTAR SALVAR NOVAMENTE" class="defeat-button battle-ui-button" style="display: none;" />
                 <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button battle-ui-button battle-ui-primary" />
             </ui:VisualElement>
         </ui:VisualElement>
