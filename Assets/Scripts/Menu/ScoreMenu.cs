@@ -34,16 +34,16 @@ public class ScoreMenu : IMenu
             ((Label)element).text = _ranking[index].jogador_nome;
         };
 
-        _scoreListView.columns["Pontos"].makeCell = () => new Label();
-        _scoreListView.columns["Pontos"].bindCell = (element, index) =>
+        _scoreListView.columns["Tempo"].makeCell = () => new Label();
+        _scoreListView.columns["Tempo"].bindCell = (element, index) =>
         {
-            ((Label)element).text = _ranking[index].pontuacao.ToString();
+            ((Label)element).text = MatchTime.Format(_ranking[index].duracao_segundos);
         };
 
         _scoreListView.columns["Posicao"].makeCell = () => new Label();
         _scoreListView.columns["Posicao"].bindCell = (element, index) =>
         {
-            ((Label)element).text = (index + 1).ToString();
+            ((Label)element).text = _ranking[index].posicao.ToString();
         };
 
         _scoreBackButton.clicked += OnBackClicked;
@@ -78,7 +78,7 @@ public class ScoreMenu : IMenu
             _scoreListView.itemsSource = _ranking;
             _scoreListView.Rebuild();
             _statusLabel.text = ranking.Length == 0 ? "Ainda não há vitórias registradas." :
-                "Top 10 — melhor pontuação em uma vitória de cada jogador.";
+                "Top 10 — menor tempo de conclusão de cada jogador. Tempos iguais compartilham a posição.";
         });
     }
 

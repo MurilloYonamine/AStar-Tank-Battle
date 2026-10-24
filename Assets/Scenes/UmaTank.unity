@@ -35947,6 +35947,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3400000001}
   - component: {fileID: 3400000002}
+  - component: {fileID: 3400000003}
   m_Layer: 0
   m_Name: Battle Session
   m_TagString: Untagged
@@ -35992,7 +35993,6 @@ MonoBehaviour:
   - {fileID: 1988315320}
   - {fileID: 429847192}
   - {fileID: 2117052378}
-  pointsPerEnemy: 100
   matchTimeLimitSeconds: 180
   eliminationTarget: 10
   characterSelection: {fileID: 1592468118}
@@ -36010,6 +36010,23 @@ MonoBehaviour:
   goDuration: 0.5
   ultimateWindPrefab: {fileID: 4683849804331954680, guid: b421bd88c64d2c34c916ba4bf41dce11, type: 3}
   ultimateWindScale: 0.25
+--- !u!114 &3400000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3400000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f38b4a05cf774f178b41a782d83722a4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CombatEffects
+  muzzlePrefab: {fileID: 6980259576133684760, guid: 1f58a1dea6bbd9347843e4935585e6a2, type: 3}
+  impactPrefab: {fileID: 3077343761403282166, guid: f78aaaec3b393e24ca74cd6de8194347, type: 3}
+  particleMaterial: {fileID: 2100000, guid: 3193e3e670624c149fa821c198c8a094, type: 2}
+  muzzleScale: 0.65
+  impactScale: 0.55
 --- !u!1 &3500000000
 GameObject:
   m_ObjectHideFlags: 0

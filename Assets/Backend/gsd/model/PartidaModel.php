@@ -40,17 +40,30 @@ class PartidaModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Melhor pontuacao de cada jogador apenas entre vitorias; desempate por ID do jogador.
+    // Menor tempo de cada jogador apenas entre vitorias. ID estabiliza a exibicao,
+    // mas nao desempata a colocacao: o Controller compartilha posicoes em tempos iguais.
     public function listar_ranking()
     {
         $query = "SELECT j.id AS jogador_id, j.name AS jogador_nome, "
-            . "MAX(p.pontuacao) AS pontuacao FROM partidas p "
+            . "MIN(p.duracao_segundos) AS duracao_segundos FROM partidas p "
             . "JOIN jogadores j ON j.id = p.jogador_id "
-            . "WHERE p.resultado = 'vitoria' "
-            . "GROUP BY j.id, j.name ORDER BY pontuacao DESC, j.id ASC LIMIT 10";
+            . "WHERE p.resultado = 'vitoria' AND p.duracao_segundos > 0 "
+            . "GROUP BY j.id, j.name ORDER BY duracao_segundos ASC, j.id ASC LIMIT 10";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Consulta apenas leitura. Exclui somente a partida do jogador autenticado,
+    // inclusive em recargas/tentativas repetidas, para nao comparar o recorde consigo mesmo.
+    public function recorde_sem_partida($jogadorId, $uuid)
+    {
+        $query = "SELECT MIN(duracao_segundos) FROM partidas WHERE resultado = 'vitoria' "
+            . 'AND duracao_segundos > 0 AND NOT (jogador_id = :jogador_id AND partida_uuid = :uuid)';
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':jogador_id' => $jogadorId, ':uuid' => $uuid]);
+        $tempo = $stmt->fetchColumn();
+        return $tempo === null || $tempo === false ? 0.0 : (float)$tempo;
     }
 
     // Consultas da página web: todas as partidas entram nos totais e na média de duração.
@@ -77,18 +90,20 @@ class PartidaModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Desempenho por pontuação entre todas as partidas, inclusive derrotas e empates.
+    // Melhor/pior tempo DE CONCLUSAO: somente vitorias. Derrotas e empates
+    // permanecem no historico e na media geral, mas nao sao tempos de conclusao.
     public function partida_extrema($melhor)
     {
         if ($melhor) {
-            $ordem = 'p.pontuacao DESC, p.duracao_segundos ASC, p.id ASC';
+            $ordem = 'p.duracao_segundos ASC, p.id ASC';
         } else {
-            $ordem = 'p.pontuacao ASC, p.duracao_segundos DESC, p.id ASC';
+            $ordem = 'p.duracao_segundos DESC, p.id ASC';
         }
 
         $query = 'SELECT p.id, j.name AS jogador_nome, p.pontuacao, p.resultado, '
             . 'p.duracao_segundos FROM partidas p '
-            . 'JOIN jogadores j ON j.id = p.jogador_id ORDER BY ' . $ordem . ' LIMIT 1';
+            . "JOIN jogadores j ON j.id = p.jogador_id WHERE p.resultado = 'vitoria' "
+            . 'AND p.duracao_segundos > 0 ORDER BY ' . $ordem . ' LIMIT 1';
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -98,7 +113,7 @@ class PartidaModel
     {
         $query = "SELECT j.id, j.name AS jogador_nome, COUNT(p.id) AS total, "
             . "AVG(p.duracao_segundos) AS duracao_media, "
-            . "MAX(CASE WHEN p.resultado = 'vitoria' THEN p.pontuacao END) AS melhor_vitoria "
+            . "MIN(CASE WHEN p.resultado = 'vitoria' AND p.duracao_segundos > 0 THEN p.duracao_segundos END) AS melhor_vitoria "
             . "FROM jogadores j LEFT JOIN partidas p ON p.jogador_id = j.id "
             . "GROUP BY j.id, j.name ORDER BY total DESC, j.id ASC";
         $stmt = $this->conn->prepare($query);

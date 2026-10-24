@@ -37,12 +37,12 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [SerializeField] private string passiveName;
     [SerializeField, TextArea(2, 3)] private string passiveDescription;
 
-    [Header("Ultimate design")]
-    [SerializeField] private string ultimateName;
-    [SerializeField, TextArea(2, 3)] private string ultimateDescription;
-    [SerializeField] private UltimateEffect ultimateEffect;
-    [Tooltip("Optional HUD icon. An empty field uses the authored ULT placeholder.")]
-    [SerializeField] private Texture2D ultimateIcon;
+    [Header("Unique Skill design")]
+    [SerializeField, InspectorName("Unique Skill Name")] private string ultimateName;
+    [SerializeField, TextArea(2, 3), InspectorName("Unique Skill Description")] private string ultimateDescription;
+    [SerializeField, InspectorName("Unique Skill Effect")] private UltimateEffect ultimateEffect;
+    [Tooltip("Optional HUD icon. An empty field uses the Unique Skill text placeholder; assigning an image hides that text.")]
+    [SerializeField, InspectorName("Unique Skill Icon")] private Texture2D ultimateIcon;
     [SerializeField, Min(0.1f)] private float ultimateDurationSeconds = 4f;
     [SerializeField, Min(1f)] private float ultimateSpeedMultiplier = 1.5f;
     [SerializeField, Range(0f, 1f)] private float ultimateHealFraction;
@@ -51,7 +51,7 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [SerializeField, Min(1f)] private float ultimateShotDamageMultiplier = 1f;
     [SerializeField, Min(1f)] private float ultimateExplosionRadiusMultiplier = 1f;
 
-    [Header("Ultimate charge design")]
+    [Header("Unique Skill charge design")]
     [SerializeField, Range(0f, 100f)] private float chargePerSecond = 2f;
     [SerializeField, Range(0f, 100f)] private float chargePerElimination = 15f;
 

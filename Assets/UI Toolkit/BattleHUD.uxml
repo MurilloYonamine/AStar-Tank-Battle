@@ -10,21 +10,20 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="hud-card objective-card">
-                <ui:Label text="TEMPO" class="hud-caption" />
+              <ui:VisualElement class="objective-stat">
+                <ui:Label text="TEMPO RESTANTE" class="hud-caption" />
                 <ui:Label name="TimeLabel" text="03:00" class="hud-value" />
+              </ui:VisualElement>
+              <ui:VisualElement class="objective-stat">
                 <ui:Label text="ELIMINAÇÕES" class="hud-caption" />
                 <ui:Label name="EliminationLabel" text="0 / 10" class="hud-value" />
-            </ui:VisualElement>
-            <ui:VisualElement class="hud-card score-card">
-                <ui:Label text="PONTOS" class="hud-caption" />
-                <ui:Label name="ScoreLabel" text="0" class="hud-value" />
+              </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="UltimateCard" class="ultimate-card">
-                <ui:Label name="UltimateNameLabel" text="Habilidade" class="ultimate-name" />
+                <ui:Label name="UltimateNameLabel" text="Unique Skill" class="ultimate-name" />
                 <ui:VisualElement name="UltimateIcon" class="ultimate-icon" picking-mode="Ignore">
-                    <ui:Label name="UltimatePlaceholder" text="ULT" class="ultimate-placeholder" />
+                    <ui:Label name="UltimatePlaceholder" text="Unique&#10;Skill" class="ultimate-placeholder" />
                     <ui:VisualElement name="UltimateMask" class="ultimate-mask" />
-                    <ui:Label name="UltimatePercentLabel" text="0%" class="ultimate-percent" />
                 </ui:VisualElement>
                 <ui:Label name="UltimateStatusLabel" text="CARREGANDO" class="ultimate-status" />
             </ui:VisualElement>
@@ -35,14 +34,33 @@
         <ui:VisualElement name="DefeatScreen" class="defeat-screen">
             <ui:VisualElement class="defeat-card">
                 <ui:Label name="ResultTitleLabel" text="RESULTADO" class="result-title battle-ui-title" />
-                <ui:Label text="PONTUAÇÃO FINAL" class="result-score-caption" />
-                <ui:Label name="FinalScoreLabel" text="0" class="defeat-score battle-ui-title" />
-                <ui:Label name="ResultDurationLabel" text="DURAÇÃO: 0 s" class="result-duration" />
+                <ui:Label name="ResultTimeCaptionLabel" text="TEMPO DE CONCLUSÃO" class="result-time-caption" />
+                <ui:Label name="FinalTimeLabel" text="00:00,000" class="result-time battle-ui-title" />
+                <ui:Label name="ResultRankingNoteLabel" text="Apenas vitórias entram no ranking." class="result-duration" />
                 <ui:Label name="ResultEliminationsLabel" text="ELIMINAÇÕES: 0 / 10" class="result-duration" />
-                <ui:VisualElement name="ResultCharacterPreview" class="result-character-preview" picking-mode="Ignore" />
+                <ui:VisualElement class="result-body">
+                    <ui:VisualElement name="ResultCharacterPreview" class="result-character-preview" picking-mode="Ignore" />
+                    <ui:VisualElement name="ResultRankingPanel" class="result-ranking" style="display: none;">
+                        <ui:Label text="RANKING" class="result-ranking-title" />
+                        <ui:Label text="MELHORES TEMPOS" class="result-ranking-subtitle" />
+                        <ui:Label name="ResultRankingStatusLabel" text="" class="result-ranking-status" />
+                        <ui:MultiColumnListView name="ResultRankingList" class="result-ranking-list">
+                            <ui:Columns>
+                                <ui:Column name="Posicao" title="Pos." width="16%" />
+                                <ui:Column name="Jogador" title="Jogador" width="50%" />
+                                <ui:Column name="Tempo" title="Tempo" width="34%" />
+                            </ui:Columns>
+                        </ui:MultiColumnListView>
+                        <ui:Button name="RetryRankingButton" text="RECARREGAR RANKING" class="battle-ui-button result-ranking-retry" style="display: none;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:Label name="SaveStatusLabel" text="" class="save-status" />
                 <ui:Button name="RetrySaveButton" text="TENTAR SALVAR NOVAMENTE" class="defeat-button battle-ui-button" style="display: none;" />
-                <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button battle-ui-button battle-ui-primary" />
+                <ui:VisualElement class="result-actions">
+                    <ui:Button name="ReplayButton" text="JOGAR NOVAMENTE" class="defeat-button battle-ui-button battle-ui-primary" />
+                    <ui:Button name="ReturnToLoginButton" text="VOLTAR AO LOGIN" class="defeat-button battle-ui-button" />
+                    <ui:Button name="ReturnToMenuButton" text="VOLTAR AO MENU" class="defeat-button battle-ui-button" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="PauseScreen" class="pause-screen" style="display: none;">

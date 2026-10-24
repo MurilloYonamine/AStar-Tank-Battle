@@ -8,6 +8,9 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Owns the timed elimination match and submits its immutable result through DataManager.
 /// Selection, countdown and battle pauses do not count toward the time limit.
+/// Performance: lowest completion time among victories; each player's best is ranked.
+/// Equal stored milliseconds share competition ranks (1, 1, 3). Losses/draws stay in history.
+/// The legacy points field is sent as zero for schema compatibility, never used as the criterion.
 /// </summary>
 public sealed class BattleSessionController : MonoBehaviour
 {
@@ -18,7 +21,6 @@ public sealed class BattleSessionController : MonoBehaviour
     [SerializeField] private StyleSheet hudStyle;
     [SerializeField] private TankHealth playerHealth;
     [SerializeField] private TankHealth[] enemyHealths;
-    [SerializeField, Min(1)] private int pointsPerEnemy = 100;
 
     [Header("Match objectives")]
     [SerializeField, Min(1f)] private float matchTimeLimitSeconds = 180f;
@@ -57,16 +59,19 @@ public sealed class BattleSessionController : MonoBehaviour
     private VisualElement healthFill;
     private VisualElement mainMenu;
     private Label healthLabel;
-    private Label scoreLabel;
     private Label timeLabel;
     private Label eliminationLabel;
     private Label resultTitleLabel;
     private Label resultEliminationsLabel;
-    private Label finalScoreLabel;
-    private Label resultDurationLabel;
+    private Label resultTimeCaptionLabel;
+    private Label finalTimeLabel;
+    private Label resultRankingNoteLabel;
     private Label saveStatusLabel;
     private Button returnButton;
     private Button retrySaveButton;
+    private Button replayButton;
+    private Button loginButton;
+    private ResultRankingPanel resultRanking;
     private VisualElement pauseScreen;
     private Button resumeButton;
     private readonly Dictionary<Animator, float> pausedAnimatorSpeeds = new();
@@ -97,7 +102,6 @@ public sealed class BattleSessionController : MonoBehaviour
     private double roundDurationSeconds;
     private string roundId;
     private int enemiesKilled;
-    private int finalRoundScore;
     private bool saveInProgress;
     private bool matchSaved;
     private string roundOutcome;
@@ -105,7 +109,7 @@ public sealed class BattleSessionController : MonoBehaviour
     private int activeEliminationTarget;
     private readonly TankUltimateState playerUltimate = new();
     private VisualElement ultimateCard, ultimateIcon, ultimateMask;
-    private Label ultimatePlaceholder, ultimatePercentLabel, ultimateNameLabel, ultimateStatusLabel;
+    private Label ultimatePlaceholder, ultimateNameLabel, ultimateStatusLabel;
     private VisualElement ultimateScreenEffect;
     private GameObject ultimateWindInstance;
     private ParticleSystem[] ultimateWindParticles;
@@ -115,7 +119,6 @@ public sealed class BattleSessionController : MonoBehaviour
     public bool IsRoundActive => roundActive;
     public bool IsBattlePaused { get; private set; }
     public bool IsStartingRound { get; private set; }
-    public int RoundScore => observedPlayerData != null ? observedPlayerData.pontos : 0;
     public double RemainingSeconds => Math.Max(0, activeTimeLimit - ElapsedSeconds);
 
     private double ElapsedSeconds => !roundActive ? roundDurationSeconds : Math.Max(0,
@@ -171,16 +174,19 @@ public sealed class BattleSessionController : MonoBehaviour
         resultCharacterPreview = hudRoot.Q<VisualElement>("ResultCharacterPreview");
         healthFill = hudRoot.Q<VisualElement>("HealthFill");
         healthLabel = hudRoot.Q<Label>("HealthLabel");
-        scoreLabel = hudRoot.Q<Label>("ScoreLabel");
         timeLabel = hudRoot.Q<Label>("TimeLabel");
         eliminationLabel = hudRoot.Q<Label>("EliminationLabel");
         resultTitleLabel = hudRoot.Q<Label>("ResultTitleLabel");
         resultEliminationsLabel = hudRoot.Q<Label>("ResultEliminationsLabel");
-        finalScoreLabel = hudRoot.Q<Label>("FinalScoreLabel");
-        resultDurationLabel = hudRoot.Q<Label>("ResultDurationLabel");
+        resultTimeCaptionLabel = hudRoot.Q<Label>("ResultTimeCaptionLabel");
+        finalTimeLabel = hudRoot.Q<Label>("FinalTimeLabel");
+        resultRankingNoteLabel = hudRoot.Q<Label>("ResultRankingNoteLabel");
         saveStatusLabel = hudRoot.Q<Label>("SaveStatusLabel");
         returnButton = hudRoot.Q<Button>("ReturnToMenuButton");
         retrySaveButton = hudRoot.Q<Button>("RetrySaveButton");
+        replayButton = hudRoot.Q<Button>("ReplayButton");
+        loginButton = hudRoot.Q<Button>("ReturnToLoginButton");
+        resultRanking = new ResultRankingPanel(hudRoot);
         pauseScreen = hudRoot.Q<VisualElement>("PauseScreen");
         resumeButton = hudRoot.Q<Button>("ResumeButton");
         matchIntro = hudRoot.Q<VisualElement>("MatchIntro");
@@ -190,7 +196,6 @@ public sealed class BattleSessionController : MonoBehaviour
         ultimateIcon = hudRoot.Q<VisualElement>("UltimateIcon");
         ultimateMask = hudRoot.Q<VisualElement>("UltimateMask");
         ultimatePlaceholder = hudRoot.Q<Label>("UltimatePlaceholder");
-        ultimatePercentLabel = hudRoot.Q<Label>("UltimatePercentLabel");
         ultimateNameLabel = hudRoot.Q<Label>("UltimateNameLabel");
         ultimateStatusLabel = hudRoot.Q<Label>("UltimateStatusLabel");
         ultimateScreenEffect = hudRoot.Q<VisualElement>("UltimateScreenEffect");
@@ -198,6 +203,8 @@ public sealed class BattleSessionController : MonoBehaviour
         hudSortingOrder = hudDocument.sortingOrder;
         returnButton.clicked += ReturnToMenu;
         retrySaveButton.clicked += RetrySaveMatch;
+        if (replayButton != null) replayButton.clicked += ReplayRound;
+        if (loginButton != null) loginButton.clicked += ReturnToLogin;
         retrySaveButton.style.display = DisplayStyle.None;
         if (resumeButton != null) resumeButton.clicked += ResumeFromButton;
         if (pauseScreen != null) pauseScreen.style.display = DisplayStyle.None;
@@ -412,6 +419,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void OnDestroy()
     {
+        resultRanking?.Dispose();
         pauseAudioSettings?.Dispose();
         if (ultimateWindInstance != null) Destroy(ultimateWindInstance);
         hudRoot?.UnregisterCallback<GeometryChangedEvent>(OnHudGeometryChanged);
@@ -442,6 +450,8 @@ public sealed class BattleSessionController : MonoBehaviour
             returnButton.clicked -= ReturnToMenu;
         }
         if (retrySaveButton != null) retrySaveButton.clicked -= RetrySaveMatch;
+        if (replayButton != null) replayButton.clicked -= ReplayRound;
+        if (loginButton != null) loginButton.clicked -= ReturnToLogin;
         if (resumeButton != null) resumeButton.clicked -= ResumeFromButton;
     }
 
@@ -685,7 +695,6 @@ public sealed class BattleSessionController : MonoBehaviour
             return;
         }
 
-        GameManager.Instance.AddScore(pointsPerEnemy);
         playerUltimate.AddElimination();
         enemiesKilled++;
         RefreshHud();
@@ -706,12 +715,13 @@ public sealed class BattleSessionController : MonoBehaviour
 
     /// <summary>
     /// The first terminal condition wins. Snapshot all submitted data once so retries
-    /// cannot change the score, duration, outcome or UUID of an already finished match.
+    /// cannot change the duration, outcome or UUID of an already finished match.
     /// </summary>
     private void FinishRound(string outcome)
     {
         if (!roundActive) return;
-        roundDurationSeconds = Math.Max(0.001, Math.Min(activeTimeLimit, ElapsedSeconds));
+        roundDurationSeconds = Math.Round(Math.Max(0.001, Math.Min(activeTimeLimit, ElapsedSeconds)),
+            3, MidpointRounding.AwayFromZero);
         roundActive = false;
         // O timestamp é UTC; a duração vem do relógio real descontando pausas.
         // Isso mantém os horários comparáveis sem alterar Time.timeScale.
@@ -730,15 +740,17 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         GameManager manager = GameManager.Instance;
-        int finalScore = RoundScore;
         manager.enabled = false;
 
-        finalRoundScore = finalScore;
-        finalScoreLabel.text = finalScore.ToString();
+        resultTimeCaptionLabel.text = outcome == "vitoria" ? "TEMPO DE CONCLUSÃO" : "DURAÇÃO DA PARTIDA";
+        finalTimeLabel.text = MatchTime.Format(roundDurationSeconds);
         resultTitleLabel.text = outcome == "vitoria" ? "VITÓRIA!" :
             outcome == "empate" ? "EMPATE — TEMPO ESGOTADO" : "DERROTA";
         resultEliminationsLabel.text = $"ELIMINAÇÕES: {enemiesKilled} / {activeEliminationTarget}";
-        resultDurationLabel.text = $"DURAÇÃO: {roundDurationSeconds:F1} s";
+        resultRankingNoteLabel.text = outcome == "vitoria"
+            ? "Aguardando salvamento para consultar sua colocação."
+            : "Apenas vitórias entram no ranking de conclusão.";
+        resultRanking?.Prepare(outcome == "vitoria");
         // Only the new match endpoint is called, not the legacy account-score update.
         RetrySaveMatch();
         RefreshHud();
@@ -770,20 +782,29 @@ public sealed class BattleSessionController : MonoBehaviour
         saveStatusLabel.text = "Salvando partida...";
         retrySaveButton.style.display = DisplayStyle.None;
         returnButton.SetEnabled(false);
+        replayButton?.SetEnabled(false);
+        loginButton?.SetEnabled(false);
 
         // Repetir usa o mesmo UUID e os mesmos dados; a Model não cria outra partida.
         string submittedId = roundId;
+        // Keep the legacy points column/API compatible without awarding points per kill.
+        // Performance is the existing duracao_segundos field, ranked only for victories.
         GameManager.Instance.DataManager.SaveMatch(observedPlayerData.id, submittedId,
-            roundStartedUtc, roundFinishedUtc, roundDurationSeconds, roundOutcome, finalRoundScore, enemiesKilled,
+            roundStartedUtc, roundFinishedUtc, roundDurationSeconds, roundOutcome, 0, enemiesKilled,
             (success, error) =>
             {
                 if (this == null || submittedId != roundId) return;
                 saveInProgress = false;
                 returnButton.SetEnabled(true);
+                replayButton?.SetEnabled(true);
+                loginButton?.SetEnabled(true);
                 if (success)
                 {
                     matchSaved = true;
                     saveStatusLabel.text = "Partida salva com sucesso.";
+                    // Query only after commit confirmation, so a new personal best is already visible.
+                    if (roundOutcome == "vitoria")
+                        resultRanking?.Load(GameManager.Instance.DataManager, observedPlayerData.id, roundId, roundDurationSeconds);
                 }
                 else
                 {
@@ -795,6 +816,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void StopRoundResult()
     {
+        resultRanking?.Close();
         if (roundResult != null) StopCoroutine(roundResult);
         roundResult = null;
         characterSelection?.Close();
@@ -818,6 +840,28 @@ public sealed class BattleSessionController : MonoBehaviour
         ShowMainMenu();
     }
 
+    private void ReplayRound()
+    {
+        if (roundActive || IsStartingRound || saveInProgress || observedPlayerData == null) return;
+        BattleAudioController.PlayButtonClick();
+        StopRoundResult();
+        defeatScreen.style.display = DisplayStyle.None;
+        battleOverlay.style.display = DisplayStyle.None;
+        PlayerData player = observedPlayerData;
+        // Reuse the authenticated account, not its finished round. Update opens selection again;
+        // StartCombat supplies a fresh UUID and resets time, eliminations, HP and skill charge.
+        GameManager.Instance.StartGame(new PlayerData(player.id, player.name, player.email, null, 0,
+            player.created_at, player.updated_at));
+    }
+
+    private void ReturnToLogin()
+    {
+        ReturnToMenu();
+        GameManager.Instance?.DataManager?.CancelLogin();
+        MenuManager menu = menuManager != null ? menuManager : MenuManager.Instance;
+        menu?.OpenPlayScreen();
+    }
+
     private void ShowMainMenu()
     {
         BattleAudioController.PlayMenuMusic();
@@ -836,7 +880,6 @@ public sealed class BattleSessionController : MonoBehaviour
             : 0f;
         healthFill.style.width = new Length(healthPercent, LengthUnit.Percent);
 
-        scoreLabel.text = RoundScore.ToString();
         int seconds = (int)Math.Ceiling(RemainingSeconds);
         timeLabel.text = $"{seconds / 60:00}:{seconds % 60:00}";
         eliminationLabel.text = $"{enemiesKilled} / {activeEliminationTarget}";
@@ -933,16 +976,14 @@ public sealed class BattleSessionController : MonoBehaviour
         if (ultimateCard == null) return;
         CharacterClassDefinition definition = playerUltimate.Definition;
         bool available = playerUltimate.IsEnabled;
-        ultimateNameLabel.text = definition != null ? definition.UltimateName : "Habilidade";
+        ultimateNameLabel.text = definition != null ? definition.UltimateName : "Unique Skill";
         ultimateStatusLabel.text = !available ? "EM PREPARAÇÃO" : playerUltimate.IsActive
             ? $"EM USO — {playerUltimate.RemainingDuration:F1} s" : playerUltimate.IsReady
                 ? "SHIFT — PRONTA" : "CARREGANDO";
-        ultimatePercentLabel.text = playerUltimate.IsActive ? $"{playerUltimate.RemainingDuration:F1}s" :
-            $"{Mathf.FloorToInt(playerUltimate.Charge)}%";
         float fill = playerUltimate.IsActive && definition != null
             ? playerUltimate.RemainingDuration / Mathf.Max(0.1f, definition.UltimateDurationSeconds)
             : playerUltimate.Charge / 100f;
-        ultimateMask.style.height = new Length(100f * (1f - Mathf.Clamp01(fill)), LengthUnit.Percent);
+        ultimateMask.style.height = new Length(100f * Mathf.Clamp01(fill), LengthUnit.Percent);
         Texture2D icon = definition != null ? definition.UltimateIcon : null;
         ultimateIcon.style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
         ultimatePlaceholder.style.display = icon != null ? DisplayStyle.None : DisplayStyle.Flex;
@@ -953,6 +994,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private static void StopCombatDamage()
     {
+        CombatEffects.ClearBursts();
         foreach (Shell shell in FindObjectsByType<Shell>(FindObjectsSortMode.None))
         {
             shell.gameObject.SetActive(false);

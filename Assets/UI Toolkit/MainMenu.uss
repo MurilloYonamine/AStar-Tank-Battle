@@ -104,7 +104,17 @@
 
 #ScoreTitle {
     font-size: 42px;
+    top: 5%;
 }
+
+#RankingStatusLabel {
+    position: absolute;
+    left: 10%; right: 10%; top: 18%;
+    font-size: 16px;
+    -unity-text-align: middle-center;
+}
+
+#RankingSubtitle { position: absolute; left: 10%; right: 10%; top: 13%; color: var(--color-text); font-size: 22px; -unity-text-align: middle-center; }
 
 #PlayTitle,
 .auth-title,
@@ -118,9 +128,9 @@
     position: absolute;
     left: 10%;
     right: 10%;
-    top: 20%;
-    bottom: 14%;
-    min-height: 300px;
+    top: 27%;
+    bottom: 20%;
+    min-height: 180px;
     background-color: rgba(0, 0, 0, 0);
     border-width: 2px;
     border-color: var(--color-primary);

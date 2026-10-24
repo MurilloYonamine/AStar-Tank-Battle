@@ -117,15 +117,35 @@ class PartidaController
 
     public function listar_ranking($data)
     {
-        if ($this->autenticar($data) === false) return;
+        $jogadorId = $this->autenticar($data);
+        if ($jogadorId === false) return;
+        $uuid = $data['partida_uuid'] ?? null;
+        if ($uuid !== null && (!is_string($uuid) ||
+            !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/iD', $uuid))) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Identificador de partida inválido.']);
+            return;
+        }
         try {
             $ranking = $this->model->listar_ranking();
-            foreach ($ranking as &$jogador) {
+            $tempoAnterior = null;
+            $posicao = 0;
+            foreach ($ranking as $indice => &$jogador) {
                 $jogador['jogador_id'] = (int)$jogador['jogador_id'];
-                $jogador['pontuacao'] = (int)$jogador['pontuacao'];
+                $jogador['duracao_segundos'] = (float)$jogador['duracao_segundos'];
+                // DECIMAL(10,3) do banco: comparar milissegundos evita empates por arredondamento visual.
+                $tempo = (int)round($jogador['duracao_segundos'] * 1000);
+                if ($tempo !== $tempoAnterior) $posicao = $indice + 1;
+                $jogador['posicao'] = $posicao; // Ex.: 1, 1, 3. ID nao favorece um jogador no empate.
+                $tempoAnterior = $tempo;
             }
             unset($jogador);
-            echo json_encode(['ranking' => $ranking], JSON_INVALID_UTF8_SUBSTITUTE);
+            $response = ['ranking' => $ranking];
+            if ($uuid !== null) {
+                $response['comparacao_recorde_disponivel'] = true;
+                $response['recorde_anterior_segundos'] = $this->model->recorde_sem_partida($jogadorId, $uuid);
+            }
+            echo json_encode($response, JSON_INVALID_UTF8_SUBSTITUTE);
         } catch (PDOException $exception) {
             http_response_code(500);
             echo json_encode(['error' => 'Não foi possível carregar o ranking.']);

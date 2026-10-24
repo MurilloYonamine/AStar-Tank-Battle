@@ -56,23 +56,39 @@ public class DataManager : MonoBehaviour
     {
         public int jogador_id;
         public string jogador_nome;
-        public int pontuacao;
+        public double duracao_segundos;
+        public int posicao;
     }
 
     [Serializable]
-    private class RankingResponse
+    public class RankingResponse
     {
         public RankingEntry[] ranking;
         public string error;
+        public bool comparacao_recorde_disponivel;
+        public double recorde_anterior_segundos;
     }
 
-    /// <summary>Loads the PHP top ten: each player's best winning match, authenticated by token.</summary>
+    /// <summary>
+    /// POST api_ranking_partidas with jogador_id/token. Receives ranking entries containing
+    /// jogador_id, jogador_nome, duracao_segundos (numeric seconds) and posicao (1, 1, 3 on ties).
+    /// The Model returns each player's fastest victory. Never convert duration into score points.
+    /// </summary>
     public void LoadRanking(int playerId, Action<RankingEntry[], string> completed)
     {
-        StartCoroutine(LoadRankingRequest(playerId, completed));
+        StartCoroutine(LoadRankingRequest(playerId, null, (response, error) => completed(response?.ranking, error)));
     }
 
-    private IEnumerator LoadRankingRequest(int playerId, Action<RankingEntry[], string> completed)
+    /// <summary>
+    /// Optional partida_uuid requests a comparison excluding this saved match, without changing
+    /// the save API or database. Missing comparison data never authorizes a new-record announcement.
+    /// </summary>
+    public void LoadMatchRanking(int playerId, string matchId, Action<RankingResponse, string> completed)
+    {
+        StartCoroutine(LoadRankingRequest(playerId, matchId, completed));
+    }
+
+    private IEnumerator LoadRankingRequest(int playerId, string matchId, Action<RankingResponse, string> completed)
     {
         if (playerId <= 0 || string.IsNullOrEmpty(Token))
         {
@@ -82,6 +98,7 @@ public class DataManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("jogador_id", playerId);
         form.AddField("token", Token);
+        if (!string.IsNullOrEmpty(matchId)) form.AddField("partida_uuid", matchId);
         using (UnityWebRequest www = UnityWebRequest.Post(URL_RANKING, form))
         {
             www.timeout = 10;
@@ -91,7 +108,17 @@ public class DataManager : MonoBehaviour
             catch (ArgumentException) { /* Invalid JSON must not be shown as an empty ranking. */ }
             if (www.result == UnityWebRequest.Result.Success && response?.ranking != null &&
                 string.IsNullOrEmpty(response.error))
-                completed(response.ranking, null);
+            {
+                // An older server returns only points. Do not present missing durations as records of zero.
+                bool valid = Array.TrueForAll(response.ranking, entry => entry != null && entry.jogador_id > 0 &&
+                    entry.posicao > 0 && entry.duracao_segundos > 0 &&
+                    !double.IsNaN(entry.duracao_segundos) && !double.IsInfinity(entry.duracao_segundos));
+                valid &= !response.comparacao_recorde_disponivel ||
+                    response.recorde_anterior_segundos >= 0 && !double.IsNaN(response.recorde_anterior_segundos) &&
+                    !double.IsInfinity(response.recorde_anterior_segundos);
+                completed(valid ? response : null, valid ? null :
+                    "O servidor ainda não retornou um ranking por tempo válido. Atualize os arquivos PHP da pasta gsd.");
+            }
             else
                 completed(null, !string.IsNullOrEmpty(response?.error) ? response.error :
                     "Não foi possível carregar o ranking. Verifique a conexão e abra o placar novamente.");

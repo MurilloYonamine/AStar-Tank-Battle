@@ -72,6 +72,7 @@ public class Shell : MonoBehaviour
         exploded = true;
         shellCollider.enabled = false;
         body.linearVelocity = Vector3.zero;
+        CombatEffects.PlayImpact(position);
         if (explosion != null)
         {
             GameObject effect = Instantiate(explosion, position, Quaternion.identity);

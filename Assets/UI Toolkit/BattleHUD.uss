@@ -13,8 +13,9 @@
     left: 24px;
     right: 24px;
     top: 20px;
+    bottom: 20px;
     flex-direction: row;
-    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .hud-card {
@@ -29,26 +30,11 @@
     border-radius: 8px;
 }
 
-.score-card {
-    align-items: center;
-    justify-content: center;
-}
-
-.score-card .hud-caption,
-.score-card .hud-value {
-    width: 100%;
-    -unity-text-align: middle-center;
-}
-
-.score-card .hud-value {
-    font-size: 40px;
-}
-
 .ultimate-card {
     position: absolute;
     right: 0;
-    top: 100%;
-    margin-top: 16px;
+    bottom: 0;
+    flex-shrink: 0;
     width: 230px;
     padding: 12px;
     align-items: center;
@@ -63,7 +49,7 @@
     white-space: normal;
     -unity-text-align: middle-center;
 }
-.ultimate-name { margin-bottom: 8px; }
+.ultimate-name { margin-bottom: 8px; font-size: 15px; }
 .ultimate-status { margin-top: 8px; }
 .ultimate-icon {
     width: 96px;
@@ -74,20 +60,24 @@
     border-width: 2px;
     border-color: rgb(174, 168, 223);
     border-radius: 8px;
+    opacity: 0.55;
+    transition-property: opacity, scale;
+    transition-duration: 0.18s;
 }
 .ultimate-placeholder {
     position: absolute;
-    left: 0; right: 0; top: 0; bottom: 0;
+    left: 0; right: 0; top: 10px; height: 42px;
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    font-size: 32px;
+    font-size: 16px;
+    white-space: normal;
     color: white;
 }
 .ultimate-mask {
     position: absolute;
-    left: 0; right: 0; top: 0;
-    height: 100%;
-    background-color: rgba(5, 9, 20, 0.82);
+    left: 0; right: 0; bottom: 0;
+    height: 0%;
+    background-color: rgba(100, 213, 248, 0.45);
 }
 .ultimate-percent {
     position: absolute;
@@ -100,7 +90,8 @@
     color: white;
 }
 .ultimate-ready { border-color: rgb(255, 220, 110); }
-.ultimate-ready .ultimate-icon { border-color: rgb(255, 220, 110); }
+.ultimate-ready .ultimate-icon { border-color: rgb(255, 220, 110); border-width: 4px; opacity: 1; scale: 1.08 1.08; }
+.ultimate-active .ultimate-icon { opacity: 1; }
 .ultimate-active { border-color: rgb(91, 205, 113); }
 .ultimate-unavailable { opacity: 0.6; }
 
@@ -119,6 +110,10 @@
 }
 
 .objective-card {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    translate: -50% 0;
     align-items: center;
     min-width: 160px;
 }
@@ -185,7 +180,7 @@
     border-radius: 12px;
 }
 
-.result-score-caption {
+.result-time-caption {
     font-size: 26px;
     flex-shrink: 0;
     color: var(--color-text);
@@ -193,12 +188,34 @@
 }
 
 .result-character-preview {
-    width: 100%;
     flex-grow: 1;
     flex-basis: 0;
     min-height: 0;
     -unity-background-scale-mode: scale-to-fit;
 }
+
+.result-body { width: 100%; flex-direction: row; flex-grow: 1; flex-basis: 0; min-height: 0; }
+.result-ranking { width: 48%; margin-left: 12px; padding: 8px; min-height: 0; }
+.result-ranking-title { color: var(--color-primary); font-size: 18px; white-space: normal; }
+.result-ranking-subtitle { color: var(--color-text); font-size: 13px; margin-bottom: 4px; }
+.result-ranking-status { color: var(--color-text); font-size: 14px; white-space: normal; margin-bottom: 6px; }
+.result-ranking-list {
+    flex-grow: 1; min-height: 70px; font-size: 14px;
+    background-color: rgba(16, 26, 46, 0.7);
+    border-width: 1px; border-color: var(--color-border);
+}
+.result-ranking-list Label { color: var(--color-text); font-size: 14px; -unity-text-align: middle-center; }
+.result-ranking-list .unity-multi-column-header,
+.result-ranking-list .unity-multi-column-header-container,
+.result-ranking-list .unity-multi-column-header__column { background-color: var(--color-panel); }
+.result-ranking-list .unity-multi-column-header { min-height: 28px; height: 28px; }
+.result-ranking-list .unity-list-view__item:hover,
+.result-ranking-list .unity-list-view__item--selected { background-color: rgba(242, 201, 76, 0.18); }
+.result-ranking-retry { height: 34px; font-size: 13px; margin-top: 4px; }
+.result-actions { width: 100%; flex-direction: row; justify-content: center; flex-shrink: 0; flex-wrap: wrap; }
+.result-actions .defeat-button { width: 31%; min-width: 140px; height: 52px; font-size: 18px; margin: 4px; }
+.battle-compact .result-ranking-title { font-size: 15px; }
+.battle-compact .result-ranking-status { font-size: 12px; }
 
 .battle-compact .defeat-card {
     padding-top: 10px;
@@ -207,8 +224,8 @@
     padding-right: 20px;
 }
 .battle-compact .result-title { font-size: 22px; margin-bottom: 4px; }
-.battle-compact .result-score-caption { font-size: 18px; }
-.battle-compact .defeat-score { font-size: 40px; margin-bottom: 4px; }
+.battle-compact .result-time-caption { font-size: 18px; }
+.battle-compact .result-time { font-size: 40px; margin-bottom: 4px; }
 .battle-compact .result-duration { font-size: 15px; }
 .battle-compact .save-status { font-size: 14px; margin-top: 4px; margin-bottom: 4px; }
 .battle-compact .defeat-button {
@@ -218,7 +235,7 @@
     margin-top: 4px;
 }
 
-.defeat-score {
+.result-time {
     margin-top: 0;
     margin-bottom: 12px;
     flex-shrink: 0;
@@ -233,7 +250,16 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
     margin-bottom: 12px;
+    white-space: normal;
 }
+
+.objective-card { flex-direction: row; align-items: center; min-width: 0; padding-left: 12px; padding-right: 12px; }
+.objective-stat { align-items: center; flex-shrink: 0; min-width: 115px; margin-left: 8px; margin-right: 8px; }
+.objective-card .hud-caption { font-size: 14px; white-space: nowrap; }
+.objective-card .hud-value { font-size: 28px; }
+.result-top-ten { color: rgb(242, 201, 76); -unity-font-style: bold; }
+.result-record { color: rgb(255, 221, 105); -unity-font-style: bold; font-size: 25px; padding: 6px; background-color: rgba(242, 201, 76, 0.12); border-radius: 6px; }
+.battle-compact .result-record { font-size: 18px; }
 
 .save-status {
     min-height: 28px;

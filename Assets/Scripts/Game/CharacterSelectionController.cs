@@ -340,7 +340,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
             classAttributesLabel.text = "3 estrelas = padrão. Passe o mouse para ver os valores.";
             UpdateStatStars(null);
             passiveLabel.text = "Passiva: em preparação.";
-            ultimateLabel.text = "Ult: em preparação.";
+            ultimateLabel.text = "Unique Skill: em preparação.";
             if (classNoticeLabel != null) classNoticeLabel.text = "Habilidades serão adicionadas nas próximas etapas.";
             return;
         }
@@ -349,10 +349,10 @@ public sealed class CharacterSelectionController : MonoBehaviour
         classAttributesLabel.text = "3 estrelas = padrão. Passe o mouse para ver os valores.";
         UpdateStatStars(definition);
         passiveLabel.text = $"Passiva: {definition.PassiveName} — {definition.PassiveDescription}";
-        ultimateLabel.text = $"Ult: {definition.UltimateName} — {definition.UltimateDescription}";
+        ultimateLabel.text = $"Unique Skill: {definition.UltimateName} — {definition.UltimateDescription}";
         if (classNoticeLabel != null) classNoticeLabel.text = definition.GameplayEnabled
-            ? "DISPONÍVEL: atributos ativos. No player, use SHIFT quando a ult estiver pronta."
-            : "PLANEJAMENTO: atributos, passivas e ult ainda não estão ativos no combate.";
+            ? "DISPONÍVEL: atributos ativos. No player, use SHIFT quando a Unique Skill estiver pronta."
+            : "PLANEJAMENTO: atributos, passivas e Unique Skill ainda não estão ativos no combate.";
     }
 
     /// <summary>Three stars represent the existing actor base; each step is approximately 20%.</summary>

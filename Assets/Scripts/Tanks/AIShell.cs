@@ -88,6 +88,7 @@ public class AIShell : MonoBehaviour
         exploded = true;
         shellCollider.enabled = false;
         body.linearVelocity = Vector3.zero;
+        CombatEffects.PlayImpact(position);
         if (blockedByObstacle && owner != null && owner.TryGetComponent(out AITank attacker))
             attacker.NotifyBlockedShot(ownerGeneration);
         if (explosion != null)

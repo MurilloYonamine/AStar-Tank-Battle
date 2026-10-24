@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class DestroyShell : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    // Lifetime counts combat time, never time spent in the pause menu.
+    [SerializeField, Min(0.1f)] private float lifetimeSeconds = 3f;
+
+    private void Update()
     {
-        Destroy(this.gameObject, 3);  
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        lifetimeSeconds -= Time.deltaTime;
+        if (lifetimeSeconds <= 0f) Destroy(gameObject);
     }
 
 }

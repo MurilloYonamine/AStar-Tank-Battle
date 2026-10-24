@@ -5,10 +5,10 @@
             <ui:Label text="ANTES DE JOGAR" class="selection-title battle-ui-title" />
             <ui:ScrollView class="game-info-scroll">
                 <ui:Label text="COMO JOGAR" class="game-info-heading" />
-                <ui:Label text="Movimente o tanque com W, A, S, D ou as setas. Ajuste a mira com Q e E. Atire com espaço ou botão esquerdo do mouse. Use ESC para pausar. Com Silence Suzuka, use SHIFT quando a ult chegar a 100%; ela carrega com o tempo e com eliminações." class="game-info-text" />
-                <ui:Label text="Alcance a meta de eliminações antes do tempo acabar para vencer. Se o tempo acabar enquanto você ainda estiver vivo, a partida termina em empate. Se sua vida chegar a zero antes de concluir o objetivo, você perde. Acompanhe o tempo e a meta na HUD; a pausa interrompe o cronômetro." class="game-info-text" />
+                <ui:Label text="Movimente o tanque com W, A, S, D ou as setas. Ajuste a mira com Q e E. Atire com espaço ou botão esquerdo do mouse. Use ESC para pausar. Com Silence Suzuka, use SHIFT quando a Unique Skill chegar a 100%; ela carrega com o tempo e com eliminações." class="game-info-text" />
+                <ui:Label text="Elimine 10 inimigos antes dos 3 minutos para vencer. Seu tempo de conclusão é sua marca: quanto menor, melhor. Apenas vitórias entram no ranking, que guarda o melhor tempo de cada jogador; tempos iguais compartilham a posição. Se o tempo acabar enquanto você ainda estiver vivo, a partida termina em empate. Se sua vida chegar a zero antes de concluir o objetivo, você perde. Acompanhe o tempo restante e as eliminações na HUD; a pausa e a contagem inicial não entram no tempo da partida." class="game-info-text" />
                 <ui:Label text="DADOS DA PARTIDA" class="game-info-heading" />
-                <ui:Label text="Coletamos a identificação do jogador, horários de início e término, duração, resultado, pontuação e número de inimigos eliminados. Esses dados são usados para histórico, ranking e análise do gameplay." class="game-info-text" />
+                <ui:Label text="Coletamos a identificação do jogador, horários de início e término, duração em segundos, resultado e número de inimigos eliminados. Esses dados são usados para histórico e análise do gameplay. Nas vitórias, a duração é o tempo de conclusão usado para comparar os melhores resultados no ranking." class="game-info-text" />
                 <ui:Label text="Os dados são enviados à API PHP e armazenados no MySQL configurado para este projeto (XAMPP nesta instalação) por tempo indeterminado. O token usado para autenticação expira após um dia." class="game-info-text" />
             </ui:ScrollView>
             <ui:VisualElement class="selection-actions game-info-actions">

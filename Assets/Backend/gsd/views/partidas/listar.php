@@ -6,7 +6,7 @@ function nome_jogador($valor)
 
 function segundos($valor)
 {
-    return number_format((float)$valor, 1, ',', '.') . ' s';
+    return number_format((float)$valor, 3, ',', '.') . ' s';
 }
 
 function horario_utc($valor)
@@ -35,28 +35,33 @@ function horario_utc($valor)
         </table>
     </div>
 
-    <h2>Melhor e pior pontuação</h2>
+    <h2>Melhor e pior tempo de conclusão (somente vitórias)</h2>
+    <p>Menor tempo é melhor. Derrotas e empates aparecem no histórico e na média geral, mas não entram nesta comparação nem no ranking.</p>
+    <?php if (!$melhor || !$pior): ?>
+        <div class="alert alert-info">Ainda não há vitórias para comparar os tempos de conclusão.</div>
+    <?php else: ?>
     <div class="table-responsive mb-4">
         <table class="table table-striped table-hover">
-            <thead><tr><th>Desempenho</th><th>Jogador</th><th>Resultado</th><th>Pontos</th><th>Duração</th></tr></thead>
+            <thead><tr><th>Desempenho</th><th>Jogador</th><th>Resultado</th><th>Tempo de conclusão (sem pausas)</th></tr></thead>
             <tbody>
-                <tr><td>Melhor</td><td><?= nome_jogador($melhor['jogador_nome']) ?></td><td><?= nome_jogador($melhor['resultado']) ?></td><td><?= (int)$melhor['pontuacao'] ?></td><td><?= segundos($melhor['duracao_segundos']) ?></td></tr>
-                <tr><td>Pior</td><td><?= nome_jogador($pior['jogador_nome']) ?></td><td><?= nome_jogador($pior['resultado']) ?></td><td><?= (int)$pior['pontuacao'] ?></td><td><?= segundos($pior['duracao_segundos']) ?></td></tr>
+                <tr><td>Melhor</td><td><?= nome_jogador($melhor['jogador_nome']) ?></td><td><?= nome_jogador($melhor['resultado']) ?></td><td><?= segundos($melhor['duracao_segundos']) ?></td></tr>
+                <tr><td>Pior</td><td><?= nome_jogador($pior['jogador_nome']) ?></td><td><?= nome_jogador($pior['resultado']) ?></td><td><?= segundos($pior['duracao_segundos']) ?></td></tr>
             </tbody>
         </table>
     </div>
+    <?php endif; ?>
 
     <h2>Resumo por jogador</h2>
     <div class="table-responsive mb-4">
         <table class="table table-striped table-hover">
-            <thead><tr><th>Jogador</th><th>Partidas</th><th>Duração média (todas)</th><th>Melhor vitória (pontos)</th></tr></thead>
+            <thead><tr><th>Jogador</th><th>Partidas</th><th>Duração média (todas)</th><th>Menor tempo em vitória</th></tr></thead>
             <tbody>
                 <?php foreach ($jogadores as $jogador): ?>
                     <tr>
                         <td><?= nome_jogador($jogador['jogador_nome']) ?></td>
                         <td><?= (int)$jogador['total'] ?></td>
                         <td><?= $jogador['duracao_media'] === null ? '—' : segundos($jogador['duracao_media']) ?></td>
-                        <td><?= $jogador['melhor_vitoria'] === null ? 'Sem vitórias' : (int)$jogador['melhor_vitoria'] . ' pontos' ?></td>
+                        <td><?= $jogador['melhor_vitoria'] === null ? 'Sem vitórias' : segundos($jogador['melhor_vitoria']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -66,7 +71,7 @@ function horario_utc($valor)
     <h2>Todas as partidas</h2>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
-            <thead><tr><th>ID</th><th>Jogador</th><th>Início (UTC)</th><th>Término (UTC)</th><th>Duração (sem pausas)</th><th>Resultado</th><th>Pontos</th><th>Eliminações</th></tr></thead>
+            <thead><tr><th>ID</th><th>Jogador</th><th>Início (UTC)</th><th>Término (UTC)</th><th>Duração (sem pausas)</th><th>Resultado</th><th>Eliminações</th></tr></thead>
             <tbody>
                 <?php foreach ($partidas as $partida): ?>
                     <tr>
@@ -76,7 +81,6 @@ function horario_utc($valor)
                         <td><?= horario_utc($partida['fim_utc']) ?></td>
                         <td><?= segundos($partida['duracao_segundos']) ?></td>
                         <td><?= nome_jogador($partida['resultado']) ?></td>
-                        <td><?= (int)$partida['pontuacao'] ?></td>
                         <td><?= (int)$partida['inimigos_eliminados'] ?></td>
                     </tr>
                 <?php endforeach; ?>

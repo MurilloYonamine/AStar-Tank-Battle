@@ -120,6 +120,7 @@ public class Drive : MonoBehaviour
             }
             GetComponent<TankAppearance>()?.CharacterAnimation?.PlayAttack();
             BattleAudioController.PlayShot();
+            CombatEffects.PlayMuzzle(bulletSpawn);
         }
     }
 

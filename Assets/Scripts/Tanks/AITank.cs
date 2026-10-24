@@ -74,6 +74,13 @@ public class AITank : MonoBehaviour
             perception.IsWithinAttackRange(enemy.transform, targetCollider) &&
             fireCooldownRemaining <= 0f)
         {
+            // The player may be visible while a branch or wall still intersects the ballistic arc.
+            if (!HasClearShotFrom(transform.position))
+            {
+                stateMachine.NotifyBlockedShot();
+                fireCooldownRemaining = Mathf.Min(0.25f, fireInterval);
+                return;
+            }
             CreateBullet();
             fireCooldownRemaining = Mathf.Max(0.1f, fireInterval);
             // Cosmetic animation is optional and must never prevent a shot or its cooldown.
@@ -202,5 +209,6 @@ public class AITank : MonoBehaviour
             body.linearVelocity = projectileSpeed * direction;
         }
         BattleAudioController.PlayShot(true);
+        CombatEffects.PlayMuzzle(bulletSpawn.transform);
     }
 }

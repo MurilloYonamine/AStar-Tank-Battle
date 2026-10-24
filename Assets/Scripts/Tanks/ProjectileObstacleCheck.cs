@@ -6,7 +6,6 @@ using UnityEngine;
 /// </summary>
 public static class ProjectileObstacleCheck
 {
-    private static readonly int CoverMask = LayerMask.GetMask("VegetationCover");
     private static readonly int ObstacleMask = LayerMask.GetMask("Obstacle", "VegetationCover");
 
     public static bool IsObstacle(Collider collider)
@@ -37,13 +36,13 @@ public static class ProjectileObstacleCheck
         impactPosition = shell.transform.position;
         Vector3 extents = shell.bounds.extents;
         float radius = Mathf.Max(0.02f, Mathf.Min(extents.x, extents.y, extents.z));
-        if (Physics.CheckSphere(impactPosition, radius, CoverMask, QueryTriggerInteraction.Collide))
+        if (Physics.CheckSphere(impactPosition, radius, ObstacleMask, QueryTriggerInteraction.Collide))
             return true;
 
         float distance = velocity.magnitude * Time.fixedDeltaTime;
         if (distance <= 0.0001f) return false;
         if (!Physics.SphereCast(impactPosition, radius, velocity.normalized, out RaycastHit hit,
-                distance, CoverMask, QueryTriggerInteraction.Collide)) return false;
+                distance, ObstacleMask, QueryTriggerInteraction.Collide)) return false;
         impactPosition = hit.point;
         return true;
     }

@@ -44,6 +44,8 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
     private bool hasFiringPosition;
     private float repositionRemaining;
     private float repositionCooldownRemaining;
+    private float firingPathCheckRemaining;
+    private bool firingPathClear;
 
     public EnemyTankState CurrentState { get; private set; } = EnemyTankState.Patrol;
     public bool IsRepositioning => isRepositioning;
@@ -110,7 +112,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         targetMemoryRemaining = targetMemoryDuration;
         if (isRepositioning) return;
         if (perception.CanSeeTarget(target.transform, targetCollider) &&
-            perception.IsWithinAttackRange(target.transform, targetCollider))
+            perception.IsWithinAttackRange(target.transform, targetCollider) && HasClearFiringPath())
         {
             EnterAttack();
         }
@@ -128,6 +130,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
     public void ResetForNewRound()
     {
         blockedFiringCells.Clear();
+        firingPathCheckRemaining = 0f;
         repositionCooldownRemaining = 0f;
         targetMemoryRemaining = 0f;
         repathCooldownRemaining = 0f;
@@ -206,6 +209,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         repathCooldownRemaining = Mathf.Max(0f, repathCooldownRemaining - Time.deltaTime);
         repositionCooldownRemaining = Mathf.Max(0f, repositionCooldownRemaining - Time.deltaTime);
         repositionRemaining = Mathf.Max(0f, repositionRemaining - Time.deltaTime);
+        firingPathCheckRemaining = Mathf.Max(0f, firingPathCheckRemaining - Time.deltaTime);
 
         bool targetVisible = target != null &&
             perception.CanSeeTarget(target.transform, targetCollider);
@@ -227,7 +231,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
             case EnemyTankState.Patrol:
                 if (targetVisible)
                 {
-                    if (perception.IsWithinAttackRange(target.transform, targetCollider))
+                    if (perception.IsWithinAttackRange(target.transform, targetCollider) && HasClearFiringPath())
                     {
                         EnterAttack();
                     }
@@ -263,7 +267,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
                     isRepositioning = false;
                     plannedTargetNode = null;
                     repathCooldownRemaining = 0f;
-                    if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider))
+                    if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider) && HasClearFiringPath())
                     {
                         EnterAttack();
                     }
@@ -272,7 +276,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
                 break;
 
             case EnemyTankState.Chase:
-                if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider))
+                if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider) && HasClearFiringPath())
                 {
                     EnterAttack();
                 }
@@ -282,7 +286,11 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
                 }
                 else
                 {
-                    RepathToTrackedCell();
+                    // Do not bounce straight back into Attack at the same obstructed position.
+                    // If no firing node is available, ordinary A* pursuit keeps advancing instead.
+                    if (targetVisible && perception.IsWithinAttackRange(target.transform, targetCollider))
+                        NotifyBlockedShot();
+                    if (CurrentState == EnemyTankState.Chase) RepathToTrackedCell();
                 }
                 break;
 
@@ -314,6 +322,7 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
 
     private void EnterChase()
     {
+        firingPathCheckRemaining = 0f;
         isRepositioning = false;
         bool wasPatrolling = CurrentState == EnemyTankState.Patrol;
         CurrentState = EnemyTankState.Chase;
@@ -333,6 +342,17 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         isRepositioning = false;
         CurrentState = EnemyTankState.Attack;
         movement.Stop();
+    }
+
+    private bool HasClearFiringPath()
+    {
+        if (attack == null) return true;
+        if (firingPathCheckRemaining <= 0f)
+        {
+            firingPathClear = attack.HasClearShotFrom(transform.position);
+            firingPathCheckRemaining = 0.2f; // Bounded tactical check, not dozens of casts every frame.
+        }
+        return firingPathClear;
     }
 
     private void RepathToTrackedCell()
