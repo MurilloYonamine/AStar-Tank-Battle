@@ -11,12 +11,13 @@
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="ScoreScreen" style="display: none;">
-        <ui:Label text="PLACAR GLOBAL" name="ScoreTitle" class="title"/>
+        <ui:Label text="RANKING DE VITÓRIAS" name="ScoreTitle" class="title"/>
+        <ui:Label text="" name="RankingStatusLabel" style="white-space: normal; color: rgb(242, 201, 76); margin-bottom: 12px;"/>
         <ui:MultiColumnListView columns="" sort-column-descriptions="" name="ScoreList">
             <ui:Columns>
                 <ui:Column name="Jogador" title="Jogador" width="200px" min-width="25%"/>
                 <ui:Column name="Pontos" title="Pontos" width="25%"/>
-                <ui:Column name="Data" title="Data" width="50%"/>
+                <ui:Column name="Posicao" title="Posição" width="50%"/>
             </ui:Columns>
         </ui:MultiColumnListView>
         <ui:Button text="VOLTAR" name="BackButton"/>

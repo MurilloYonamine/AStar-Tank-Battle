@@ -20,6 +20,7 @@ public class DataManager : MonoBehaviour
     private const string URL_UPDATE = URL_BASE + "/?action=api_atualizar";
     private const string URL_LOGIN = URL_BASE + "/?action=api_login";
     private const string URL_MATCH = URL_BASE + "/?action=api_salvar_partida";
+    private const string URL_RANKING = URL_BASE + "/?action=api_ranking_partidas";
 
     // Como no exemplo da aula, a Unity cria o token no login e o PHP o associa ao jogador
     // por um dia. Guardamos o token só em memória para enviá-lo nas rotas protegidas.
@@ -50,22 +51,68 @@ public class DataManager : MonoBehaviour
         public string error = "";
     }
 
+    [Serializable]
+    public class RankingEntry
+    {
+        public int jogador_id;
+        public string jogador_nome;
+        public int pontuacao;
+    }
+
+    [Serializable]
+    private class RankingResponse
+    {
+        public RankingEntry[] ranking;
+        public string error;
+    }
+
+    /// <summary>Loads the PHP top ten: each player's best winning match, authenticated by token.</summary>
+    public void LoadRanking(int playerId, Action<RankingEntry[], string> completed)
+    {
+        StartCoroutine(LoadRankingRequest(playerId, completed));
+    }
+
+    private IEnumerator LoadRankingRequest(int playerId, Action<RankingEntry[], string> completed)
+    {
+        if (playerId <= 0 || string.IsNullOrEmpty(Token))
+        {
+            completed(null, "Entre na sua conta para consultar o ranking de vitórias.");
+            yield break;
+        }
+        WWWForm form = new WWWForm();
+        form.AddField("jogador_id", playerId);
+        form.AddField("token", Token);
+        using (UnityWebRequest www = UnityWebRequest.Post(URL_RANKING, form))
+        {
+            www.timeout = 10;
+            yield return www.SendWebRequest();
+            RankingResponse response = null;
+            try { response = JsonUtility.FromJson<RankingResponse>(www.downloadHandler.text); }
+            catch (ArgumentException) { /* Invalid JSON must not be shown as an empty ranking. */ }
+            if (www.result == UnityWebRequest.Result.Success && response?.ranking != null &&
+                string.IsNullOrEmpty(response.error))
+                completed(response.ranking, null);
+            else
+                completed(null, !string.IsNullOrEmpty(response?.error) ? response.error :
+                    "Não foi possível carregar o ranking. Verifique a conexão e abra o placar novamente.");
+        }
+    }
+
     /// <summary>
     /// POST api_salvar_partida: jogador_id, token, partida_uuid, inicio_utc, fim_utc,
     /// duracao_segundos, resultado, pontuacao e inimigos_eliminados. A API responde
-    /// {success, partida_id, repetida} ou {error}. Nesta etapa só enviamos "derrota";
-    /// vitória e empate serão integrados quando suas regras estiverem prontas.
+    /// {success, partida_id, repetida} ou {error}. Result is vitoria, derrota or empate.
     /// O mesmo matchId é reutilizado ao tentar novamente para não criar outra linha.
     /// </summary>
     public void SaveMatch(int playerId, string matchId, DateTime startedUtc, DateTime finishedUtc,
-        double durationSeconds, int score, int enemiesKilled, Action<bool, string> completed)
+        double durationSeconds, string outcome, int score, int enemiesKilled, Action<bool, string> completed)
     {
         StartCoroutine(SaveMatchRequest(playerId, matchId, startedUtc, finishedUtc,
-            durationSeconds, score, enemiesKilled, completed));
+            durationSeconds, outcome, score, enemiesKilled, completed));
     }
 
     private IEnumerator SaveMatchRequest(int playerId, string matchId, DateTime startedUtc, DateTime finishedUtc,
-        double durationSeconds, int score, int enemiesKilled, Action<bool, string> completed)
+        double durationSeconds, string outcome, int score, int enemiesKilled, Action<bool, string> completed)
     {
         if (string.IsNullOrEmpty(Token))
         {
@@ -82,7 +129,7 @@ public class DataManager : MonoBehaviour
         form.AddField("inicio_utc", startedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         form.AddField("fim_utc", finishedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         form.AddField("duracao_segundos", durationSeconds.ToString("F3", CultureInfo.InvariantCulture));
-        form.AddField("resultado", "derrota");
+        form.AddField("resultado", outcome);
         form.AddField("pontuacao", score);
         form.AddField("inimigos_eliminados", enemiesKilled);
 
@@ -200,8 +247,7 @@ public class DataManager : MonoBehaviour
         StartCoroutine(nameof(LoadDataFromJson));
     }
 
-    // POST api_listar: lista pública do placar antigo de jogadores, não o ranking de
-    // melhores partidas. O ScoreMenu ainda usa essa rota enquanto a UI não for migrada.
+    // Legacy public player list retained for existing consumers. ScoreMenu uses LoadRanking.
     private IEnumerator LoadDataFromJson()
     {
         WWWForm form = new WWWForm();

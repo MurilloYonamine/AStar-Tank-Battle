@@ -35855,6 +35855,8 @@ MonoBehaviour:
   - {fileID: 429847192}
   - {fileID: 2117052378}
   pointsPerEnemy: 100
+  matchTimeLimitSeconds: 180
+  eliminationTarget: 10
   characterSelection: {fileID: 1592468118}
   playerAppearance: {fileID: 2887154944113424923}
   enemyAppearances:

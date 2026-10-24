@@ -6,9 +6,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Controla a batalha e envia a derrota ao middleware PHP por DataManager.
-/// Começa a medir após a seleção e a contagem regressiva; ainda não há lógica
-/// de vitória ou empate nesta classe.
+/// Owns the timed elimination match and submits its immutable result through DataManager.
+/// Selection, countdown and battle pauses do not count toward the time limit.
 /// </summary>
 public sealed class BattleSessionController : MonoBehaviour
 {
@@ -20,6 +19,10 @@ public sealed class BattleSessionController : MonoBehaviour
     [SerializeField] private TankHealth playerHealth;
     [SerializeField] private TankHealth[] enemyHealths;
     [SerializeField, Min(1)] private int pointsPerEnemy = 100;
+
+    [Header("Match objectives")]
+    [SerializeField, Min(1f)] private float matchTimeLimitSeconds = 180f;
+    [SerializeField, Min(1)] private int eliminationTarget = 10;
 
     [Header("Optional character selection and camera")]
     [SerializeField] private CharacterSelectionController characterSelection;
@@ -51,6 +54,10 @@ public sealed class BattleSessionController : MonoBehaviour
     private VisualElement mainMenu;
     private Label healthLabel;
     private Label scoreLabel;
+    private Label timeLabel;
+    private Label eliminationLabel;
+    private Label resultTitleLabel;
+    private Label resultEliminationsLabel;
     private Label finalScoreLabel;
     private Label resultDurationLabel;
     private Label saveStatusLabel;
@@ -89,11 +96,19 @@ public sealed class BattleSessionController : MonoBehaviour
     private int finalRoundScore;
     private bool saveInProgress;
     private bool matchSaved;
+    private string roundOutcome;
+    private double activeTimeLimit;
+    private int activeEliminationTarget;
 
     public bool IsRoundActive => roundActive;
     public bool IsBattlePaused { get; private set; }
     public bool IsStartingRound { get; private set; }
     public int RoundScore => observedPlayerData != null ? observedPlayerData.pontos : 0;
+    public double RemainingSeconds => Math.Max(0, activeTimeLimit - ElapsedSeconds);
+
+    private double ElapsedSeconds => !roundActive ? roundDurationSeconds : Math.Max(0,
+        (IsBattlePaused ? pausedAtRealtime : Time.realtimeSinceStartupAsDouble) -
+        roundStartedRealtime - pausedSeconds);
 
     private void Awake()
     {
@@ -144,6 +159,10 @@ public sealed class BattleSessionController : MonoBehaviour
         healthFill = hudRoot.Q<VisualElement>("HealthFill");
         healthLabel = hudRoot.Q<Label>("HealthLabel");
         scoreLabel = hudRoot.Q<Label>("ScoreLabel");
+        timeLabel = hudRoot.Q<Label>("TimeLabel");
+        eliminationLabel = hudRoot.Q<Label>("EliminationLabel");
+        resultTitleLabel = hudRoot.Q<Label>("ResultTitleLabel");
+        resultEliminationsLabel = hudRoot.Q<Label>("ResultEliminationsLabel");
         finalScoreLabel = hudRoot.Q<Label>("FinalScoreLabel");
         resultDurationLabel = hudRoot.Q<Label>("ResultDurationLabel");
         saveStatusLabel = hudRoot.Q<Label>("SaveStatusLabel");
@@ -223,6 +242,12 @@ public sealed class BattleSessionController : MonoBehaviour
 
         if (roundActive)
         {
+            // Resolve the deadline before accepting another pause or scoring a late kill.
+            if (!IsBattlePaused && ElapsedSeconds >= activeTimeLimit)
+            {
+                FinishRound(playerHealth.IsDead ? "derrota" : "empate");
+                return;
+            }
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
                 SetBattlePaused(!IsBattlePaused);
             RefreshHud();
@@ -519,6 +544,11 @@ public sealed class BattleSessionController : MonoBehaviour
     {
         ClearBattlePause();
         ClearCombatObjects();
+        activeTimeLimit = Math.Max(1, matchTimeLimitSeconds);
+        activeEliminationTarget = Math.Max(1, eliminationTarget);
+        enemiesKilled = 0;
+        roundDurationSeconds = 0;
+        roundOutcome = null;
 
         foreach (TankSpawn spawn in tankSpawns)
         {
@@ -582,6 +612,8 @@ public sealed class BattleSessionController : MonoBehaviour
         pausedSeconds = 0;
         pausedAtRealtime = 0;
         enemiesKilled = 0;
+        roundDurationSeconds = 0;
+        roundOutcome = null;
         saveInProgress = false;
         matchSaved = false;
         saveStatusLabel.text = "";
@@ -589,19 +621,31 @@ public sealed class BattleSessionController : MonoBehaviour
         if (PauseManager.Instance != null) PauseManager.Instance.SetPause(false);
         roundActive = true;
         enemySpawner?.StartSpawning();
+        RefreshHud();
     }
 
     private void OnEnemyDied(TankHealth enemyHealth, GameObject source)
     {
-        if (!roundActive || source != playerHealth.gameObject ||
+        if (!roundActive || IsBattlePaused || source != playerHealth.gameObject ||
             GameManager.Instance == null || GameManager.Instance.PlayerData == null)
         {
+            return;
+        }
+
+        if (playerHealth.IsDead || ElapsedSeconds >= activeTimeLimit)
+        {
+            FinishRound(playerHealth.IsDead ? "derrota" : "empate");
             return;
         }
 
         GameManager.Instance.AddScore(pointsPerEnemy);
         enemiesKilled++;
         RefreshHud();
+        if (enemiesKilled >= activeEliminationTarget)
+        {
+            FinishRound("vitoria");
+            return;
+        }
         if (!playerHealth.IsDead && characterSelection != null &&
             selectedCharacterIndex >= 0 && selectedCharacterIndex < characterSelection.CharacterCount)
             BattleAudioController.TryPlayEliminationVoice(characterSelection.GetCharacter(selectedCharacterIndex).VoiceClip);
@@ -609,17 +653,22 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void OnPlayerDied(TankHealth health, GameObject source)
     {
-        if (!roundActive)
-        {
-            return;
-        }
+        FinishRound("derrota");
+    }
 
+    /// <summary>
+    /// The first terminal condition wins. Snapshot all submitted data once so retries
+    /// cannot change the score, duration, outcome or UUID of an already finished match.
+    /// </summary>
+    private void FinishRound(string outcome)
+    {
+        if (!roundActive) return;
+        roundDurationSeconds = Math.Max(0.001, Math.Min(activeTimeLimit, ElapsedSeconds));
         roundActive = false;
         // O timestamp é UTC; a duração vem do relógio real descontando pausas.
         // Isso mantém os horários comparáveis sem alterar Time.timeScale.
         roundFinishedUtc = DateTime.UtcNow;
-        roundDurationSeconds = Math.Max(0.001, Time.realtimeSinceStartupAsDouble -
-            roundStartedRealtime - pausedSeconds);
+        roundOutcome = outcome;
         ClearBattlePause();
         enemySpawner?.StopSpawning();
         StopCombatDamage();
@@ -637,13 +686,15 @@ public sealed class BattleSessionController : MonoBehaviour
 
         finalRoundScore = finalScore;
         finalScoreLabel.text = finalScore.ToString();
+        resultTitleLabel.text = outcome == "vitoria" ? "VITÓRIA!" :
+            outcome == "empate" ? "EMPATE — TEMPO ESGOTADO" : "DERROTA";
+        resultEliminationsLabel.text = $"ELIMINAÇÕES: {enemiesKilled} / {activeEliminationTarget}";
         resultDurationLabel.text = $"DURAÇÃO: {roundDurationSeconds:F1} s";
-        // A morte encerra a partida uma vez. A tela só indicará "salva" após o JSON
-        // de sucesso; GameManager.EndGame não é chamado, pois alterava apenas pontos.
+        // Only the new match endpoint is called, not the legacy account-score update.
         RetrySaveMatch();
         RefreshHud();
-        if (health.DeathAnimationDuration > 0f)
-            roundResult = StartCoroutine(WaitForDeathThenShowResult(health.DeathAnimationDuration));
+        if (playerHealth.IsDead && playerHealth.DeathAnimationDuration > 0f)
+            roundResult = StartCoroutine(WaitForDeathThenShowResult(playerHealth.DeathAnimationDuration));
         else ShowRoundResult();
     }
 
@@ -674,7 +725,7 @@ public sealed class BattleSessionController : MonoBehaviour
         // Repetir usa o mesmo UUID e os mesmos dados; a Model não cria outra partida.
         string submittedId = roundId;
         GameManager.Instance.DataManager.SaveMatch(observedPlayerData.id, submittedId,
-            roundStartedUtc, roundFinishedUtc, roundDurationSeconds, finalRoundScore, enemiesKilled,
+            roundStartedUtc, roundFinishedUtc, roundDurationSeconds, roundOutcome, finalRoundScore, enemiesKilled,
             (success, error) =>
             {
                 if (this == null || submittedId != roundId) return;
@@ -736,6 +787,9 @@ public sealed class BattleSessionController : MonoBehaviour
         healthFill.style.width = new Length(healthPercent, LengthUnit.Percent);
 
         scoreLabel.text = RoundScore.ToString();
+        int seconds = (int)Math.Ceiling(RemainingSeconds);
+        timeLabel.text = $"{seconds / 60:00}:{seconds % 60:00}";
+        eliminationLabel.text = $"{enemiesKilled} / {activeEliminationTarget}";
     }
 
     private static void StopCombatDamage()

@@ -33,6 +33,19 @@
     align-items: flex-end;
 }
 
+.objective-card {
+    align-items: center;
+    min-width: 160px;
+}
+
+.result-title {
+    font-size: 30px;
+    color: var(--color-primary);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+
 .hud-caption {
     color: var(--color-primary);
     font-size: 15px;

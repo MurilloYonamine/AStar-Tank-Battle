@@ -9,6 +9,12 @@
                     <ui:VisualElement name="HealthFill" class="health-fill" />
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement class="hud-card objective-card">
+                <ui:Label text="TEMPO" class="hud-caption" />
+                <ui:Label name="TimeLabel" text="03:00" class="hud-value" />
+                <ui:Label text="ELIMINAÇÕES" class="hud-caption" />
+                <ui:Label name="EliminationLabel" text="0 / 10" class="hud-value" />
+            </ui:VisualElement>
             <ui:VisualElement class="hud-card score-card">
                 <ui:Label text="PONTOS" class="hud-caption" />
                 <ui:Label name="ScoreLabel" text="0" class="hud-value" />
@@ -16,9 +22,11 @@
         </ui:VisualElement>
         <ui:VisualElement name="DefeatScreen" class="defeat-screen">
             <ui:VisualElement class="defeat-card">
+                <ui:Label name="ResultTitleLabel" text="RESULTADO" class="result-title battle-ui-title" />
                 <ui:Label text="PONTUAÇÃO FINAL" class="result-score-caption" />
                 <ui:Label name="FinalScoreLabel" text="0" class="defeat-score battle-ui-title" />
                 <ui:Label name="ResultDurationLabel" text="DURAÇÃO: 0 s" class="result-duration" />
+                <ui:Label name="ResultEliminationsLabel" text="ELIMINAÇÕES: 0 / 10" class="result-duration" />
                 <ui:VisualElement name="ResultCharacterPreview" class="result-character-preview" picking-mode="Ignore" />
                 <ui:Label name="SaveStatusLabel" text="" class="save-status" />
                 <ui:Button name="RetrySaveButton" text="TENTAR SALVAR NOVAMENTE" class="defeat-button battle-ui-button" style="display: none;" />

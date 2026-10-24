@@ -6,7 +6,7 @@
             <ui:ScrollView class="game-info-scroll">
                 <ui:Label text="COMO JOGAR" class="game-info-heading" />
                 <ui:Label text="Movimente o tanque com W, A, S, D ou as setas. Ajuste a mira com Q e E. Atire com espaço ou botão esquerdo do mouse. Use ESC para pausar durante a partida." class="game-info-text" />
-                <ui:Label text="Destrua tanques inimigos para marcar pontos e mantenha seu tanque vivo. Se a vida chegar a zero, a partida termina em derrota. As condições de vitória e empate ainda serão implementadas." class="game-info-text" />
+                <ui:Label text="Alcance a meta de eliminações antes do tempo acabar para vencer. Se o tempo acabar enquanto você ainda estiver vivo, a partida termina em empate. Se sua vida chegar a zero antes de concluir o objetivo, você perde. Acompanhe o tempo e a meta na HUD; a pausa interrompe o cronômetro." class="game-info-text" />
                 <ui:Label text="DADOS DA PARTIDA" class="game-info-heading" />
                 <ui:Label text="Coletamos a identificação do jogador, horários de início e término, duração, resultado, pontuação e número de inimigos eliminados. Esses dados são usados para histórico, ranking e análise do gameplay." class="game-info-text" />
                 <ui:Label text="Os dados são enviados à API PHP e armazenados no MySQL configurado para este projeto (XAMPP nesta instalação) por tempo indeterminado. O token usado para autenticação expira após um dia." class="game-info-text" />
