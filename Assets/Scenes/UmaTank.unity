@@ -25002,22 +25002,27 @@ MonoBehaviour:
     ModelPrefab: {fileID: 6197875222825019286, guid: ced5339ba6560f3438f03d3a289d5f2d,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b1, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 6412334d691e2e379a66dfb1e7712589, type: 2}
   - DisplayName: Super Creek
     ModelPrefab: {fileID: 7104283324534214091, guid: 4d37aa933b3f4aa4bb793b8b73b4139d,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b2, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 5aaf1b2bed1faa99580dc38299189893, type: 2}
   - DisplayName: Fenomeno
     ModelPrefab: {fileID: 5798820952359004272, guid: 4ead77933e14f524fb28b08bde76a53f,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b3, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 29e0b66b2f3405e039885f46bb8c277a, type: 2}
   - DisplayName: Matikanetannhauser
     ModelPrefab: {fileID: 1697724984734256220, guid: b9f64ba8a8137e1418ed31589bc47621,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b4, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 68dd791ca192c6b1b2597dd68d99f040, type: 2}
   - DisplayName: Silence Suzuka
     ModelPrefab: {fileID: 6751020389872671593, guid: 47325454db6ec1b40b7c7be0ab7aac15,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 3137bc0d5dc9dcc139c2f008175cc2f3, type: 2}
   previewRoot: {fileID: 1697967075}
   previewCamera: {fileID: 1704461938}
   rotationSpeed: 15

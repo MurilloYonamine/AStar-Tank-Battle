@@ -450,13 +450,13 @@ public sealed class BattleSessionController : MonoBehaviour
         // Keep stable gameplay actors: only their cosmetic model and weapon transforms change.
         // This preserves Murilo's public score API and the existing HP/death event subscriptions.
         CharacterSelectionController.CharacterOption selected = characterSelection.GetCharacter(selectedIndex);
-        playerAppearance.ApplyCharacter(selected.ModelPrefab, selected.DisplayName);
+        playerAppearance.ApplyCharacter(selected.ModelPrefab, selected.DisplayName, selected.ClassDefinition);
         int enemyIndex = 0;
         for (int i = 0; i < characterSelection.CharacterCount; i++)
         {
             if (i == selectedIndex) continue;
             CharacterSelectionController.CharacterOption option = characterSelection.GetCharacter(i);
-            enemyAppearances[enemyIndex++].ApplyCharacter(option.ModelPrefab, option.DisplayName);
+            enemyAppearances[enemyIndex++].ApplyCharacter(option.ModelPrefab, option.DisplayName, option.ClassDefinition);
         }
     }
 

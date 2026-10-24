@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Shows the group's five cosmetic characters before combat, using an isolated rotating 3D preview.
+/// Shows the group's characters and draft class profiles using an isolated rotating 3D preview.
 /// The existing name/menu/backend flow is retained by BattleSessionController.
 /// </summary>
 public sealed class CharacterSelectionController : MonoBehaviour
@@ -14,6 +14,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
     {
         public string DisplayName;
         public GameObject ModelPrefab;
+        [Tooltip("Independent class design asset. Does not belong inside the visual prefab.")]
+        public CharacterClassDefinition ClassDefinition;
         [Tooltip("Spoken cue played when this character is shown in selection, not during combat or results.")]
         public AudioClip VoiceClip;
     }
@@ -35,6 +37,12 @@ public sealed class CharacterSelectionController : MonoBehaviour
     private VisualElement previewImage;
     private Label nameLabel;
     private Label indexLabel;
+    private VisualElement classDetails;
+    private Label classNameLabel;
+    private Label classDescriptionLabel;
+    private Label classAttributesLabel;
+    private Label passiveLabel;
+    private Label ultimateLabel;
     private Button previousButton;
     private Button nextButton;
     private Button confirmButton;
@@ -173,6 +181,12 @@ public sealed class CharacterSelectionController : MonoBehaviour
         previewImage = root.Q<VisualElement>("CharacterPreview");
         nameLabel = root.Q<Label>("CharacterName");
         indexLabel = root.Q<Label>("CharacterIndex");
+        classDetails = root.Q<VisualElement>("CharacterClassDetails");
+        classNameLabel = root.Q<Label>("ClassNameLabel");
+        classDescriptionLabel = root.Q<Label>("ClassDescriptionLabel");
+        classAttributesLabel = root.Q<Label>("ClassAttributesLabel");
+        passiveLabel = root.Q<Label>("PassiveDescriptionLabel");
+        ultimateLabel = root.Q<Label>("UltimateDescriptionLabel");
         previousButton = root.Q<Button>("PreviousCharacterButton");
         nextButton = root.Q<Button>("NextCharacterButton");
         confirmButton = root.Q<Button>("ConfirmCharacterButton");
@@ -252,6 +266,20 @@ public sealed class CharacterSelectionController : MonoBehaviour
             : Mathf.Max(1.8f, bounds.extents.magnitude * 1.15f);
         nameLabel.text = option.DisplayName.ToUpperInvariant();
         indexLabel.text = $"{index + 1} / {CharacterCount}";
+        UpdateClassDetails(option.ClassDefinition);
+    }
+
+    private void UpdateClassDetails(CharacterClassDefinition definition)
+    {
+        // Older scenes without this optional panel/profile retain cosmetic selection.
+        if (classDetails == null) return;
+        classDetails.style.display = definition != null ? DisplayStyle.Flex : DisplayStyle.None;
+        if (definition == null) return;
+        classNameLabel.text = definition.ClassName;
+        classDescriptionLabel.text = definition.Description;
+        classAttributesLabel.text = definition.AttributeSummary;
+        passiveLabel.text = $"Passiva: {definition.PassiveName} — {definition.PassiveDescription}";
+        ultimateLabel.text = $"Ult: {definition.UltimateName} — {definition.UltimateDescription}";
     }
 
     private void OnDestroy()

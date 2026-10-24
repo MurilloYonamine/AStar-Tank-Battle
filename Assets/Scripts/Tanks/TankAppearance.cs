@@ -11,9 +11,13 @@ public sealed class TankAppearance : MonoBehaviour
 
     public string CharacterName { get; private set; }
     public TankCharacterAnimation CharacterAnimation { get; private set; }
+    // A profile reference is not an applied modifier. Stage 3 keeps gameplay unchanged.
+    public CharacterClassDefinition ClassDefinition { get; private set; }
 
-    public void ApplyCharacter(GameObject modelPrefab, string characterName)
+    public void ApplyCharacter(GameObject modelPrefab, string characterName,
+        CharacterClassDefinition classDefinition = null)
     {
+        ClassDefinition = classDefinition;
         if (modelRoot != null)
         {
             modelRoot.gameObject.SetActive(false);

@@ -26,6 +26,14 @@
         </ui:VisualElement>
         <ui:Label name="CharacterName" text="MEISHO DOTO" class="selection-name" />
         <ui:Label name="CharacterIndex" text="1 / 5" class="selection-index" />
+        <ui:ScrollView name="CharacterClassDetails" class="selection-class-details" horizontal-scroller-visibility="Hidden" style="display: none;">
+            <ui:Label name="ClassNameLabel" class="selection-class-title" />
+            <ui:Label name="ClassDescriptionLabel" class="selection-class-text" />
+            <ui:Label name="ClassAttributesLabel" class="selection-class-text" />
+            <ui:Label name="PassiveDescriptionLabel" class="selection-class-text" />
+            <ui:Label name="UltimateDescriptionLabel" class="selection-class-text" />
+            <ui:Label text="PLANEJAMENTO: atributos, passivas e ults ainda não estão ativos no combate." class="selection-class-notice" />
+        </ui:ScrollView>
         <ui:VisualElement class="selection-actions">
             <ui:Button name="CharacterBackButton" text="VOLTAR" class="selection-button selection-back battle-ui-button battle-ui-back" />
             <ui:Button name="ConfirmCharacterButton" text="COMEÇAR PARTIDA" class="selection-button battle-ui-button battle-ui-primary" />
