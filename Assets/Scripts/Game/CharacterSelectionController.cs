@@ -351,7 +351,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
         passiveLabel.text = $"Passiva: {definition.PassiveName} — {definition.PassiveDescription}";
         ultimateLabel.text = $"Unique Skill: {definition.UltimateName} — {definition.UltimateDescription}";
         if (classNoticeLabel != null) classNoticeLabel.text = definition.GameplayEnabled
-            ? "DISPONÍVEL: atributos ativos. No player, use SHIFT quando a Unique Skill estiver pronta."
+            ? "CLASSE ATIVA. Use SHIFT quando a Unique Skill estiver pronta."
             : "PLANEJAMENTO: atributos, passivas e Unique Skill ainda não estão ativos no combate.";
     }
 

@@ -15,6 +15,12 @@ public class Shell : MonoBehaviour
     private float currentSpeed;
     private float verticalSpeed;
     private bool exploded;
+    private float damageMultiplier = 1f, radiusMultiplier = 1f;
+    public void SetCombatMultipliers(float damage, float radius)
+    {
+        damageMultiplier = Mathf.Max(.1f, damage);
+        radiusMultiplier = Mathf.Max(.1f, radius);
+    }
 
     private void Awake()
     {
@@ -79,6 +85,7 @@ public class Shell : MonoBehaviour
             if (effect.TryGetComponent(out ExplosionDamage damageArea))
             {
                 damageArea.SetSource(owner);
+                damageArea.SetCombatMultipliers(damageMultiplier, radiusMultiplier);
             }
         }
 

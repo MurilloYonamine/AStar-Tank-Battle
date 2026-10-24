@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
+  m_Name: CafeClass
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
+  className: "Persistência"
+  description: "Classe de persistência para o UmaTank. Mais vida máxima, com dano e velocidade um pouco menores."
+  gameplayEnabled: 1
+  healthMultiplier: 1.1
+  movementSpeedMultiplier: 0.95
+  shotDamageMultiplier: 0.95
+  shotIntervalMultiplier: 1
+  passiveName: "Passos constantes"
+  passiveDescription: "Mais vida máxima, com dano e velocidade um pouco menores."
+  lowHealthThreshold: 0
+  lowHealthShotIntervalMultiplier: 1
+  ultimateName: "Passos na névoa"
+  ultimateDescription: "Recupera 30% da vida ao longo de 8 segundos, ganha 15% de velocidade. Efeito temporário de 8 segundos."
+  ultimateEffect: 1
+  ultimateIcon: {fileID: 0}
+  ultimateDurationSeconds: 8
+  ultimateSpeedMultiplier: 1.15
+  ultimateHealFraction: 0.3
+  ultimateDamageReduction: 0
+  ultimateShotIntervalMultiplier: 1
+  ultimateShotDamageMultiplier: 1
+  ultimateExplosionRadiusMultiplier: 1
+  chargePerSecond: 2
+  chargePerElimination: 15

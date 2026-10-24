@@ -19,7 +19,10 @@ public class AITank : MonoBehaviour
     private Collider targetCollider;
     private float fireCooldownRemaining;
     private Quaternion restingCannonRotation;
+    private TankHealth health;
+    public float ShotInterval => fireInterval * (health != null ? health.ShotIntervalMultiplier : 1f);
     public int WeaponGeneration { get; private set; }
+    private void Awake() => health = GetComponent<TankHealth>();
 
     private void Start()
     {
@@ -45,7 +48,7 @@ public class AITank : MonoBehaviour
         {
             restingCannonRotation = cannon.localRotation;
         }
-        fireCooldownRemaining = fireInterval;
+        fireCooldownRemaining = ShotInterval;
     }
 
     private void Update()
@@ -82,7 +85,7 @@ public class AITank : MonoBehaviour
                 return;
             }
             CreateBullet();
-            fireCooldownRemaining = Mathf.Max(0.1f, fireInterval);
+            fireCooldownRemaining = Mathf.Max(0.1f, ShotInterval);
             // Cosmetic animation is optional and must never prevent a shot or its cooldown.
             TankCharacterAnimation characterAnimation = GetComponent<TankAppearance>()?.CharacterAnimation;
             if (characterAnimation != null) characterAnimation.PlayAttack();
@@ -105,7 +108,7 @@ public class AITank : MonoBehaviour
     public void ResetForNewRound()
     {
         WeaponGeneration++;
-        fireCooldownRemaining = fireInterval;
+        fireCooldownRemaining = ShotInterval;
         if (cannon != null)
         {
             cannon.localRotation = restingCannonRotation;
@@ -202,6 +205,8 @@ public class AITank : MonoBehaviour
         if (shell.TryGetComponent(out AIShell projectile))
         {
             projectile.SetOwner(gameObject);
+            projectile.SetCombatMultipliers(health != null ? health.ShotDamageMultiplier : 1f,
+                health != null ? health.ExplosionRadiusMultiplier : 1f);
         }
 
         if (shell.TryGetComponent(out Rigidbody body))

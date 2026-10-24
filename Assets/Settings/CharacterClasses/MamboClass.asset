@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MamboClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
   className: "Equilíbrio"
+  gameplayEnabled: 1
   description: "Uma classe versátil para alternar entre combate e reposicionamento."
   healthMultiplier: 1
   movementSpeedMultiplier: 1
@@ -24,7 +25,7 @@ MonoBehaviour:
   ultimateDescription: "Recupera um pouco de vida e aumenta temporariamente a velocidade."
   ultimateEffect: 3
   ultimateIcon: {fileID: 0}
-  ultimateDurationSeconds: 4
+  ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.25
   ultimateHealFraction: 0.1
   ultimateDamageReduction: 0

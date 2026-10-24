@@ -17,6 +17,7 @@ public class Drive : MonoBehaviour
     public Transform cannon;
     public Transform bulletSpawn;
     public GameObject bulletPrefab;
+    [SerializeField, Min(.05f)] private float fireInterval = .35f;
     [Tooltip("Starting upward pitch in degrees; manual elevation remains available.")]
     [SerializeField, Range(-10f, 30f)] private float initialElevation = 5f;
     [SerializeField, Range(-20f, 0f)] private float minimumElevation = -5f;
@@ -33,6 +34,10 @@ public class Drive : MonoBehaviour
     private const float CollisionSkin = 0.05f;
     private float classSpeedMultiplier = 1f;
     private float ultimateSpeedMultiplier = 1f;
+    private float fireCooldownRemaining;
+    private TankHealth health;
+    public float ShotInterval => fireInterval * (health != null ? health.ShotIntervalMultiplier : 1f);
+    public void ResetWeaponCooldown() => fireCooldownRemaining = 0f;
 
     public float MovementSpeed => speed * classSpeedMultiplier * ultimateSpeedMultiplier;
     public void SetClassSpeedMultiplier(float value) => classSpeedMultiplier = Mathf.Max(0.1f, value);
@@ -42,6 +47,7 @@ public class Drive : MonoBehaviour
     {
         body = GetComponent<Rigidbody>();
         hull = GetComponent<BoxCollider>();
+        health = GetComponent<TankHealth>();
         body.isKinematic = false;
         body.useGravity = false;
         body.constraints = RigidbodyConstraints.FreezePositionY |
@@ -90,6 +96,7 @@ public class Drive : MonoBehaviour
             return;
         }
 
+        fireCooldownRemaining = Mathf.Max(0f, fireCooldownRemaining - Time.deltaTime);
         if (moveAction == null || moveAction.action == null)
         {
             moveInput = Vector2.zero;
@@ -112,16 +119,30 @@ public class Drive : MonoBehaviour
 
         if (fireAction != null && fireAction.WasPressedThisFrame())
         {
-            GameObject projectile = Instantiate(bulletPrefab, bulletSpawn.position,
-                Quaternion.LookRotation(cannon.forward));
-            if (projectile.TryGetComponent(out Shell shell))
-            {
-                shell.SetOwner(gameObject);
-            }
-            GetComponent<TankAppearance>()?.CharacterAnimation?.PlayAttack();
-            BattleAudioController.PlayShot();
-            CombatEffects.PlayMuzzle(bulletSpawn);
+            TryFire();
         }
+    }
+
+    /// <summary>Snapshots class/skill modifiers before consuming a single empowered shot.</summary>
+    public bool TryFire()
+    {
+        if (!isActiveAndEnabled || fireCooldownRemaining > 0f || bulletPrefab == null ||
+            cannon == null || bulletSpawn == null || health != null && health.IsDead ||
+            PauseManager.Instance != null && PauseManager.Instance.IsPaused) return false;
+        float interval = ShotInterval;
+        GameObject projectile = Instantiate(bulletPrefab, bulletSpawn.position, Quaternion.LookRotation(cannon.forward));
+        if (projectile.TryGetComponent(out Shell shell))
+        {
+            shell.SetOwner(gameObject);
+            shell.SetCombatMultipliers(health != null ? health.ShotDamageMultiplier : 1f,
+                health != null ? health.ExplosionRadiusMultiplier : 1f);
+            health?.ConsumeEmpoweredShot();
+        }
+        fireCooldownRemaining = Mathf.Max(.05f, interval);
+        GetComponent<TankAppearance>()?.CharacterAnimation?.PlayAttack();
+        BattleAudioController.PlayShot();
+        CombatEffects.PlayMuzzle(bulletSpawn);
+        return true;
     }
 
     public void ResetAim()

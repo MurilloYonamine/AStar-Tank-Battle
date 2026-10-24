@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Shared, read-only class design data, independent of models and per-tank state.
-/// Only profiles marked gameplayEnabled are applied; other profiles remain visible design drafts.
+/// Profiles are UmaTank-specific designs; skins share one profile per character identity.
 /// Never store current HP, ultimate charge or cooldown on this shared asset.
 /// </summary>
 [CreateAssetMenu(fileName = "CharacterClass", menuName = "UmaTank/Character Class")]
@@ -22,7 +22,7 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [SerializeField, TextArea(2, 3)] private string description;
 
     [Header("Implementation status")]
-    [Tooltip("Enable only after the class has been implemented and tested. Currently used by Suzuka.")]
+    [Tooltip("Disabling a profile restores base attributes and disables its Unique Skill.")]
     [SerializeField] private bool gameplayEnabled;
 
     [Header("Base attributes (applied only for enabled classes)")]
@@ -36,6 +36,9 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [Header("Passive design")]
     [SerializeField] private string passiveName;
     [SerializeField, TextArea(2, 3)] private string passiveDescription;
+    [Tooltip("Zero disables the low-health passive. Compared against current HP / maximum HP.")]
+    [SerializeField, Range(0f, 1f)] private float lowHealthThreshold;
+    [SerializeField, Range(.1f, 1f)] private float lowHealthShotIntervalMultiplier = 1f;
 
     [Header("Unique Skill design")]
     [SerializeField, InspectorName("Unique Skill Name")] private string ultimateName;
@@ -64,6 +67,8 @@ public sealed class CharacterClassDefinition : ScriptableObject
     public float ShotIntervalMultiplier => shotIntervalMultiplier;
     public string PassiveName => passiveName;
     public string PassiveDescription => passiveDescription;
+    public float LowHealthThreshold => lowHealthThreshold;
+    public float LowHealthShotIntervalMultiplier => lowHealthShotIntervalMultiplier;
     public string UltimateName => ultimateName;
     public string UltimateDescription => ultimateDescription;
     public UltimateEffect Effect => ultimateEffect;

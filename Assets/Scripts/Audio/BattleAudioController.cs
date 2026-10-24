@@ -14,6 +14,11 @@ public sealed class BattleAudioController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float menuMusicVolume = 0.4f;
     [SerializeField, Range(0f, 1f)] private float gameplayMusicVolume = 1f;
 
+    [Header("Defeat music")]
+    [Tooltip("Optional loop for the defeat result screen. An empty field leaves defeat without music.")]
+    [SerializeField] private AudioClip defeatMusicClip;
+    [SerializeField, Range(0f, 1f)] private float defeatMusicVolume = 0.5f;
+
     [Header("Character voices")]
     [Tooltip("Dedicated authored source: switching characters interrupts only the previous voice.")]
     [SerializeField] private AudioSource characterVoiceSource;
@@ -143,7 +148,17 @@ public sealed class BattleAudioController : MonoBehaviour
     {
         if (instance != null) PlayCue(instance.matchStartClip, instance.countdownVolume);
     }
-    public static void PlayResult() => PlayCue(instance != null ? instance.resultClip : null);
+    /// <summary>Defeat uses the existing music bus; victory/draw retain the authored result cue.</summary>
+    public static void PlayResult(string outcome = "vitoria")
+    {
+        if (outcome == "derrota")
+        {
+            PlayMusic(instance != null ? instance.defeatMusicClip : null,
+                instance != null ? instance.defeatMusicVolume : 1f);
+            return;
+        }
+        PlayCue(instance != null ? instance.resultClip : null);
+    }
 
     /// <summary>Called once after creating a projectile, never by aiming or cooldown updates.</summary>
     public static void PlayShot(bool enemyShot = false)

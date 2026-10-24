@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CreekClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
   className: "Resistência"
+  gameplayEnabled: 1
   description: "Mais resistência para sobreviver, em troca de mobilidade."
   healthMultiplier: 1.25
   movementSpeedMultiplier: 0.85
@@ -24,7 +25,7 @@ MonoBehaviour:
   ultimateDescription: "Recupera parte da vida ao longo de alguns segundos."
   ultimateEffect: 1
   ultimateIcon: {fileID: 0}
-  ultimateDurationSeconds: 4
+  ultimateDurationSeconds: 6
   ultimateSpeedMultiplier: 1
   ultimateHealFraction: 0.25
   ultimateDamageReduction: 0

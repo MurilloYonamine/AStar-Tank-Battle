@@ -13,18 +13,21 @@ MonoBehaviour:
   m_Name: DotoClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
   className: "Superação"
+  gameplayEnabled: 1
   description: "Uma classe pensada para reagir quando a situação fica difícil."
   healthMultiplier: 1
   movementSpeedMultiplier: 1
   shotDamageMultiplier: 1
   shotIntervalMultiplier: 1
   passiveName: "Não vou desistir!"
-  passiveDescription: "Com pouca vida, terá um intervalo menor entre disparos."
+  passiveDescription: "Com até 35% de vida, reduz em 20% o intervalo entre disparos."
+  lowHealthThreshold: 0.35
+  lowHealthShotIntervalMultiplier: 0.8
   ultimateName: "Último esforço"
   ultimateDescription: "Reduz temporariamente o dano recebido e o intervalo entre disparos."
   ultimateEffect: 2
   ultimateIcon: {fileID: 0}
-  ultimateDurationSeconds: 4
+  ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1
   ultimateHealFraction: 0
   ultimateDamageReduction: 0.4

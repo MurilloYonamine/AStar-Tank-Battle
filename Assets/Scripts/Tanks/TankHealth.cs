@@ -14,6 +14,35 @@ public sealed class TankHealth : MonoBehaviour
     [SerializeField] private bool deactivateOnDeath;
 
     private float classHealthMultiplier = 1f;
+    private CharacterClassDefinition classDefinition;
+    private TankUltimateState uniqueSkill;
+    private float healingRemainder;
+    public float ShotDamageMultiplier => (classDefinition != null ? classDefinition.ShotDamageMultiplier : 1f) *
+        (uniqueSkill != null ? uniqueSkill.ShotDamageMultiplier : 1f);
+    public float ExplosionRadiusMultiplier => uniqueSkill != null ? uniqueSkill.ExplosionRadiusMultiplier : 1f;
+    public float ShotIntervalMultiplier
+    {
+        get
+        {
+            float interval = classDefinition != null ? classDefinition.ShotIntervalMultiplier : 1f;
+            if (classDefinition != null && CurrentHealth > 0 &&
+                classDefinition.LowHealthThreshold > 0f &&
+                CurrentHealth <= Mathf.FloorToInt(MaxHealth * classDefinition.LowHealthThreshold + .0001f))
+                interval *= classDefinition.LowHealthShotIntervalMultiplier;
+            return interval * (uniqueSkill != null ? uniqueSkill.ShotIntervalMultiplier : 1f);
+        }
+    }
+
+    /// <summary>Per-actor references only. Never mutates the shared profile or enables enemy skills.</summary>
+    public void ConfigureClass(CharacterClassDefinition definition)
+    {
+        classDefinition = definition != null && definition.GameplayEnabled ? definition : null;
+        uniqueSkill = null;
+        healingRemainder = 0f;
+        SetClassHealthMultiplier(classDefinition != null ? classDefinition.HealthMultiplier : 1f);
+    }
+    public void SetUniqueSkillState(TankUltimateState state) => uniqueSkill = state;
+    public void ConsumeEmpoweredShot() => uniqueSkill?.ConsumeEmpoweredShot();
     public int MaxHealth => Mathf.Max(1, Mathf.RoundToInt(maxHealth * classHealthMultiplier));
     /// <summary>Changes the class limit, never the serialized base HP or a tank's death state.</summary>
     public void SetClassHealthMultiplier(float value)
@@ -48,6 +77,8 @@ public sealed class TankHealth : MonoBehaviour
         stoppedBehaviours.Clear();
         stoppedColliders.Clear();
         CurrentHealth = MaxHealth;
+        healingRemainder = 0f;
+        uniqueSkill = null;
         IsDead = false;
         DeathAnimationDuration = 0f;
         GetComponent<TankAppearance>()?.CharacterAnimation?.PlayIdle();
@@ -60,7 +91,9 @@ public sealed class TankHealth : MonoBehaviour
             return;
         }
 
-        CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
+        float reduction = uniqueSkill != null ? Mathf.Clamp(uniqueSkill.DamageReduction, 0f, .95f) : 0f;
+        int effectiveDamage = Mathf.Max(1, Mathf.CeilToInt(amount * (1f - reduction)));
+        CurrentHealth = Mathf.Max(0, CurrentHealth - effectiveDamage);
         if (CurrentHealth > 0)
         {
             GetComponent<TankAppearance>()?.CharacterAnimation?.PlayHit();
@@ -81,6 +114,18 @@ public sealed class TankHealth : MonoBehaviour
         if (DeathAnimationDuration > 0f)
             deathRoutine = StartCoroutine(FinishDeath());
         else DeactivateDeadTank();
+    }
+
+    /// <summary>Accumulates sub-HP ticks, clamps at maximum HP and never resurrects a dead actor.</summary>
+    public void Heal(float amount)
+    {
+        if (IsDead || amount <= 0f || float.IsNaN(amount) || float.IsInfinity(amount)) return;
+        if (CurrentHealth >= MaxHealth) { healingRemainder = 0f; return; }
+        healingRemainder += amount;
+        int recovered = Mathf.FloorToInt(healingRemainder + .0001f);
+        healingRemainder = Mathf.Max(0f, healingRemainder - recovered);
+        CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + recovered);
+        if (CurrentHealth == MaxHealth) healingRemainder = 0f;
     }
 
     private void StopGameplay()

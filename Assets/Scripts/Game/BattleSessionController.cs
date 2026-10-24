@@ -632,6 +632,7 @@ public sealed class BattleSessionController : MonoBehaviour
         if (playerHealth.TryGetComponent(out Drive drive) && drive.cannon != null)
         {
             drive.ResetAim();
+            drive.ResetWeaponCooldown();
         }
 
         foreach (TankHealth enemyHealth in enemyHealths)
@@ -659,6 +660,7 @@ public sealed class BattleSessionController : MonoBehaviour
     private void StartCombat()
     {
         playerUltimate.Configure(playerAppearance != null ? playerAppearance.ClassDefinition : null);
+        playerHealth.SetUniqueSkillState(playerUltimate);
         BattleAudioController.PlayGameplayMusic();
         // Este é o início real da partida. O UUID identifica uma tentativa no MySQL;
         // seleção de personagem e contagem regressiva não entram na duração.
@@ -768,7 +770,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void ShowRoundResult()
     {
-        BattleAudioController.PlayResult();
+        BattleAudioController.PlayResult(roundOutcome);
         hudRoot.pickingMode = PickingMode.Position;
         battleHud.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.Flex;
@@ -890,7 +892,7 @@ public sealed class BattleSessionController : MonoBehaviour
     {
         CharacterClassDefinition definition = tank.GetComponent<TankAppearance>()?.ClassDefinition;
         bool active = definition != null && definition.GameplayEnabled;
-        tank.GetComponent<TankHealth>()?.SetClassHealthMultiplier(active ? definition.HealthMultiplier : 1f);
+        tank.GetComponent<TankHealth>()?.ConfigureClass(definition);
         tank.GetComponent<Drive>()?.SetClassSpeedMultiplier(active ? definition.MovementSpeedMultiplier : 1f);
         tank.GetComponent<EnemyTankMovement>()?.SetClassSpeedMultiplier(active ? definition.MovementSpeedMultiplier : 1f);
     }
@@ -899,16 +901,20 @@ public sealed class BattleSessionController : MonoBehaviour
     {
         if (!roundActive || IsStartingRound || IsBattlePaused || playerHealth.IsDead ||
             PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
-        playerUltimate.Tick(Time.unscaledDeltaTime);
+        playerHealth.Heal(playerUltimate.Tick(Time.unscaledDeltaTime) * playerHealth.MaxHealth);
         Keyboard keyboard = Keyboard.current;
         if (keyboard != null && (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.rightShiftKey.wasPressedThisFrame))
-            playerUltimate.TryActivate();
+        {
+            if (playerUltimate.TryActivate())
+                playerHealth.Heal(playerUltimate.ActivationHealFraction * playerHealth.MaxHealth);
+        }
         playerHealth.GetComponent<Drive>()?.SetUltimateSpeedMultiplier(playerUltimate.SpeedMultiplier);
     }
 
     private void StopPlayerUltimate()
     {
         playerUltimate.Reset();
+        if (playerHealth != null) playerHealth.SetUniqueSkillState(null);
         StopUltimateFeedback();
         if (playerHealth != null) playerHealth.GetComponent<Drive>()?.SetUltimateSpeedMultiplier(1f);
     }
@@ -927,12 +933,18 @@ public sealed class BattleSessionController : MonoBehaviour
         {
             ultimateScreenEffect.style.display = DisplayStyle.Flex;
             ultimateScreenEffect.style.opacity = .7f + .12f * Mathf.Sin(ultimateVisualTime * 3f);
+            Color tint = playerUltimate.FeedbackColor;
+            tint.a = .25f;
+            ultimateScreenEffect.style.borderLeftColor = tint;
+            ultimateScreenEffect.style.borderRightColor = tint;
+            ultimateScreenEffect.style.borderTopColor = tint;
+            ultimateScreenEffect.style.borderBottomColor = tint;
         }
 
         if (ultimateWindInstance == null && ultimateWindPrefab != null)
         {
             ultimateWindInstance = Instantiate(ultimateWindPrefab, playerHealth.transform);
-            ultimateWindInstance.name = "Suzuka Ultimate Wind";
+            ultimateWindInstance.name = "Unique Skill Feedback";
             ultimateWindInstance.transform.SetLocalPositionAndRotation(new Vector3(0f, .7f, 0f), Quaternion.identity);
             ultimateWindInstance.transform.localScale = Vector3.one * ultimateWindScale;
             ultimateWindParticles = ultimateWindInstance.GetComponentsInChildren<ParticleSystem>(true);
@@ -942,13 +954,18 @@ public sealed class BattleSessionController : MonoBehaviour
                 var main = particles.main;
                 main.scalingMode = ParticleSystemScalingMode.Hierarchy;
                 main.maxParticles = Mathf.Min(main.maxParticles, 96);
-                main.startColor = new Color(.65f, .9f, 1f, .55f);
+                main.startColor = playerUltimate.FeedbackColor;
                 var collision = particles.collision;
                 collision.enabled = false; // A visual effect must never push a tank or block a projectile.
             }
             foreach (Collider collider in ultimateWindInstance.GetComponentsInChildren<Collider>(true)) collider.enabled = false;
         }
         if (ultimateWindInstance == null) return;
+        foreach (ParticleSystem particles in ultimateWindParticles)
+        {
+            var main = particles.main;
+            main.startColor = playerUltimate.FeedbackColor;
+        }
         ultimateWindInstance.SetActive(true);
         foreach (ParticleSystem particles in ultimateWindParticles)
         {
@@ -977,8 +994,9 @@ public sealed class BattleSessionController : MonoBehaviour
         CharacterClassDefinition definition = playerUltimate.Definition;
         bool available = playerUltimate.IsEnabled;
         ultimateNameLabel.text = definition != null ? definition.UltimateName : "Unique Skill";
+        bool empoweredShot = definition != null && definition.Effect == CharacterClassDefinition.UltimateEffect.EmpoweredShot;
         ultimateStatusLabel.text = !available ? "EM PREPARAÇÃO" : playerUltimate.IsActive
-            ? $"EM USO — {playerUltimate.RemainingDuration:F1} s" : playerUltimate.IsReady
+            ? $"{(empoweredShot ? "PRÓXIMO TIRO" : "EM USO")} — {playerUltimate.RemainingDuration:F1} s" : playerUltimate.IsReady
                 ? "SHIFT — PRONTA" : "CARREGANDO";
         float fill = playerUltimate.IsActive && definition != null
             ? playerUltimate.RemainingDuration / Mathf.Max(0.1f, definition.UltimateDurationSeconds)

@@ -20,6 +20,17 @@ public sealed class ExplosionDamage : MonoBehaviour
     private float visualRemaining;
     private bool initialPulseApplied;
     private BattleSessionController battleSession;
+    private float damageMultiplier = 1f, radiusMultiplier = 1f;
+    public float EffectiveRadius => radius * radiusMultiplier;
+
+    /// <summary>Projectile-owned snapshot, independent of shooter death, pooling or expired skills.</summary>
+    public void SetCombatMultipliers(float damage, float blastRadius)
+    {
+        if (initialPulseApplied) return;
+        damageMultiplier = Mathf.Max(.1f, damage);
+        radiusMultiplier = Mathf.Max(.1f, blastRadius);
+        if (areaCollider != null) areaCollider.radius = EffectiveRadius;
+    }
 
     private void Awake()
     {
@@ -42,7 +53,7 @@ public sealed class ExplosionDamage : MonoBehaviour
         initialPulseApplied = true;
         // A newly created trigger can already overlap a tank before OnTriggerEnter runs.
         foreach (Collider other in Physics.OverlapSphere(
-                     transform.position, radius, Physics.AllLayers, QueryTriggerInteraction.Ignore))
+                     transform.position, EffectiveRadius, Physics.AllLayers, QueryTriggerInteraction.Ignore))
         {
             TryDamage(other);
         }
@@ -88,12 +99,12 @@ public sealed class ExplosionDamage : MonoBehaviour
         }
 
         float distance = Vector3.Distance(transform.position, other.ClosestPoint(transform.position));
-        if (distance >= radius)
+        if (distance >= EffectiveRadius)
         {
             return;
         }
 
-        int damage = Mathf.CeilToInt(maximumDamage * (1f - distance / radius));
+        int damage = Mathf.CeilToInt(maximumDamage * damageMultiplier * (1f - distance / EffectiveRadius));
         if (damage > 0)
         {
             damagedTanks.Add(health);

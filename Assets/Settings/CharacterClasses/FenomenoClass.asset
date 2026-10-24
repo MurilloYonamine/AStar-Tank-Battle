@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: FenomenoClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
   className: "Artilharia"
+  gameplayEnabled: 1
   description: "Disparos fortes e mais espaçados, valorizando cada acerto."
   healthMultiplier: 1
   movementSpeedMultiplier: 1
@@ -21,10 +22,10 @@ MonoBehaviour:
   passiveName: "Força concentrada"
   passiveDescription: "Mais dano por disparo, com um intervalo maior entre tiros."
   ultimateName: "Alvo identificado"
-  ultimateDescription: "Fortalece o próximo disparo e amplia sua explosão, sem atravessar obstáculos."
+  ultimateDescription: "O próximo tiro em até 10 segundos causa o dobro de dano e tem uma explosão 50% maior, sem atravessar obstáculos."
   ultimateEffect: 4
   ultimateIcon: {fileID: 0}
-  ultimateDurationSeconds: 4
+  ultimateDurationSeconds: 10
   ultimateSpeedMultiplier: 1
   ultimateHealFraction: 0
   ultimateDamageReduction: 0
