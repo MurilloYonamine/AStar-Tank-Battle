@@ -451,12 +451,37 @@ public sealed class BattleSessionController : MonoBehaviour
         // This preserves Murilo's public score API and the existing HP/death event subscriptions.
         CharacterSelectionController.CharacterOption selected = characterSelection.GetCharacter(selectedIndex);
         playerAppearance.ApplyCharacter(selected.ModelPrefab, selected.DisplayName, selected.ClassDefinition);
-        int enemyIndex = 0;
+
+        // A larger cosmetic roster does not enlarge the scene's four gameplay actors.
+        // Shuffle eligible options, then assign only as many as the enemy pool can hold.
+        List<int> candidates = new();
         for (int i = 0; i < characterSelection.CharacterCount; i++)
         {
             if (i == selectedIndex) continue;
             CharacterSelectionController.CharacterOption option = characterSelection.GetCharacter(i);
-            enemyAppearances[enemyIndex++].ApplyCharacter(option.ModelPrefab, option.DisplayName, option.ClassDefinition);
+            if (option.ModelPrefab == null) continue;
+            candidates.Add(i);
+        }
+
+        if (candidates.Count == 0)
+        {
+            Debug.LogError("Character selection needs at least one unselected enemy model.", this);
+            return;
+        }
+
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int swapIndex = UnityEngine.Random.Range(0, i + 1);
+            (candidates[i], candidates[swapIndex]) = (candidates[swapIndex], candidates[i]);
+        }
+
+        for (int enemyIndex = 0; enemyIndex < enemyAppearances.Length; enemyIndex++)
+        {
+            if (enemyAppearances[enemyIndex] == null) continue;
+            // Smaller custom rosters may reuse an eligible enemy, never the player option.
+            CharacterSelectionController.CharacterOption option =
+                characterSelection.GetCharacter(candidates[enemyIndex % candidates.Count]);
+            enemyAppearances[enemyIndex].ApplyCharacter(option.ModelPrefab, option.DisplayName, option.ClassDefinition);
         }
     }
 
