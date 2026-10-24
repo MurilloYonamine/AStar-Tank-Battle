@@ -13,7 +13,14 @@ public sealed class TankHealth : MonoBehaviour
     [SerializeField] private GameObject deathSmoke;
     [SerializeField] private bool deactivateOnDeath;
 
-    public int MaxHealth => maxHealth;
+    private float classHealthMultiplier = 1f;
+    public int MaxHealth => Mathf.Max(1, Mathf.RoundToInt(maxHealth * classHealthMultiplier));
+    /// <summary>Changes the class limit, never the serialized base HP or a tank's death state.</summary>
+    public void SetClassHealthMultiplier(float value)
+    {
+        classHealthMultiplier = Mathf.Max(0.1f, value);
+        CurrentHealth = Mathf.Min(CurrentHealth, MaxHealth);
+    }
     public int CurrentHealth { get; private set; }
     public bool IsDead { get; private set; }
     public bool DeactivatesOnDeath => deactivateOnDeath;
@@ -40,7 +47,7 @@ public sealed class TankHealth : MonoBehaviour
             if (collider != null) collider.enabled = true;
         stoppedBehaviours.Clear();
         stoppedColliders.Clear();
-        CurrentHealth = maxHealth;
+        CurrentHealth = MaxHealth;
         IsDead = false;
         DeathAnimationDuration = 0f;
         GetComponent<TankAppearance>()?.CharacterAnimation?.PlayIdle();

@@ -19,6 +19,18 @@
                 <ui:Label text="PONTOS" class="hud-caption" />
                 <ui:Label name="ScoreLabel" text="0" class="hud-value" />
             </ui:VisualElement>
+            <ui:VisualElement name="UltimateCard" class="ultimate-card">
+                <ui:Label name="UltimateNameLabel" text="Habilidade" class="ultimate-name" />
+                <ui:VisualElement name="UltimateIcon" class="ultimate-icon" picking-mode="Ignore">
+                    <ui:Label name="UltimatePlaceholder" text="ULT" class="ultimate-placeholder" />
+                    <ui:VisualElement name="UltimateMask" class="ultimate-mask" />
+                    <ui:Label name="UltimatePercentLabel" text="0%" class="ultimate-percent" />
+                </ui:VisualElement>
+                <ui:Label name="UltimateStatusLabel" text="CARREGANDO" class="ultimate-status" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="UltimateScreenEffect" class="ultimate-screen-effect" picking-mode="Ignore" style="display: none;">
+            <ui:VisualElement class="ultimate-screen-inner" picking-mode="Ignore" />
         </ui:VisualElement>
         <ui:VisualElement name="DefeatScreen" class="defeat-screen">
             <ui:VisualElement class="defeat-card">
@@ -36,6 +48,23 @@
         <ui:VisualElement name="PauseScreen" class="pause-screen" style="display: none;">
             <ui:VisualElement class="pause-card">
                 <ui:Label text="PAUSE" class="pause-title battle-ui-title" />
+                <ui:VisualElement class="pause-audio">
+                    <ui:VisualElement class="slider-row">
+                        <ui:Label text="MASTER" class="slider-label" />
+                        <ui:Slider name="PauseMasterSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider" />
+                        <ui:Label name="PauseMasterValueLabel" text="100%" class="slider-value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="slider-row">
+                        <ui:Label text="MÚSICA" class="slider-label" />
+                        <ui:Slider name="PauseMusicSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider" />
+                        <ui:Label name="PauseMusicValueLabel" text="100%" class="slider-value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="slider-row">
+                        <ui:Label text="SFX" class="slider-label" />
+                        <ui:Slider name="PauseSFXSlider" low-value="0.0001" high-value="1" value="1" class="volume-slider" />
+                        <ui:Label name="PauseSFXValueLabel" text="100%" class="slider-value-label" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:Button name="ResumeButton" text="CONTINUAR" class="pause-button battle-ui-button battle-ui-primary" />
                 <ui:Label text="ESC para continuar" class="pause-hint" picking-mode="Ignore" />
             </ui:VisualElement>

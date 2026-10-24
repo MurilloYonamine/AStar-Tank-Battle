@@ -88,4 +88,13 @@ public sealed class TankCharacterAnimation : MonoBehaviour
         dancing = true;
         if (Ready) characterAnimator.SetBool("Dancing", true);
     }
+
+    /// <summary>Only affects the disposable result preview, never the dead battle actor.</summary>
+    public void PlayResult(string outcome)
+    {
+        PlayIdle();
+        if (outcome == "vitoria") PlayDance();
+        else if (outcome == "derrota") PlayDeath();
+        // Draw uses Idle; the non-looping Death state naturally holds its final pose.
+    }
 }

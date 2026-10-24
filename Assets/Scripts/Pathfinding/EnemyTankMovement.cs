@@ -40,6 +40,9 @@ public sealed class EnemyTankMovement : MonoBehaviour
 
     public bool IsMoving => currentNodeIndex < currentPath.Count;
     public bool HasDestination { get; private set; }
+    private float classSpeedMultiplier = 1f;
+    public float MovementSpeed => moveSpeed * classSpeedMultiplier;
+    public void SetClassSpeedMultiplier(float value) => classSpeedMultiplier = Mathf.Max(0.1f, value);
     public IReadOnlyList<GridNode> CurrentPath => currentPath;
 
     private void Awake()
@@ -335,7 +338,7 @@ public sealed class EnemyTankMovement : MonoBehaviour
             }
         }
 
-        float step = Mathf.Min(moveSpeed * Time.fixedDeltaTime, distance);
+        float step = Mathf.Min(MovementSpeed * Time.fixedDeltaTime, distance);
         Vector3 travelDirection = direction / distance;
         float allowedStep = step;
 

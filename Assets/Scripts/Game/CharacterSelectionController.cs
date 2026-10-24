@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Shows the group's characters and draft class profiles using an isolated rotating 3D preview.
+/// Shows character families, skins and class availability in an isolated rotating 3D preview.
 /// The existing name/menu/backend flow is retained by BattleSessionController.
 /// </summary>
 public sealed class CharacterSelectionController : MonoBehaviour
@@ -13,6 +14,9 @@ public sealed class CharacterSelectionController : MonoBehaviour
     public sealed class CharacterOption
     {
         public string DisplayName;
+        [Tooltip("Stable character identity shared by skins; not a prefab or file name.")]
+        public string CharacterId;
+        public string AppearanceName;
         public GameObject ModelPrefab;
         [Tooltip("Independent class design asset. Does not belong inside the visual prefab.")]
         public CharacterClassDefinition ClassDefinition;
@@ -41,8 +45,10 @@ public sealed class CharacterSelectionController : MonoBehaviour
     private Label classNameLabel;
     private Label classDescriptionLabel;
     private Label classAttributesLabel;
+    private VisualElement healthStars, speedStars, damageStars, cadenceStars;
     private Label passiveLabel;
     private Label ultimateLabel;
+    private Label classNoticeLabel;
     private Button previousButton;
     private Button nextButton;
     private Button confirmButton;
@@ -52,6 +58,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
     private Color previewBackground;
     private CameraClearFlags previewClearFlags;
     private int selectedIndex;
+    private bool showingResult;
 
     public bool IsOpen { get; private set; }
     public int CharacterCount => characters == null ? 0 : characters.Length;
@@ -59,6 +66,36 @@ public sealed class CharacterSelectionController : MonoBehaviour
     public event Action Cancelled;
 
     public CharacterOption GetCharacter(int index) => characters[index];
+
+    public string GetCharacterIdentity(int index)
+    {
+        CharacterOption option = characters[index];
+        return !string.IsNullOrEmpty(option.CharacterId) ? option.CharacterId :
+            option.ModelPrefab != null ? option.ModelPrefab.GetInstanceID().ToString() : index.ToString();
+    }
+
+    /// <summary>Distinct character families, not just distinct skins; never the player's family.</summary>
+    public List<int> CreateEnemyRoster(int playerIndex, int count)
+    {
+        count = Mathf.Max(0, count);
+        List<int> candidates = new();
+        string playerIdentity = GetCharacterIdentity(playerIndex);
+        for (int i = 0; i < CharacterCount; i++)
+            if (characters[i].ModelPrefab != null &&
+                !string.Equals(GetCharacterIdentity(i), playerIdentity, StringComparison.OrdinalIgnoreCase))
+                candidates.Add(i);
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int swap = UnityEngine.Random.Range(0, i + 1);
+            (candidates[i], candidates[swap]) = (candidates[swap], candidates[i]);
+        }
+        HashSet<string> families = new(StringComparer.OrdinalIgnoreCase);
+        List<int> roster = new();
+        foreach (int index in candidates)
+            if (families.Add(GetCharacterIdentity(index))) roster.Add(index);
+        if (roster.Count > count) roster.RemoveRange(count, roster.Count - count);
+        return roster;
+    }
 
     public void Open()
     {
@@ -88,6 +125,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
     public void Close()
     {
+        showingResult = false;
         BattleAudioController.StopCharacterVoice();
         IsOpen = false;
         showingInstructions = false;
@@ -98,14 +136,15 @@ public sealed class CharacterSelectionController : MonoBehaviour
         if (previewModel != null) previewModel.SetActive(false);
     }
 
-    public void ShowResultPreview(int index, VisualElement resultImage)
+    public void ShowResultPreview(int index, VisualElement resultImage, string outcome = "vitoria")
     {
         if (resultImage == null || CharacterCount == 0) return;
         EnsureUI();
         Close();
-        // A separate, collision-free preview dances. The dead gameplay actor stays dead.
+        // A separate, collision-free preview reacts. The battle actor is never revived.
         ShowCharacter(Mathf.Clamp(index, 0, CharacterCount - 1), true);
-        previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.PlayDance();
+        previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.PlayResult(outcome);
+        showingResult = true;
         resultImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(previewTexture));
         previewCamera.enabled = true;
     }
@@ -185,8 +224,13 @@ public sealed class CharacterSelectionController : MonoBehaviour
         classNameLabel = root.Q<Label>("ClassNameLabel");
         classDescriptionLabel = root.Q<Label>("ClassDescriptionLabel");
         classAttributesLabel = root.Q<Label>("ClassAttributesLabel");
+        healthStars = root.Q<VisualElement>("HealthStars");
+        speedStars = root.Q<VisualElement>("SpeedStars");
+        damageStars = root.Q<VisualElement>("DamageStars");
+        cadenceStars = root.Q<VisualElement>("CadenceStars");
         passiveLabel = root.Q<Label>("PassiveDescriptionLabel");
         ultimateLabel = root.Q<Label>("UltimateDescriptionLabel");
+        classNoticeLabel = root.Q<Label>("ClassNoticeLabel");
         previousButton = root.Q<Button>("PreviousCharacterButton");
         nextButton = root.Q<Button>("NextCharacterButton");
         confirmButton = root.Q<Button>("ConfirmCharacterButton");
@@ -235,15 +279,29 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
         if (characterOnly)
         {
-            Animator animator = previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.Animator;
-            if (animator != null)
+            Transform characterRoot = TankAppearance.FindCharacterRoot(previewModel.transform);
+            if (characterRoot != null)
             {
                 // Hide the tank only in this disposable preview; keep the original prefab and battle actor intact.
                 foreach (Renderer renderer in previewModel.GetComponentsInChildren<Renderer>(true))
-                    if (!renderer.transform.IsChildOf(animator.transform)) renderer.enabled = false;
+                    if (!renderer.transform.IsChildOf(characterRoot)) renderer.enabled = false;
             }
         }
 
+        FramePreview(characterOnly, false);
+        nameLabel.text = option.DisplayName.ToUpperInvariant() +
+            (string.IsNullOrEmpty(option.AppearanceName) ? "" : " — " + option.AppearanceName.ToUpperInvariant());
+        indexLabel.text = $"{index + 1} / {CharacterCount}";
+        UpdateClassDetails(option.ClassDefinition);
+    }
+
+    private void LateUpdate()
+    {
+        if (showingResult && previewModel != null && previewCamera.enabled) FramePreview(true, true);
+    }
+
+    private void FramePreview(bool characterOnly, bool smooth)
+    {
         Renderer[] renderers = previewModel.GetComponentsInChildren<Renderer>();
         Bounds bounds = new(previewRoot.position, Vector3.one);
         bool hasBounds = false;
@@ -259,27 +317,67 @@ public sealed class CharacterSelectionController : MonoBehaviour
         Vector3 direction = characterOnly
             ? new Vector3(0f, 0.15f, 1f).normalized
             : new Vector3(3f, 2f, 4f).normalized;
-        previewCamera.transform.position = bounds.center + direction * 8f;
-        previewCamera.transform.LookAt(bounds.center);
-        previewCamera.orthographicSize = characterOnly
+        Vector3 cameraPosition = bounds.center + direction * 8f;
+        float blend = smooth ? 1f - Mathf.Exp(-6f * Time.unscaledDeltaTime) : 1f;
+        previewCamera.transform.position = Vector3.Lerp(previewCamera.transform.position, cameraPosition, blend);
+        previewCamera.transform.rotation = Quaternion.Slerp(previewCamera.transform.rotation,
+            Quaternion.LookRotation(-direction), blend);
+        float size = characterOnly
             ? Mathf.Max(0.75f, Mathf.Max(bounds.extents.y, bounds.extents.x / previewCamera.aspect) * 1.05f)
             : Mathf.Max(1.8f, bounds.extents.magnitude * 1.15f);
-        nameLabel.text = option.DisplayName.ToUpperInvariant();
-        indexLabel.text = $"{index + 1} / {CharacterCount}";
-        UpdateClassDetails(option.ClassDefinition);
+        previewCamera.orthographicSize = Mathf.Lerp(previewCamera.orthographicSize, size, blend);
     }
 
     private void UpdateClassDetails(CharacterClassDefinition definition)
     {
         // Older scenes without this optional panel/profile retain cosmetic selection.
         if (classDetails == null) return;
-        classDetails.style.display = definition != null ? DisplayStyle.Flex : DisplayStyle.None;
-        if (definition == null) return;
+        classDetails.style.display = DisplayStyle.Flex;
+        if (definition == null)
+        {
+            classNameLabel.text = "Classe básica";
+            classDescriptionLabel.text = "Esta personagem ainda usa os atributos básicos de combate.";
+            classAttributesLabel.text = "3 estrelas = padrão. Passe o mouse para ver os valores.";
+            UpdateStatStars(null);
+            passiveLabel.text = "Passiva: em preparação.";
+            ultimateLabel.text = "Ult: em preparação.";
+            if (classNoticeLabel != null) classNoticeLabel.text = "Habilidades serão adicionadas nas próximas etapas.";
+            return;
+        }
         classNameLabel.text = definition.ClassName;
         classDescriptionLabel.text = definition.Description;
-        classAttributesLabel.text = definition.AttributeSummary;
+        classAttributesLabel.text = "3 estrelas = padrão. Passe o mouse para ver os valores.";
+        UpdateStatStars(definition);
         passiveLabel.text = $"Passiva: {definition.PassiveName} — {definition.PassiveDescription}";
         ultimateLabel.text = $"Ult: {definition.UltimateName} — {definition.UltimateDescription}";
+        if (classNoticeLabel != null) classNoticeLabel.text = definition.GameplayEnabled
+            ? "DISPONÍVEL: atributos ativos. No player, use SHIFT quando a ult estiver pronta."
+            : "PLANEJAMENTO: atributos, passivas e ult ainda não estão ativos no combate.";
+    }
+
+    /// <summary>Three stars represent the existing actor base; each step is approximately 20%.</summary>
+    private static int GetStatStars(float multiplier) =>
+        Mathf.Clamp(Mathf.RoundToInt(3f + (multiplier - 1f) * 5f), 1, 5);
+
+    private void UpdateStatStars(CharacterClassDefinition definition)
+    {
+        bool planned = definition != null && !definition.GameplayEnabled;
+        SetStatStars(healthStars, definition != null ? definition.HealthMultiplier : 1f, "Vida", planned);
+        SetStatStars(speedStars, definition != null ? definition.MovementSpeedMultiplier : 1f, "Velocidade", planned);
+        SetStatStars(damageStars, definition != null ? definition.ShotDamageMultiplier : 1f, "Dano", planned);
+        // A shorter interval means a better cadence, so stars use its reciprocal.
+        SetStatStars(cadenceStars, definition != null ? 1f / Mathf.Max(.1f, definition.ShotIntervalMultiplier) : 1f,
+            "Cadência", planned);
+    }
+
+    private static void SetStatStars(VisualElement row, float multiplier, string attribute, bool planned)
+    {
+        if (row == null) return; // Older authored scenes may not include the optional ratings yet.
+        int stars = GetStatStars(multiplier);
+        int index = 0;
+        foreach (VisualElement star in row.Children()) star.EnableInClassList("stat-star-filled", index++ < stars);
+        row.tooltip = $"{attribute}: {stars}/5 — {multiplier * 100f:0}% do padrão." +
+            (planned ? " Planejado; ainda não aplicado ao combate." : " Atributo ativo no combate.");
     }
 
     private void OnDestroy()

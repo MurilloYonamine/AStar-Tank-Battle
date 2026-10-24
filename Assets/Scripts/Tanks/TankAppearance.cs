@@ -11,7 +11,7 @@ public sealed class TankAppearance : MonoBehaviour
 
     public string CharacterName { get; private set; }
     public TankCharacterAnimation CharacterAnimation { get; private set; }
-    // A profile reference is not an applied modifier. Stage 3 keeps gameplay unchanged.
+    // Visual replacement only stores the profile; the battle explicitly applies supported stats.
     public CharacterClassDefinition ClassDefinition { get; private set; }
 
     public void ApplyCharacter(GameObject modelPrefab, string characterName,
@@ -68,6 +68,16 @@ public sealed class TankAppearance : MonoBehaviour
         {
             if (child.name == "TankTurret") return child;
         }
+        return null;
+    }
+
+    public static Transform FindCharacterRoot(Transform root)
+    {
+        Animator animator = root.GetComponentInChildren<Animator>(true);
+        if (animator != null && animator.transform != root) return animator.transform;
+        // Unanimated models still need a character-only result preview, without their tank.
+        foreach (Transform child in root)
+            if (child.GetComponentInChildren<SkinnedMeshRenderer>(true) != null) return child;
         return null;
     }
 }

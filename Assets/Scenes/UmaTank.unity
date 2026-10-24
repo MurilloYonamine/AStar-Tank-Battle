@@ -24997,110 +24997,162 @@ MonoBehaviour:
     type: 3}
   characters:
   - DisplayName: Meisho Doto
+    CharacterId: meisho-doto
+    AppearanceName: ""
     ModelPrefab: {fileID: 6197875222825019286, guid: ced5339ba6560f3438f03d3a289d5f2d,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b1, type: 3}
     ClassDefinition: {fileID: 11400000, guid: 6412334d691e2e379a66dfb1e7712589, type: 2}
   - DisplayName: Super Creek
+    CharacterId: super-creek
+    AppearanceName: "Múmia"
     ModelPrefab: {fileID: 7104283324534214091, guid: 4d37aa933b3f4aa4bb793b8b73b4139d,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b2, type: 3}
     ClassDefinition: {fileID: 11400000, guid: 5aaf1b2bed1faa99580dc38299189893, type: 2}
   - DisplayName: Fenomeno
+    CharacterId: fenomeno
+    AppearanceName: ""
     ModelPrefab: {fileID: 5798820952359004272, guid: 4ead77933e14f524fb28b08bde76a53f,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b3, type: 3}
     ClassDefinition: {fileID: 11400000, guid: 29e0b66b2f3405e039885f46bb8c277a, type: 2}
   - DisplayName: Matikanetannhauser
+    CharacterId: matikanetannhauser
+    AppearanceName: ""
     ModelPrefab: {fileID: 1697724984734256220, guid: b9f64ba8a8137e1418ed31589bc47621,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b4, type: 3}
     ClassDefinition: {fileID: 11400000, guid: 68dd791ca192c6b1b2597dd68d99f040, type: 2}
   - DisplayName: Silence Suzuka
+    CharacterId: silence-suzuka
+    AppearanceName: ""
     ModelPrefab: {fileID: 6751020389872671593, guid: 47325454db6ec1b40b7c7be0ab7aac15,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
     ClassDefinition: {fileID: 11400000, guid: 3137bc0d5dc9dcc139c2f008175cc2f3, type: 2}
-  - DisplayName: Agemasen
+  - DisplayName: Special Week
+    CharacterId: special-week
+    AppearanceName: ""
     ModelPrefab: {fileID: 3097888121602204344, guid: 27733ca1fbf029149890502156a4591c,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Agnes
+    VoiceClip: {fileID: 0}
+  - DisplayName: Agnes Tachyon
+    CharacterId: agnes-tachyon
+    AppearanceName: ""
     ModelPrefab: {fileID: 8081286497218204957, guid: de6ed436fbcbae64b9c9641785017704,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Bourbono
+    VoiceClip: {fileID: 0}
+  - DisplayName: Mihono Bourbon
+    CharacterId: mihono-bourbon
+    AppearanceName: ""
     ModelPrefab: {fileID: 3973664798045723056, guid: e32368eb7b60cdd408c4860a5f23a04f,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Creek Shinobe
+    VoiceClip: {fileID: 0}
+  - DisplayName: Super Creek
+    CharacterId: super-creek
+    AppearanceName: "Shinobi"
     ModelPrefab: {fileID: 2872959291122205291, guid: 29ce4e8f83571684980d1a2839e01ab8,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Daitaku
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b2, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 5aaf1b2bed1faa99580dc38299189893, type: 2}
+  - DisplayName: Daitaku Helios
+    CharacterId: daitaku-helios
+    AppearanceName: ""
     ModelPrefab: {fileID: 1878853220203916390, guid: 35e46b8d495ac724a8c57a3348f548f5,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Daiwa
+    VoiceClip: {fileID: 0}
+  - DisplayName: Daiwa Scarlet
+    CharacterId: daiwa-scarlet
+    AppearanceName: ""
     ModelPrefab: {fileID: 2936163323007611840, guid: 44e7ec34fc3a0eb468d3d9a704ec62d1,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Doto Halloween
+    VoiceClip: {fileID: 0}
+  - DisplayName: Meisho Doto
+    CharacterId: meisho-doto
+    AppearanceName: "Halloween"
     ModelPrefab: {fileID: 1337084418680203417, guid: 707ae554475e16743b73a554b4921f9f,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Mayano
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b1, type: 3}
+    ClassDefinition: {fileID: 11400000, guid: 6412334d691e2e379a66dfb1e7712589, type: 2}
+  - DisplayName: Mayano Top Gun
+    CharacterId: mayano-top-gun
+    AppearanceName: "Halloween"
     ModelPrefab: {fileID: 4215146397453932353, guid: cd4dbe72e844d1e47800e50668e5305f,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Muteki
+    VoiceClip: {fileID: 0}
+  - DisplayName: Yaeno Muteki
+    CharacterId: yaeno-muteki
+    AppearanceName: ""
     ModelPrefab: {fileID: 3671126154024635928, guid: 449d711f692d0964c8b49cc612d34262,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Oguri
+    VoiceClip: {fileID: 0}
+  - DisplayName: Oguri Cap
+    CharacterId: oguri-cap
+    AppearanceName: "Natal"
     ModelPrefab: {fileID: 6869817442786054886, guid: 904d1b47e00fb9949a3bb3d559348df3,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Opera
+    VoiceClip: {fileID: 0}
+  - DisplayName: T.M. Opera O
+    CharacterId: tm-opera-o
+    AppearanceName: ""
     ModelPrefab: {fileID: 7043905366006555078, guid: b273e83fa605bb442a7fc20b4a499061,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Sakura
+    VoiceClip: {fileID: 0}
+  - DisplayName: Sakura Chiyono O
+    CharacterId: sakura-chiyono-o
+    AppearanceName: ""
     ModelPrefab: {fileID: 500057644304070192, guid: 828308dc8e25c1d429d75695c24df06b,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Tamano
+    VoiceClip: {fileID: 0}
+  - DisplayName: Tamamo Cross
+    CharacterId: tamamo-cross
+    AppearanceName: ""
     ModelPrefab: {fileID: 4111524923173423666, guid: a00ed4cd53c0e7e459e11e6d41493c4d,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Tokai
+    VoiceClip: {fileID: 0}
+  - DisplayName: Tokai Teio
+    CharacterId: tokai-teio
+    AppearanceName: ""
     ModelPrefab: {fileID: 1659283777834196039, guid: 4387c28275a6296409680be7e21e2dc4,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Tosho
+    VoiceClip: {fileID: 0}
+  - DisplayName: Sweep Tosho
+    CharacterId: sweep-tosho
+    AppearanceName: ""
     ModelPrefab: {fileID: 8622476531507434479, guid: 44b52c92b32a3cd4586e9787a826d2a6,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+    VoiceClip: {fileID: 0}
   - DisplayName: Vodka
+    CharacterId: vodka
+    AppearanceName: ""
     ModelPrefab: {fileID: 980334741786948687, guid: 81e50576b9167db419c9b587685edc03,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Cafe
+    VoiceClip: {fileID: 0}
+  - DisplayName: Manhattan Cafe
+    CharacterId: manhattan-cafe
+    AppearanceName: ""
     ModelPrefab: {fileID: 3056736648317201363, guid: c8a86c6bd6583034c87ef538d070165c,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Bono
+    VoiceClip: {fileID: 0}
+  - DisplayName: Hishi Akebono
+    CharacterId: hishi-akebono
+    AppearanceName: ""
     ModelPrefab: {fileID: 1441822565134976600, guid: af0c266b109f6de4ea7c0375e2e73d38,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Goldship
+    VoiceClip: {fileID: 0}
+  - DisplayName: Gold Ship
+    CharacterId: gold-ship
+    AppearanceName: "Bazuca"
     ModelPrefab: {fileID: 6586737852537089965, guid: 5b5bc9b0c5fa2fd4e905577aaeb19f7f,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
-  - DisplayName: Xen
+    VoiceClip: {fileID: 0}
+  - DisplayName: Yaeno Muteki
+    CharacterId: yaeno-muteki
+    AppearanceName: "Xen"
     ModelPrefab: {fileID: 1965166538356402677, guid: b1807e9b7fcc22c448fcd08a48fc3fef,
       type: 3}
-    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+    VoiceClip: {fileID: 0}
   previewRoot: {fileID: 1697967075}
   previewCamera: {fileID: 1704461938}
   rotationSpeed: 15
@@ -35956,6 +36008,8 @@ MonoBehaviour:
   cameraSettleTime: 0.75
   countdownStepDuration: 1
   goDuration: 0.5
+  ultimateWindPrefab: {fileID: 4683849804331954680, guid: b421bd88c64d2c34c916ba4bf41dce11, type: 3}
+  ultimateWindScale: 0.25
 --- !u!1 &3500000000
 GameObject:
   m_ObjectHideFlags: 0

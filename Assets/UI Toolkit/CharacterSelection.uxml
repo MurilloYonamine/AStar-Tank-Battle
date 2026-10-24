@@ -5,7 +5,7 @@
             <ui:Label text="ANTES DE JOGAR" class="selection-title battle-ui-title" />
             <ui:ScrollView class="game-info-scroll">
                 <ui:Label text="COMO JOGAR" class="game-info-heading" />
-                <ui:Label text="Movimente o tanque com W, A, S, D ou as setas. Ajuste a mira com Q e E. Atire com espaço ou botão esquerdo do mouse. Use ESC para pausar durante a partida." class="game-info-text" />
+                <ui:Label text="Movimente o tanque com W, A, S, D ou as setas. Ajuste a mira com Q e E. Atire com espaço ou botão esquerdo do mouse. Use ESC para pausar. Com Silence Suzuka, use SHIFT quando a ult chegar a 100%; ela carrega com o tempo e com eliminações." class="game-info-text" />
                 <ui:Label text="Alcance a meta de eliminações antes do tempo acabar para vencer. Se o tempo acabar enquanto você ainda estiver vivo, a partida termina em empate. Se sua vida chegar a zero antes de concluir o objetivo, você perde. Acompanhe o tempo e a meta na HUD; a pausa interrompe o cronômetro." class="game-info-text" />
                 <ui:Label text="DADOS DA PARTIDA" class="game-info-heading" />
                 <ui:Label text="Coletamos a identificação do jogador, horários de início e término, duração, resultado, pontuação e número de inimigos eliminados. Esses dados são usados para histórico, ranking e análise do gameplay." class="game-info-text" />
@@ -25,14 +25,40 @@
             <ui:Button name="NextCharacterButton" text="›" class="selection-arrow battle-ui-button" />
         </ui:VisualElement>
         <ui:Label name="CharacterName" text="MEISHO DOTO" class="selection-name" />
-        <ui:Label name="CharacterIndex" text="1 / 5" class="selection-index" />
+        <ui:Label name="CharacterIndex" text="1 / 25" class="selection-index" />
         <ui:ScrollView name="CharacterClassDetails" class="selection-class-details" horizontal-scroller-visibility="Hidden" style="display: none;">
             <ui:Label name="ClassNameLabel" class="selection-class-title" />
-            <ui:Label name="ClassDescriptionLabel" class="selection-class-text" />
+            <ui:VisualElement class="stat-grid">
+                <ui:VisualElement class="stat-row">
+                    <ui:Label text="VIDA" class="stat-name" />
+                    <ui:VisualElement name="HealthStars" class="stat-stars" picking-mode="Position">
+                        <ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star" /><ui:VisualElement class="stat-star" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-row">
+                    <ui:Label text="VELOCIDADE" class="stat-name" />
+                    <ui:VisualElement name="SpeedStars" class="stat-stars" picking-mode="Position">
+                        <ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star" /><ui:VisualElement class="stat-star" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-row">
+                    <ui:Label text="DANO" class="stat-name" />
+                    <ui:VisualElement name="DamageStars" class="stat-stars" picking-mode="Position">
+                        <ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star" /><ui:VisualElement class="stat-star" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-row">
+                    <ui:Label text="CADÊNCIA" class="stat-name" />
+                    <ui:VisualElement name="CadenceStars" class="stat-stars" picking-mode="Position">
+                        <ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star stat-star-filled" /><ui:VisualElement class="stat-star" /><ui:VisualElement class="stat-star" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:Label name="ClassAttributesLabel" class="selection-class-text" />
+            <ui:Label name="ClassDescriptionLabel" class="selection-class-text" />
             <ui:Label name="PassiveDescriptionLabel" class="selection-class-text" />
             <ui:Label name="UltimateDescriptionLabel" class="selection-class-text" />
-            <ui:Label text="PLANEJAMENTO: atributos, passivas e ults ainda não estão ativos no combate." class="selection-class-notice" />
+            <ui:Label name="ClassNoticeLabel" text="" class="selection-class-notice" />
         </ui:ScrollView>
         <ui:VisualElement class="selection-actions">
             <ui:Button name="CharacterBackButton" text="VOLTAR" class="selection-button selection-back battle-ui-button battle-ui-back" />

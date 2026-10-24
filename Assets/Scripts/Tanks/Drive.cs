@@ -28,8 +28,15 @@ public class Drive : MonoBehaviour
     private Vector2 moveInput;
     private float elevation;
     private Quaternion cannonRestRotation;
+    private Transform aimReference;
     private readonly LayerMask obstacleMask = 1 << 6;
     private const float CollisionSkin = 0.05f;
+    private float classSpeedMultiplier = 1f;
+    private float ultimateSpeedMultiplier = 1f;
+
+    public float MovementSpeed => speed * classSpeedMultiplier * ultimateSpeedMultiplier;
+    public void SetClassSpeedMultiplier(float value) => classSpeedMultiplier = Mathf.Max(0.1f, value);
+    public void SetUltimateSpeedMultiplier(float value) => ultimateSpeedMultiplier = Mathf.Max(1f, value);
 
     private void Awake()
     {
@@ -42,6 +49,7 @@ public class Drive : MonoBehaviour
         if (cannon != null)
         {
             cannonRestRotation = cannon.localRotation;
+            aimReference = cannon;
             ResetAim();
         }
 
@@ -100,10 +108,7 @@ public class Drive : MonoBehaviour
         }
 
         elevation = Mathf.Clamp(elevation, minimumElevation, maximumElevation);
-        if (cannon != null)
-        {
-            cannon.localRotation = cannonRestRotation * Quaternion.Euler(-elevation, 0f, 0f);
-        }
+        ApplyAimPose();
 
         if (fireAction != null && fireAction.WasPressedThisFrame())
         {
@@ -121,6 +126,17 @@ public class Drive : MonoBehaviour
     public void ResetAim()
     {
         elevation = Mathf.Clamp(initialElevation, minimumElevation, maximumElevation);
+        ApplyAimPose();
+    }
+
+    private void LateUpdate()
+    {
+        // Cosmetic animation must not leave a different barrel pose after Update fired the shell.
+        ApplyAimPose();
+    }
+
+    private void ApplyAimPose()
+    {
         if (cannon != null)
         {
             cannon.localRotation = cannonRestRotation * Quaternion.Euler(-elevation, 0f, 0f);
@@ -131,12 +147,19 @@ public class Drive : MonoBehaviour
     {
         cannon = turret;
         bulletSpawn = muzzle;
-        cannonRestRotation = cannon.localRotation;
+        // Rebinding the same weapon must not capture an already pitched pose as its new neutral.
+        if (aimReference != cannon)
+        {
+            cannonRestRotation = cannon.localRotation;
+            aimReference = cannon;
+        }
         ResetAim();
     }
 
     private void FixedUpdate()
     {
+        // Steering is input-driven: impacts must not leave residual yaw spinning the tank.
+        body.angularVelocity = Vector3.zero;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
         {
             body.linearVelocity = Vector3.zero;
@@ -159,7 +182,7 @@ public class Drive : MonoBehaviour
             nextRotation = body.rotation;
         }
 
-        float requestedSpeed = moveInput.y * speed;
+        float requestedSpeed = moveInput.y * MovementSpeed;
         if (Mathf.Abs(requestedSpeed) < 0.001f)
         {
             body.linearVelocity = Vector3.zero;

@@ -37,6 +37,10 @@ public sealed class BattleSessionController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float countdownStepDuration = 1f;
     [SerializeField, Min(0.1f)] private float goDuration = 0.5f;
 
+    [Header("Suzuka ultimate feedback (cosmetic only)")]
+    [SerializeField] private GameObject ultimateWindPrefab;
+    [SerializeField, Min(.01f)] private float ultimateWindScale = .25f;
+
     private struct TankSpawn
     {
         public TankHealth Health;
@@ -99,6 +103,14 @@ public sealed class BattleSessionController : MonoBehaviour
     private string roundOutcome;
     private double activeTimeLimit;
     private int activeEliminationTarget;
+    private readonly TankUltimateState playerUltimate = new();
+    private VisualElement ultimateCard, ultimateIcon, ultimateMask;
+    private Label ultimatePlaceholder, ultimatePercentLabel, ultimateNameLabel, ultimateStatusLabel;
+    private VisualElement ultimateScreenEffect;
+    private GameObject ultimateWindInstance;
+    private ParticleSystem[] ultimateWindParticles;
+    private float ultimateVisualTime;
+    private PauseAudioSettings pauseAudioSettings;
 
     public bool IsRoundActive => roundActive;
     public bool IsBattlePaused { get; private set; }
@@ -149,6 +161,7 @@ public sealed class BattleSessionController : MonoBehaviour
         VisualElement menuRoot = menuDocument.rootVisualElement;
         mainMenu = menuRoot.Q<VisualElement>("MainMenu");
         hudRoot = hudDocument.rootVisualElement;
+        hudRoot.RegisterCallback<GeometryChangedEvent>(OnHudGeometryChanged);
         if (!hudRoot.styleSheets.Contains(hudStyle)) hudRoot.styleSheets.Add(hudStyle);
         hudRoot.pickingMode = PickingMode.Ignore;
 
@@ -173,6 +186,15 @@ public sealed class BattleSessionController : MonoBehaviour
         matchIntro = hudRoot.Q<VisualElement>("MatchIntro");
         matchFade = hudRoot.Q<VisualElement>("MatchFade");
         countdownLabel = hudRoot.Q<Label>("CountdownLabel");
+        ultimateCard = hudRoot.Q<VisualElement>("UltimateCard");
+        ultimateIcon = hudRoot.Q<VisualElement>("UltimateIcon");
+        ultimateMask = hudRoot.Q<VisualElement>("UltimateMask");
+        ultimatePlaceholder = hudRoot.Q<Label>("UltimatePlaceholder");
+        ultimatePercentLabel = hudRoot.Q<Label>("UltimatePercentLabel");
+        ultimateNameLabel = hudRoot.Q<Label>("UltimateNameLabel");
+        ultimateStatusLabel = hudRoot.Q<Label>("UltimateStatusLabel");
+        ultimateScreenEffect = hudRoot.Q<VisualElement>("UltimateScreenEffect");
+        pauseAudioSettings = new PauseAudioSettings(menuRoot, hudRoot);
         hudSortingOrder = hudDocument.sortingOrder;
         returnButton.clicked += ReturnToMenu;
         retrySaveButton.clicked += RetrySaveMatch;
@@ -250,6 +272,8 @@ public sealed class BattleSessionController : MonoBehaviour
             }
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
                 SetBattlePaused(!IsBattlePaused);
+            UpdatePlayerUltimate();
+            RefreshUltimateFeedback();
             RefreshHud();
         }
     }
@@ -308,6 +332,7 @@ public sealed class BattleSessionController : MonoBehaviour
                 }
             }
             pauseScreen.style.display = DisplayStyle.Flex;
+            pauseAudioSettings?.Refresh();
             hudRoot.pickingMode = PickingMode.Position;
             resumeButton?.Focus();
         }
@@ -322,6 +347,12 @@ public sealed class BattleSessionController : MonoBehaviour
         if (!IsBattlePaused) return;
         BattleAudioController.PlayButtonClick();
         SetBattlePaused(false);
+    }
+
+    private void OnHudGeometryChanged(GeometryChangedEvent change)
+    {
+        // Long save errors must not squeeze the character preview out of a small Game view.
+        hudRoot.EnableInClassList("battle-compact", change.newRect.height < 720f);
     }
 
     private void SuspendProjectile(Behaviour projectile)
@@ -381,6 +412,9 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void OnDestroy()
     {
+        pauseAudioSettings?.Dispose();
+        if (ultimateWindInstance != null) Destroy(ultimateWindInstance);
+        hudRoot?.UnregisterCallback<GeometryChangedEvent>(OnHudGeometryChanged);
         ClearBattlePause();
         if (characterSelection != null)
         {
@@ -413,6 +447,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void OnDisable()
     {
+        StopPlayerUltimate();
         ClearBattlePause();
         enemySpawner?.StopSpawning();
         StopRoundIntro();
@@ -452,35 +487,18 @@ public sealed class BattleSessionController : MonoBehaviour
         CharacterSelectionController.CharacterOption selected = characterSelection.GetCharacter(selectedIndex);
         playerAppearance.ApplyCharacter(selected.ModelPrefab, selected.DisplayName, selected.ClassDefinition);
 
-        // A larger cosmetic roster does not enlarge the scene's four gameplay actors.
-        // Shuffle eligible options, then assign only as many as the enemy pool can hold.
-        List<int> candidates = new();
-        for (int i = 0; i < characterSelection.CharacterCount; i++)
+        List<int> candidates = characterSelection.CreateEnemyRoster(selectedIndex, enemyAppearances.Length);
+        if (candidates.Count < enemyAppearances.Length)
         {
-            if (i == selectedIndex) continue;
-            CharacterSelectionController.CharacterOption option = characterSelection.GetCharacter(i);
-            if (option.ModelPrefab == null) continue;
-            candidates.Add(i);
-        }
-
-        if (candidates.Count == 0)
-        {
-            Debug.LogError("Character selection needs at least one unselected enemy model.", this);
+            Debug.LogError("Character selection needs four distinct enemy character families.", this);
             return;
-        }
-
-        for (int i = candidates.Count - 1; i > 0; i--)
-        {
-            int swapIndex = UnityEngine.Random.Range(0, i + 1);
-            (candidates[i], candidates[swapIndex]) = (candidates[swapIndex], candidates[i]);
         }
 
         for (int enemyIndex = 0; enemyIndex < enemyAppearances.Length; enemyIndex++)
         {
             if (enemyAppearances[enemyIndex] == null) continue;
-            // Smaller custom rosters may reuse an eligible enemy, never the player option.
             CharacterSelectionController.CharacterOption option =
-                characterSelection.GetCharacter(candidates[enemyIndex % candidates.Count]);
+                characterSelection.GetCharacter(candidates[enemyIndex]);
             enemyAppearances[enemyIndex].ApplyCharacter(option.ModelPrefab, option.DisplayName, option.ClassDefinition);
         }
     }
@@ -567,6 +585,8 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void PrepareRound()
     {
+        StopPlayerUltimate();
+        playerUltimate.Configure(playerAppearance != null ? playerAppearance.ClassDefinition : null);
         ClearBattlePause();
         ClearCombatObjects();
         activeTimeLimit = Math.Max(1, matchTimeLimitSeconds);
@@ -579,6 +599,7 @@ public sealed class BattleSessionController : MonoBehaviour
         {
             GameObject tank = spawn.Health.gameObject;
             tank.SetActive(false);
+            ApplySupportedClassAttributes(tank);
             spawn.Health.RestoreFullHealth();
             tank.transform.SetPositionAndRotation(spawn.Position, spawn.Rotation);
 
@@ -627,6 +648,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void StartCombat()
     {
+        playerUltimate.Configure(playerAppearance != null ? playerAppearance.ClassDefinition : null);
         BattleAudioController.PlayGameplayMusic();
         // Este é o início real da partida. O UUID identifica uma tentativa no MySQL;
         // seleção de personagem e contagem regressiva não entram na duração.
@@ -664,6 +686,7 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         GameManager.Instance.AddScore(pointsPerEnemy);
+        playerUltimate.AddElimination();
         enemiesKilled++;
         RefreshHud();
         if (enemiesKilled >= activeEliminationTarget)
@@ -694,6 +717,7 @@ public sealed class BattleSessionController : MonoBehaviour
         // Isso mantém os horários comparáveis sem alterar Time.timeScale.
         roundFinishedUtc = DateTime.UtcNow;
         roundOutcome = outcome;
+        StopPlayerUltimate();
         ClearBattlePause();
         enemySpawner?.StopSpawning();
         StopCombatDamage();
@@ -736,7 +760,7 @@ public sealed class BattleSessionController : MonoBehaviour
         hudRoot.pickingMode = PickingMode.Position;
         battleHud.style.display = DisplayStyle.None;
         defeatScreen.style.display = DisplayStyle.Flex;
-        characterSelection?.ShowResultPreview(selectedCharacterIndex, resultCharacterPreview);
+        characterSelection?.ShowResultPreview(selectedCharacterIndex, resultCharacterPreview, roundOutcome);
     }
 
     private void RetrySaveMatch()
@@ -778,6 +802,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void ReturnToMenu()
     {
+        StopPlayerUltimate();
         BattleAudioController.PlayButtonClick();
         roundActive = false;
         ClearBattlePause();
@@ -815,6 +840,115 @@ public sealed class BattleSessionController : MonoBehaviour
         int seconds = (int)Math.Ceiling(RemainingSeconds);
         timeLabel.text = $"{seconds / 60:00}:{seconds % 60:00}";
         eliminationLabel.text = $"{enemiesKilled} / {activeEliminationTarget}";
+        RefreshUltimateHud();
+    }
+
+    private static void ApplySupportedClassAttributes(GameObject tank)
+    {
+        CharacterClassDefinition definition = tank.GetComponent<TankAppearance>()?.ClassDefinition;
+        bool active = definition != null && definition.GameplayEnabled;
+        tank.GetComponent<TankHealth>()?.SetClassHealthMultiplier(active ? definition.HealthMultiplier : 1f);
+        tank.GetComponent<Drive>()?.SetClassSpeedMultiplier(active ? definition.MovementSpeedMultiplier : 1f);
+        tank.GetComponent<EnemyTankMovement>()?.SetClassSpeedMultiplier(active ? definition.MovementSpeedMultiplier : 1f);
+    }
+
+    private void UpdatePlayerUltimate()
+    {
+        if (!roundActive || IsStartingRound || IsBattlePaused || playerHealth.IsDead ||
+            PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        playerUltimate.Tick(Time.unscaledDeltaTime);
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null && (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.rightShiftKey.wasPressedThisFrame))
+            playerUltimate.TryActivate();
+        playerHealth.GetComponent<Drive>()?.SetUltimateSpeedMultiplier(playerUltimate.SpeedMultiplier);
+    }
+
+    private void StopPlayerUltimate()
+    {
+        playerUltimate.Reset();
+        StopUltimateFeedback();
+        if (playerHealth != null) playerHealth.GetComponent<Drive>()?.SetUltimateSpeedMultiplier(1f);
+    }
+
+    private void RefreshUltimateFeedback()
+    {
+        if (!roundActive || !playerUltimate.IsActive || playerHealth == null || playerHealth.IsDead)
+        {
+            StopUltimateFeedback();
+            return;
+        }
+
+        bool paused = IsBattlePaused || PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        if (!paused) ultimateVisualTime += Time.unscaledDeltaTime;
+        if (ultimateScreenEffect != null)
+        {
+            ultimateScreenEffect.style.display = DisplayStyle.Flex;
+            ultimateScreenEffect.style.opacity = .7f + .12f * Mathf.Sin(ultimateVisualTime * 3f);
+        }
+
+        if (ultimateWindInstance == null && ultimateWindPrefab != null)
+        {
+            ultimateWindInstance = Instantiate(ultimateWindPrefab, playerHealth.transform);
+            ultimateWindInstance.name = "Suzuka Ultimate Wind";
+            ultimateWindInstance.transform.SetLocalPositionAndRotation(new Vector3(0f, .7f, 0f), Quaternion.identity);
+            ultimateWindInstance.transform.localScale = Vector3.one * ultimateWindScale;
+            ultimateWindParticles = ultimateWindInstance.GetComponentsInChildren<ParticleSystem>(true);
+            foreach (ParticleSystem particles in ultimateWindParticles)
+            {
+                particles.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+                var main = particles.main;
+                main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+                main.maxParticles = Mathf.Min(main.maxParticles, 96);
+                main.startColor = new Color(.65f, .9f, 1f, .55f);
+                var collision = particles.collision;
+                collision.enabled = false; // A visual effect must never push a tank or block a projectile.
+            }
+            foreach (Collider collider in ultimateWindInstance.GetComponentsInChildren<Collider>(true)) collider.enabled = false;
+        }
+        if (ultimateWindInstance == null) return;
+        ultimateWindInstance.SetActive(true);
+        foreach (ParticleSystem particles in ultimateWindParticles)
+        {
+            if (paused && particles.isPlaying) particles.Pause(false);
+            else if (!paused && !particles.isPlaying) particles.Play(false);
+        }
+    }
+
+    private void StopUltimateFeedback()
+    {
+        ultimateVisualTime = 0f;
+        if (ultimateScreenEffect != null) ultimateScreenEffect.style.display = DisplayStyle.None;
+        if (ultimateWindInstance == null || !ultimateWindInstance.activeSelf) return;
+        foreach (ParticleSystem particles in ultimateWindParticles)
+        {
+            // Ending a paused round must not let ClearBattlePause restart this cosmetic effect.
+            pausedParticles.Remove(particles);
+            particles.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        ultimateWindInstance.SetActive(false);
+    }
+
+    private void RefreshUltimateHud()
+    {
+        if (ultimateCard == null) return;
+        CharacterClassDefinition definition = playerUltimate.Definition;
+        bool available = playerUltimate.IsEnabled;
+        ultimateNameLabel.text = definition != null ? definition.UltimateName : "Habilidade";
+        ultimateStatusLabel.text = !available ? "EM PREPARAÇÃO" : playerUltimate.IsActive
+            ? $"EM USO — {playerUltimate.RemainingDuration:F1} s" : playerUltimate.IsReady
+                ? "SHIFT — PRONTA" : "CARREGANDO";
+        ultimatePercentLabel.text = playerUltimate.IsActive ? $"{playerUltimate.RemainingDuration:F1}s" :
+            $"{Mathf.FloorToInt(playerUltimate.Charge)}%";
+        float fill = playerUltimate.IsActive && definition != null
+            ? playerUltimate.RemainingDuration / Mathf.Max(0.1f, definition.UltimateDurationSeconds)
+            : playerUltimate.Charge / 100f;
+        ultimateMask.style.height = new Length(100f * (1f - Mathf.Clamp01(fill)), LengthUnit.Percent);
+        Texture2D icon = definition != null ? definition.UltimateIcon : null;
+        ultimateIcon.style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
+        ultimatePlaceholder.style.display = icon != null ? DisplayStyle.None : DisplayStyle.Flex;
+        ultimateCard.EnableInClassList("ultimate-ready", playerUltimate.IsReady);
+        ultimateCard.EnableInClassList("ultimate-active", playerUltimate.IsActive);
+        ultimateCard.EnableInClassList("ultimate-unavailable", !available);
     }
 
     private static void StopCombatDamage()

@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Shared, read-only class design data, independent of models and per-tank state.
-/// These draft values do not modify combat until a gameplay consumer explicitly applies them.
+/// Only profiles marked gameplayEnabled are applied; other profiles remain visible design drafts.
 /// Never store current HP, ultimate charge or cooldown on this shared asset.
 /// </summary>
 [CreateAssetMenu(fileName = "CharacterClass", menuName = "UmaTank/Character Class")]
@@ -21,7 +21,11 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [SerializeField] private string className;
     [SerializeField, TextArea(2, 3)] private string description;
 
-    [Header("Draft base attributes (not applied yet)")]
+    [Header("Implementation status")]
+    [Tooltip("Enable only after the class has been implemented and tested. Currently used by Suzuka.")]
+    [SerializeField] private bool gameplayEnabled;
+
+    [Header("Base attributes (applied only for enabled classes)")]
     [Tooltip("1 means the actor's existing base value. Player and AI keep their separate base speeds.")]
     [SerializeField, Min(0.1f)] private float healthMultiplier = 1f;
     [SerializeField, Min(0.1f)] private float movementSpeedMultiplier = 1f;
@@ -29,15 +33,15 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [Tooltip("Higher values mean a longer interval, not a higher firing rate.")]
     [SerializeField, Min(0.1f)] private float shotIntervalMultiplier = 1f;
 
-    [Header("Planned passive")]
+    [Header("Passive design")]
     [SerializeField] private string passiveName;
     [SerializeField, TextArea(2, 3)] private string passiveDescription;
 
-    [Header("Planned ultimate")]
+    [Header("Ultimate design")]
     [SerializeField] private string ultimateName;
     [SerializeField, TextArea(2, 3)] private string ultimateDescription;
     [SerializeField] private UltimateEffect ultimateEffect;
-    [Tooltip("Reserved for the future HUD icon; may remain empty during class setup.")]
+    [Tooltip("Optional HUD icon. An empty field uses the authored ULT placeholder.")]
     [SerializeField] private Texture2D ultimateIcon;
     [SerializeField, Min(0.1f)] private float ultimateDurationSeconds = 4f;
     [SerializeField, Min(1f)] private float ultimateSpeedMultiplier = 1.5f;
@@ -52,6 +56,7 @@ public sealed class CharacterClassDefinition : ScriptableObject
     [SerializeField, Range(0f, 100f)] private float chargePerElimination = 15f;
 
     public string ClassName => className;
+    public bool GameplayEnabled => gameplayEnabled;
     public string Description => description;
     public float HealthMultiplier => healthMultiplier;
     public float MovementSpeedMultiplier => movementSpeedMultiplier;

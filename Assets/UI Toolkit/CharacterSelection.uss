@@ -133,6 +133,16 @@
     white-space: normal;
     margin-top: 4px;
 }
+.stat-grid { flex-direction: row; flex-wrap: wrap; margin-bottom: 6px; }
+.stat-row { width: 50%; min-width: 245px; flex-grow: 1; flex-direction: row; align-items: center; margin-top: 4px; }
+.stat-name { width: 118px; color: var(--color-text); font-size: 15px; }
+.stat-stars { flex-direction: row; }
+.stat-star {
+    width: 23px; height: 23px; margin-right: 2px;
+    background-image: url("Icons/Kenney/star_empty.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+.stat-star-filled { background-image: url("Icons/Kenney/star_filled.png"); }
 .selection-button {
     width: 270px;
     height: 58px;

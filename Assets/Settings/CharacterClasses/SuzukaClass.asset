@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: SuzukaClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
   className: "Velocidade"
+  gameplayEnabled: 1
   description: "Mobilidade para escapar e procurar boas posições de ataque."
   healthMultiplier: 0.85
   movementSpeedMultiplier: 1.15
@@ -21,10 +22,10 @@ MonoBehaviour:
   passiveName: "Sempre à frente"
   passiveDescription: "Maior velocidade de movimento, com menos vida máxima."
   ultimateName: "A vista da liderança"
-  ultimateDescription: "Aumenta bastante a velocidade por alguns segundos, sem dano de atropelamento."
+  ultimateDescription: "Aumenta a velocidade por 8 segundos, sem dano de atropelamento."
   ultimateEffect: 0
   ultimateIcon: {fileID: 0}
-  ultimateDurationSeconds: 4
+  ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.5
   ultimateHealFraction: 0
   ultimateDamageReduction: 0
