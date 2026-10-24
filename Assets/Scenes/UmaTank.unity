@@ -25016,6 +25016,70 @@ MonoBehaviour:
     ModelPrefab: {fileID: 6751020389872671593, guid: 47325454db6ec1b40b7c7be0ab7aac15,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Agemasen
+    ModelPrefab: {fileID: 3097888121602204344, guid: 27733ca1fbf029149890502156a4591c,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Agnes
+    ModelPrefab: {fileID: 8081286497218204957, guid: de6ed436fbcbae64b9c9641785017704,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Bourbono
+    ModelPrefab: {fileID: 3973664798045723056, guid: e32368eb7b60cdd408c4860a5f23a04f,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Creek Shinobe
+    ModelPrefab: {fileID: 2872959291122205291, guid: 29ce4e8f83571684980d1a2839e01ab8,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Daitaku
+    ModelPrefab: {fileID: 1878853220203916390, guid: 35e46b8d495ac724a8c57a3348f548f5,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Daiwa
+    ModelPrefab: {fileID: 2936163323007611840, guid: 44e7ec34fc3a0eb468d3d9a704ec62d1,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Doto Halloween
+    ModelPrefab: {fileID: 1337084418680203417, guid: 707ae554475e16743b73a554b4921f9f,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Mayano
+    ModelPrefab: {fileID: 4215146397453932353, guid: cd4dbe72e844d1e47800e50668e5305f,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Muteki
+    ModelPrefab: {fileID: 3671126154024635928, guid: 449d711f692d0964c8b49cc612d34262,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Oguri
+    ModelPrefab: {fileID: 6869817442786054886, guid: 904d1b47e00fb9949a3bb3d559348df3,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Opera
+    ModelPrefab: {fileID: 7043905366006555078, guid: b273e83fa605bb442a7fc20b4a499061,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Sakura
+    ModelPrefab: {fileID: 500057644304070192, guid: 828308dc8e25c1d429d75695c24df06b,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Tamano
+    ModelPrefab: {fileID: 4111524923173423666, guid: a00ed4cd53c0e7e459e11e6d41493c4d,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Tokai
+    ModelPrefab: {fileID: 1659283777834196039, guid: 4387c28275a6296409680be7e21e2dc4,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Tosho
+    ModelPrefab: {fileID: 8622476531507434479, guid: 44b52c92b32a3cd4586e9787a826d2a6,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Vodka
+    ModelPrefab: {fileID: 980334741786948687, guid: 81e50576b9167db419c9b587685edc03,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
   previewRoot: {fileID: 1697967075}
   previewCamera: {fileID: 1704461938}
   rotationSpeed: 15
