@@ -25080,6 +25080,22 @@ MonoBehaviour:
     ModelPrefab: {fileID: 980334741786948687, guid: 81e50576b9167db419c9b587685edc03,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Cafe
+    ModelPrefab: {fileID: 3056736648317201363, guid: c8a86c6bd6583034c87ef538d070165c,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Bono
+    ModelPrefab: {fileID: 1441822565134976600, guid: af0c266b109f6de4ea7c0375e2e73d38,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Goldship
+    ModelPrefab: {fileID: 6586737852537089965, guid: 5b5bc9b0c5fa2fd4e905577aaeb19f7f,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
+  - DisplayName: Xen
+    ModelPrefab: {fileID: 1965166538356402677, guid: b1807e9b7fcc22c448fcd08a48fc3fef,
+      type: 3}
+    VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b5, type: 3}
   previewRoot: {fileID: 1697967075}
   previewCamera: {fileID: 1704461938}
   rotationSpeed: 15
