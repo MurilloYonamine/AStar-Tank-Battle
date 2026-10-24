@@ -15,7 +15,7 @@ public sealed class BattleAudioController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float gameplayMusicVolume = 1f;
 
     [Header("Defeat music")]
-    [Tooltip("Optional loop for the defeat result screen. An empty field leaves defeat without music.")]
+    [Tooltip("Optional track played once on the defeat result screen. An empty field leaves defeat without music.")]
     [SerializeField] private AudioClip defeatMusicClip;
     [SerializeField, Range(0f, 1f)] private float defeatMusicVolume = 0.5f;
 
@@ -81,13 +81,13 @@ public sealed class BattleAudioController : MonoBehaviour
         if (AudioManager.Instance != null) AudioManager.Instance.StopMusic();
     }
 
-    private static void PlayMusic(AudioClip clip, float volume)
+    private static void PlayMusic(AudioClip clip, float volume, bool loop = true)
     {
         AudioManager audio = AudioManager.Instance;
         if (audio == null) return;
         if (instance != null && instance.musicSource != null) instance.musicSource.volume = volume;
         // Reuse Murilo's single music source and mixer; missing clips must not leave an old loop playing.
-        if (clip != null) audio.PlayMusic(clip, true);
+        if (clip != null) audio.PlayMusic(clip, loop);
         else audio.StopMusic();
     }
 
@@ -154,7 +154,7 @@ public sealed class BattleAudioController : MonoBehaviour
         if (outcome == "derrota")
         {
             PlayMusic(instance != null ? instance.defeatMusicClip : null,
-                instance != null ? instance.defeatMusicVolume : 1f);
+                instance != null ? instance.defeatMusicVolume : 1f, false);
             return;
         }
         PlayCue(instance != null ? instance.resultClip : null);
