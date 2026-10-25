@@ -171,8 +171,10 @@
  * JP's later additions: Assets/Skills (59 supplied PNG icons), 18 additional clips
  * in Assets/Audio/Voices and Assets/Audio/Music/sad_game_over.wav. Character media
  * origin/ownership is credited above as confirmed by the group. The separate defeat
- * track's original source/author/license are still pending; do not assume that this
- * music belongs to Cygames merely because it accompanies the characters.
+ * track was modified/edited by João Pedro Ribeiro Vivas (JP), as the group confirmed.
+ * This credits the modification, not an underlying original composition. Any underlying
+ * source/composer/license still needs confirmation; do not attribute the track to Cygames
+ * merely because it accompanies the characters.
  * Kenney UI Pack stars (CC0): https://kenney.nl/assets/ui-pack
  * Fantasy Skybox FREE / Render Knight:
  * https://assetstore.unity.com/packages/package/18353 (local Readme retained).

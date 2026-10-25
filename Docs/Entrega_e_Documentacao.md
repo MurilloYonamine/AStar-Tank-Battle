@@ -18,11 +18,11 @@ A documentação exigida na Atividade 2 está dentro dos scripts da Unity, não 
 
 - Commits `a85d5f2` e `dde65bd`: 18 arquivos adicionais de voz, 59 ícones PNG e a música `sad_game_over.wav`.
 - As vozes já escolhidas pelo JP foram mantidas nas 25 entradas da seleção; os arquivos alternativos também foram preservados.
-- A música de derrota foi ligada ao campo existente, mantendo reprodução única, volumes e mixer do Murillo.
+- A música de derrota foi modificada/editada pelo João Pedro (JP), conforme confirmado pelo grupo, e ligada ao campo existente, mantendo reprodução única, volumes e mixer do Murillo.
 - Os ícones escolhidos pelo JP foram mantidos nos 22 perfis anteriores. As três variantes novas também receberam arte: Doto Halloween, Creek Shinobi e Yaeno Xen.
-- Os perfabs `AgemasenTank` e `BonoTank` passaram a `SpecialWeekTank` e `AkebonoTank`, como renomeados pelo JP, sem mudar seus GUIDs ou perder referências.
+- Os prefabs `AgemasenTank` e `BonoTank` passaram a `SpecialWeekTank` e `AkebonoTank`, como renomeados pelo JP, sem mudar seus GUIDs ou perder referências.
 - Os conflitos foram resolvidos mantendo as habilidades e os números das skins. Continuam 25 opções, 25 perfis e 22 famílias; outra skin da personagem escolhida não vira inimiga.
-- Mapa, árvores, obstáculos, patrulha, spawn, lógica de combate, sistema PHP e SQL do grupo foram preservados. A integração ocorre apenas em `feat/murilotanquefeliz2`; a `modelsPlus` não é alterada.
+- Mapa, árvores, obstáculos, patrulha, spawn, lógica de combate, sistema PHP e SQL do grupo foram preservados. A integração foi preparada e validada em `feat/murilotanquefeliz2` para envio à `main`; a `modelsPlus` não é alterada.
 
 ## Arquivos que compõem a entrega
 
@@ -36,7 +36,7 @@ A URL da Unity é configurada em `DataManager.URL_BASE`. As instruções complet
 
 Conforme informado pelo grupo, as falas, imagens das personagens e ícones de habilidades vieram de **Umamusume: Pretty Derby**, da **Cygames**. Todos os direitos dos materiais originais são atribuídos à Cygames; o grupo não reivindica autoria deles. Essa origem está registrada nos comentários e nos arquivos de créditos.
 
-Isso não substitui as condições de uso dos titulares nem a identificação dos extratores/disponibilizadores dos modelos 3D. A música `sad_game_over.wav` é um material separado: sua fonte, compositor e licença ainda precisam ser informados. Também permanecem as incertezas de uso já registradas para músicas recortadas de vídeos e outros áudios, além das fontes de modelos/animações/cenário/fonte onde ainda não fornecidas.
+Isso não substitui as condições de uso dos titulares nem a identificação dos extratores/disponibilizadores dos modelos 3D. A música `sad_game_over.wav` é um material separado: a modificação/edição é creditada ao **João Pedro Ribeiro Vivas (JP)**, conforme informado pelo grupo. Esse crédito não atribui automaticamente a ele a composição original; a fonte/compositor de uma obra anterior e suas condições de uso, se aplicáveis, continuam a confirmar. Também permanecem as incertezas de uso já registradas para músicas recortadas de vídeos e outros áudios, além das fontes de modelos/animações/cenário/fonte onde ainda não fornecidas.
 
 Conforme esclarecido pelo grupo, os modelos 3D foram **extraídos do jogo original Umamusume: Pretty Derby**, da **Cygames**, e disponibilizados por fãs no **Sketchfab para uso de fãs**. Portanto, não são apresentados como modelagens originais feitas pelos disponibilizadores: os direitos dos modelos originais são atribuídos à Cygames. Os cinco links já fornecidos estão no comentário principal; as páginas e os extratores/disponibilizadores dos modelos posteriores ainda precisam ser informados. A disponibilidade para fãs é registrada como informação do grupo, sem afirmar que uma licença específica ou uma autorização irrestrita de uso tenha sido verificada.
 
