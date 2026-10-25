@@ -125,13 +125,19 @@
  *
  * CONTRIBUTIONS, REUSE AND GENERATIVE-AI ASSISTANCE
  * Hugo: original basic enemy behavior/state organization, earlier A* reuse and
- * gameplay integration, HUD/API connections, sound-clip integration and extensions.
- * Murillo: original menu, authentication/backend/persistence and audio infrastructure.
+ * gameplay integration; manual HUD/ranking work connected to Murillo's existing
+ * backend APIs; sound-clip integration. Classes/Unique Skills and aiming/firing
+ * refinements were developed with generative-AI assistance.
+ * Murillo: original menu, authentication/backend/persistence and audio infrastructure,
+ * developed without generative-AI assistance, as reported by the group. Subsequent
+ * AI-assisted integrations/adaptations are credited separately below.
  * João Pedro: imported character/environment assets, map and animation preparation.
  * OpenAI ChatGPT/Codex assisted development/documentation: planning and stuck points,
  * Input System migration, rotating character previews, fade/countdown/audio sync,
  * collision/replanning and blocked-shot recovery, spawn planning, class/Unique Skill
- * extensions, HUD/results/time-ranking integration and validation support.
+ * and aiming/firing extensions, documentation and validation support. AI also assisted
+ * later HUD/results/time-ranking adjustments; this is separate from the original
+ * manual implementation and does not replace the group's authorship of that work.
  * Generative coding assistance is distinct from the game's enemy AI; the group's
  * responsibility is to review, understand and test the delivered code. No generated
  * image assets were requested for this project; supplied art is used instead.
