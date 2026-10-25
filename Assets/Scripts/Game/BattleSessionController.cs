@@ -46,7 +46,8 @@
  * ORGANIZATION AND MAIN DECISIONS
  * BattleSessionController: intro, active clock, objectives, HUD, pause and result.
  * CharacterSelectionController / TankAppearance: authored UI and replaceable visual
- * models on stable gameplay actors; skins of one character share its class.
+ * models on stable gameplay actors; costumes may bind distinct class/skill profiles,
+ * while a stable character-family ID still excludes all player skins from enemy selection.
  * CharacterClassDefinition: shared read-only design assets. TankHealth and
  * TankUltimateState: per-actor HP, buffs and per-match skill charge, not asset state.
  * TankGrid / GridNode / AStarPathfinder: our orthogonal navigation graph and A*.

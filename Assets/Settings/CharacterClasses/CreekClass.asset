@@ -12,23 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: CreekClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Resistência"
+  className: "Bandagens protetoras"
   gameplayEnabled: 1
-  description: "Mais resistência para sobreviver, em troca de mobilidade."
+  description: "A Creek Múmia usa suas bandagens para sobreviver e se recuperar. Mais vida máxima, em troca de mobilidade."
   healthMultiplier: 1.25
   movementSpeedMultiplier: 0.85
   shotDamageMultiplier: 1
   shotIntervalMultiplier: 1
   passiveName: "Coração acolhedor"
   passiveDescription: "Mais vida máxima e velocidade de movimento reduzida."
-  ultimateName: "Coração puro"
-  ultimateDescription: "Recupera parte da vida ao longo de alguns segundos."
+  ultimateName: "Abraço da múmia"
+  ultimateDescription: "Recupera 25% da vida máxima ao longo de 6 segundos e recebe 15% menos dano enquanto a habilidade está ativa."
   ultimateEffect: 1
   ultimateIcon: {fileID: 0}
   ultimateDurationSeconds: 6
   ultimateSpeedMultiplier: 1
   ultimateHealFraction: 0.25
-  ultimateDamageReduction: 0
+  ultimateDamageReduction: 0.15
   ultimateShotIntervalMultiplier: 1
   ultimateShotDamageMultiplier: 1
   ultimateExplosionRadiusMultiplier: 1

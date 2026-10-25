@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 /// Shows character families, skins and class availability in an isolated rotating 3D preview.
 /// The existing name/menu/backend flow is retained by BattleSessionController.
 /// CharacterId is the stable gameplay family, separate from display name and prefab nickname;
-/// skins share a class and the enemy roster excludes the whole selected family.
+/// skins may have distinct class profiles, but the enemy roster excludes the whole selected family.
 /// UI structure/styles are authored in UXML/USS; disposable model/RenderTexture previews are
 /// created at runtime without colliders. VoiceClip supplies selection and optional kill feedback.
 /// </summary>

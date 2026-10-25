@@ -25058,7 +25058,7 @@ MonoBehaviour:
     ModelPrefab: {fileID: 2872959291122205291, guid: 29ce4e8f83571684980d1a2839e01ab8,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b2, type: 3}
-    ClassDefinition: {fileID: 11400000, guid: 5aaf1b2bed1faa99580dc38299189893, type: 2}
+    ClassDefinition: {fileID: 11400000, guid: d1a101f2b0794ac0b4c1caa1c20affba, type: 2}
   - DisplayName: Daitaku Helios
     CharacterId: daitaku-helios
     ClassDefinition: {fileID: 11400000, guid: 25a5a8d6e9fead0aa209b79365ec340c, type: 2}
@@ -25079,7 +25079,7 @@ MonoBehaviour:
     ModelPrefab: {fileID: 1337084418680203417, guid: 707ae554475e16743b73a554b4921f9f,
       type: 3}
     VoiceClip: {fileID: 8300000, guid: 65238ec9f322411292bf01f8946f73b1, type: 3}
-    ClassDefinition: {fileID: 11400000, guid: 6412334d691e2e379a66dfb1e7712589, type: 2}
+    ClassDefinition: {fileID: 11400000, guid: 0a86ab67babe4f84b98e7901fb5d0329, type: 2}
   - DisplayName: Mayano Top Gun
     CharacterId: mayano-top-gun
     ClassDefinition: {fileID: 11400000, guid: 62280bea99de6533d1129d213fc17181, type: 2}
@@ -25167,7 +25167,7 @@ MonoBehaviour:
   - DisplayName: Yaeno Muteki
     CharacterId: yaeno-muteki
     AppearanceName: "Xen"
-    ClassDefinition: {fileID: 11400000, guid: 798ee8ea2dd6dc688e2950236582dbe2, type: 2}
+    ClassDefinition: {fileID: 11400000, guid: d83397b06b074578891c19126746b7e2, type: 2}
     ModelPrefab: {fileID: 1965166538356402677, guid: b1807e9b7fcc22c448fcd08a48fc3fef,
       type: 3}
     VoiceClip: {fileID: 0}

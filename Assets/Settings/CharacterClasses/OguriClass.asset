@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: OguriClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Fôlego"
-  description: "Classe de fôlego para o UmaTank. Mais vida máxima, com velocidade e cadência reduzidas."
+  className: "Banquete de Natal"
+  description: "A Oguri de Natal guarda uma reserva para se recuperar e avançar. Mais vida máxima, com velocidade e cadência reduzidas."
   gameplayEnabled: 1
   healthMultiplier: 1.15
   movementSpeedMultiplier: 0.95
@@ -23,15 +23,15 @@ MonoBehaviour:
   passiveDescription: "Mais vida máxima, com velocidade e cadência reduzidas."
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Última porção"
-  ultimateDescription: "Recupera 25% da vida ao ativar, ganha 15% de velocidade. Efeito temporário de 8 segundos."
+  ultimateName: "Milagre da noite santa"
+  ultimateDescription: "Recupera 25% da vida máxima ao ativar, ganha 20% de velocidade e reduz em 10% o intervalo de tiro por 8 segundos."
   ultimateEffect: 3
   ultimateIcon: {fileID: 0}
   ultimateDurationSeconds: 8
-  ultimateSpeedMultiplier: 1.15
+  ultimateSpeedMultiplier: 1.2
   ultimateHealFraction: 0.25
   ultimateDamageReduction: 0
-  ultimateShotIntervalMultiplier: 1
+  ultimateShotIntervalMultiplier: 0.9
   ultimateShotDamageMultiplier: 1
   ultimateExplosionRadiusMultiplier: 1
   chargePerSecond: 2

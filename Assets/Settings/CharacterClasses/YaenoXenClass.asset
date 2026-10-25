@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
+  m_Name: YaenoXenClass
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
+  className: "Impacto"
+  description: "A aparência Xen da Yaeno concentra sua força em um disparo especial, em vez da postura defensiva da versão principal."
+  gameplayEnabled: 1
+  healthMultiplier: 1.05
+  movementSpeedMultiplier: 1
+  shotDamageMultiplier: 1.15
+  shotIntervalMultiplier: 1.15
+  passiveName: "Carga experimental"
+  passiveDescription: "Mais vida e dano por tiro, em troca de um intervalo maior entre disparos."
+  lowHealthThreshold: 0
+  lowHealthShotIntervalMultiplier: 1
+  ultimateName: "Impacto Xen"
+  ultimateDescription: "O próximo tiro em até 8 segundos causa 60% mais dano e tem 50% mais raio de explosão. É consumido mesmo se errar ou atingir um obstáculo."
+  ultimateEffect: 4
+  ultimateIcon: {fileID: 0}
+  ultimateDurationSeconds: 8
+  ultimateSpeedMultiplier: 1
+  ultimateHealFraction: 0
+  ultimateDamageReduction: 0
+  ultimateShotIntervalMultiplier: 1
+  ultimateShotDamageMultiplier: 1.6
+  ultimateExplosionRadiusMultiplier: 1.5
+  chargePerSecond: 2
+  chargePerElimination: 15

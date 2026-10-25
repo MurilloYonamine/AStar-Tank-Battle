@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: GoldShipClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Caos"
-  description: "Classe de caos para o UmaTank. Mais vida e dano por tiro, com velocidade e cadência menores."
+  className: "Artilharia caótica"
+  description: "A Gold Ship com bazuca concentra o caos em explosões maiores. Mais vida e dano por tiro, com velocidade e cadência menores."
   gameplayEnabled: 1
   healthMultiplier: 1.1
   movementSpeedMultiplier: 0.9
@@ -23,7 +23,7 @@ MonoBehaviour:
   passiveDescription: "Mais vida e dano por tiro, com velocidade e cadência menores."
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Surpresa de bordo"
+  ultimateName: "Surpresa de bazuca"
   ultimateDescription: "causa 70% mais dano, aumenta em 100% o raio da explosão. Vale apenas para o próximo tiro em até 10 segundos, mesmo se ele errar ou atingir um obstáculo."
   ultimateEffect: 4
   ultimateIcon: {fileID: 0}
