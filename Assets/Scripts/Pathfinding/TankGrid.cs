@@ -4,6 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Builds the logical grid used by enemy tanks and marks blocked cells with
 /// Physics.CheckBox. The grid uses only four orthogonal neighbours.
+/// Static obstacle layers determine walkability, while per-search moving hulls are handled
+/// by EnemyTankMovement. No NavMesh or third-party navigation implementation is used.
 /// </summary>
 [DefaultExecutionOrder(-1000)]
 public sealed class TankGrid : MonoBehaviour
@@ -60,6 +62,11 @@ public sealed class TankGrid : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Samples current obstacle colliders and rebuilds cell centers and orthogonal links.
+    /// Run after changing the map/grid setup; a tag without the configured layer/collider
+    /// does not block a cell. Hull clearance inflates checks so point-valid routes also fit tanks.
+    /// </summary>
     [ContextMenu("Rebuild Grid")]
     public void BuildGrid()
     {

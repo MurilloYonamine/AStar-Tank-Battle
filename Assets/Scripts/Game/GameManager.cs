@@ -4,6 +4,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Murillo's persistent account/menu bridge and original account-points API.
+/// UmaTank retains StartGame/PlayerData/DataManager but BattleSessionController owns the
+/// timed match and disables this legacy Update (Escape -> EndGame/quit). Current match
+/// persistence must not call EndGame, which updates an account instead of inserting an attempt.
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -63,8 +69,8 @@ public class GameManager : MonoBehaviour
 
     public void EndGame()
     {
-        // Fluxo legado de pontos por jogador. A batalha atual salva cada derrota
-        // separadamente por DataManager.SaveMatch, sem chamar este método.
+        // Legacy account-point flow only. The current battle saves each completed attempt
+        // (victory, loss or draw) through DataManager.SaveMatch without calling this method.
         Debug.Log("Fim de jogo. Pontuação final: " + PlayerData.pontos);
 
         if (PlayerData.id > 0)

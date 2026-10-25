@@ -3,6 +3,11 @@
 
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Binds Murillo's authored registration/login UI to DataManager's asynchronous API.
+/// Local validation is feedback only: PHP must approve credentials/token before StartGame.
+/// No guest bypass is exposed; failed/cancelled requests leave the player outside gameplay.
+/// </summary>
 public class AuthMenu : IMenu
 {
     private VisualElement _playScreen;

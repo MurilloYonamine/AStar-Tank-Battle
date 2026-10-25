@@ -8,9 +8,12 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 /// <summary>
-/// Comunica a Unity com o middleware PHP por UnityWebRequest e interpreta respostas JSON.
-/// A Unity nunca acessa o MySQL diretamente: index.php -> Controller -> Model -> banco.
-/// URL_BASE aponta para o XAMPP local; ao mudar de servidor, configure o endereço aqui.
+/// Unity's HTTP/JSON adapter for Murillo's PHP middleware, not a MySQL client.
+/// Requests reach index.php -> Controller (validation/auth) -> Model -> PDO/MySQL.
+/// Configure URL_BASE for the installation; localhost refers to the machine running the game.
+/// Current login/registration/match/ranking flows require valid server responses; legacy player
+/// list/account-point methods remain for compatibility, not as proof that a match was saved.
+/// Setup, collected data, retention and project attribution are in BattleSessionController's header.
 /// </summary>
 public class DataManager : MonoBehaviour
 {
@@ -22,8 +25,8 @@ public class DataManager : MonoBehaviour
     private const string URL_MATCH = URL_BASE + "/?action=api_salvar_partida";
     private const string URL_RANKING = URL_BASE + "/?action=api_ranking_partidas";
 
-    // Como no exemplo da aula, a Unity cria o token no login e o PHP o associa ao jogador
-    // por um dia. Guardamos o token só em memória para enviá-lo nas rotas protegidas.
+    // Following the class example, Unity proposes a new token during login; PHP associates it
+    // with the verified player for one day. This client keeps the token in memory only.
     public string Token { get; private set; }
     private int _loginRequestId;
 
@@ -82,6 +85,8 @@ public class DataManager : MonoBehaviour
     /// <summary>
     /// Optional partida_uuid requests a comparison excluding this saved match, without changing
     /// the save API or database. Missing comparison data never authorizes a new-record announcement.
+    /// Response adds comparacao_recorde_disponivel and recorde_anterior_segundos when supported;
+    /// a read failure is returned to the UI and never changes a successfully saved match.
     /// </summary>
     public void LoadMatchRanking(int playerId, string matchId, Action<RankingResponse, string> completed)
     {
@@ -126,10 +131,12 @@ public class DataManager : MonoBehaviour
     }
 
     /// <summary>
-    /// POST api_salvar_partida: jogador_id, token, partida_uuid, inicio_utc, fim_utc,
-    /// duracao_segundos, resultado, pontuacao e inimigos_eliminados. A API responde
-    /// {success, partida_id, repetida} ou {error}. Result is vitoria, derrota or empate.
-    /// O mesmo matchId é reutilizado ao tentar novamente para não criar outra linha.
+    /// POST api_salvar_partida sends jogador_id/token, partida_uuid, inicio_utc/fim_utc,
+    /// duracao_segundos, resultado, pontuacao and inimigos_eliminados as form fields.
+    /// Outcome is vitoria, derrota or empate; duration is numeric active seconds (F3), not points.
+    /// Receives {success, partida_id, repetida} or {error}. A successful HTTP response plus
+    /// success=true and a positive partida_id are required; malformed JSON/HTTP errors/timeouts
+    /// call completed(false, error). Retry the SAME matchId/snapshot to avoid a duplicate attempt.
     /// </summary>
     public void SaveMatch(int playerId, string matchId, DateTime startedUtc, DateTime finishedUtc,
         double durationSeconds, string outcome, int score, int enemiesKilled, Action<bool, string> completed)
@@ -151,8 +158,8 @@ public class DataManager : MonoBehaviour
         form.AddField("jogador_id", playerId);
         form.AddField("token", Token);
         form.AddField("partida_uuid", matchId);
-        // O PHP espera datas UTC nesse formato e a duração numérica em segundos.
-        // Ela pode ser menor que fim - início porque a pausa não entra na duração.
+        // The PHP contract uses UTC strings and invariant numeric seconds, independent of locale.
+        // Active duration may be less than end-start because wall-clock timestamps include pauses.
         form.AddField("inicio_utc", startedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         form.AddField("fim_utc", finishedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         form.AddField("duracao_segundos", durationSeconds.ToString("F3", CultureInfo.InvariantCulture));
@@ -169,7 +176,7 @@ public class DataManager : MonoBehaviour
             if (!string.IsNullOrEmpty(www.downloadHandler.text))
             {
                 try { response = JsonUtility.FromJson<MatchResponse>(www.downloadHandler.text); }
-                catch (ArgumentException) { /* Resposta inesperada nao confirma salvamento. */ }
+                catch (ArgumentException) { /* An unexpected response cannot confirm persistence. */ }
             }
 
             if (www.result == UnityWebRequest.Result.Success && response != null &&
@@ -179,14 +186,14 @@ public class DataManager : MonoBehaviour
                 yield break;
             }
 
-            // Falha HTTP, timeout ou JSON inesperado não autorizam confirmar o salvamento.
+            // HTTP failure, timeout or unexpected JSON cannot authorize a save confirmation.
             string error = "Não foi possível salvar a partida. Verifique a conexão e tente novamente.";
             if (response != null && !string.IsNullOrEmpty(response.error)) error = response.error;
             completed(false, error);
         }
     }
 
-    public string jsonData; // vai receber os dados no formato JSON
+    public string jsonData; // Raw legacy player-list JSON, not a match/ranking response.
 
     public delegate void OnDataLoaded(string jsonData);
     public static event OnDataLoaded onDataLoaded;
@@ -197,9 +204,10 @@ public class DataManager : MonoBehaviour
     }
 
     /// <summary>
-    /// POST api_login: email/password/token -> {id,name,email} ou {error}.
-    /// Somente o PHP confere a senha; a resposta não contém senha nem devolve o token.
-    /// O menu só libera o gameplay após receber o jogador autenticado.
+    /// POST api_login: email/password/new token -> {id,name,email} or {error}.
+    /// PHP verifies the stored password hash; the response contains neither password nor token.
+    /// Only a valid account response associates the proposed token locally and releases gameplay.
+    /// Invalid credentials, HTTP failure and malformed JSON return a null player plus an error.
     /// </summary>
     public void Login(string email, string password, Action<PlayerData, string> completed)
     {
@@ -207,6 +215,7 @@ public class DataManager : MonoBehaviour
         StartCoroutine(LoginRequest(email, password, completed, _loginRequestId));
     }
 
+    /// <summary>Clears client authentication and makes any in-flight login response obsolete.</summary>
     public void CancelLogin()
     {
         _loginRequestId++;
@@ -224,14 +233,14 @@ public class DataManager : MonoBehaviour
         using (UnityWebRequest www = UnityWebRequest.Post(URL_LOGIN, form))
         {
             yield return www.SendWebRequest();
-            // Ignora resposta atrasada se o usuário cancelou ou iniciou outro login.
+            // Cancellation/new login must not be undone by an older asynchronous response.
             if (requestId != _loginRequestId) yield break;
 
             AuthResponse response = null;
             if (!string.IsNullOrEmpty(www.downloadHandler.text))
             {
                 try { response = JsonUtility.FromJson<AuthResponse>(www.downloadHandler.text); }
-                catch (ArgumentException) { /* Uma resposta inválida não autentica o jogador. */ }
+                catch (ArgumentException) { /* Invalid JSON cannot authenticate an account. */ }
             }
 
             bool requestFailed = www.result != UnityWebRequest.Result.Success;
@@ -258,17 +267,31 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Registers an account via api_inserir, not a match. Sends name/email/password/pontos;
+    /// PHP hashes the password and returns {success:true} or {error}. The current menu sends
+    /// zero legacy points and waits for the callback before confirming registration.
+    /// </summary>
     public void SaveData(string playerName, string email, string password, int score, Action<bool, string> completed = null)
     {
         StartCoroutine(InsertNewData(playerName, email, password, score, completed));
     }
 
+    /// <summary>
+    /// Compatibility account-point update (api_atualizar), not the timed-match persistence path.
+    /// BattleSessionController uses SaveMatch for every completed outcome instead.
+    /// </summary>
     public void UpdatePlayerData(int id, string playerName, string email, string password, int score)
     {
         StartCoroutine(UpdateData(id, playerName, email, password, score));
     }
 
 
+    /// <summary>
+    /// Requests api_listar with an empty POST and forwards its raw JSON player array through
+    /// onDataLoaded. This public legacy account list neither authenticates nor supplies the
+    /// time ranking; the ranking menu uses the separate protected LoadRanking contract.
+    /// </summary>
     public void LoadData()
     {
         StartCoroutine(nameof(LoadDataFromJson));
@@ -295,8 +318,7 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    // POST api_inserir: name/email/password/pontos; PHP salva senha com hash e responde
-    // {success:true} ou {error}. A UI só confirma o cadastro após o retorno de sucesso.
+    // Registration requires both successful HTTP and the business-level success field.
     private IEnumerator InsertNewData(string playerName, string email, string password, int score, Action<bool, string> completed)
     {
         WWWForm form = new WWWForm();
@@ -311,7 +333,7 @@ public class DataManager : MonoBehaviour
 
             ApiResponse response = null;
             try { response = JsonUtility.FromJson<ApiResponse>(www.downloadHandler.text); }
-            catch (ArgumentException) { /* Tratar abaixo como erro de resposta. */ }
+            catch (ArgumentException) { /* Treat malformed JSON as a failed response below. */ }
             
             bool success = www.result == UnityWebRequest.Result.Success && response != null && response.success;
             
@@ -323,8 +345,9 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    // POST api_atualizar: id/token/pontos atualiza o placar antigo do jogador autenticado.
-    // Não cria registros em partidas; BattleSessionController usa SaveMatch ao morrer.
+    // POST api_atualizar sends id/name/token/pontos and receives {success} or {error}.
+    // This legacy log-only consumer is not used to acknowledge current match persistence.
+    // It creates no partidas row; BattleSessionController saves wins, losses AND draws via SaveMatch.
     private IEnumerator UpdateData(int id, string playerName, string email, string password, int score)
     {
         WWWForm form = new WWWForm();

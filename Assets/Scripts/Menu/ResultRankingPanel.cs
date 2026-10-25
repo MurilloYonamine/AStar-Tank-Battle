@@ -46,6 +46,10 @@ public sealed class ResultRankingPanel : IDisposable
         status.text = "Salve a partida para atualizar o ranking.";
     }
 
+    /// <summary>
+    /// Reads ranking/previous-best data for an already acknowledged match. A failed read offers
+    /// read-only retry and does not invalidate the save or announce an unverified placement.
+    /// </summary>
     public void Load(DataManager dataManager, int authenticatedPlayerId, string savedMatchId = null, double savedDuration = 0)
     {
         if (list == null) return;

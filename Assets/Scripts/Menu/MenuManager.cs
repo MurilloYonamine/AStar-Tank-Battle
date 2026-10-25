@@ -4,6 +4,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Murillo's authored UI Toolkit navigation: main menu, authentication, ranking and settings.
+/// IMenu views bind/unbind their own callbacks. BattleSessionController reuses this navigation
+/// and sound API rather than creating a second login/menu system for the integrated scene.
+/// </summary>
 public class MenuManager : MonoBehaviour
 {
     public static MenuManager Instance { get; private set; }

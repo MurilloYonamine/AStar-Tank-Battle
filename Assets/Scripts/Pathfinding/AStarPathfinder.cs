@@ -14,6 +14,12 @@ public sealed class AStarPathfinder
     private readonly List<GridNode> openNodes = new();
     private readonly HashSet<GridNode> closedNodes = new();
 
+    /// <summary>
+    /// Runs one synchronous search over the existing graph. Temporary obstacles belong to this
+    /// request only; a moving tank must not permanently change the map's shared walkability.
+    /// Costs/parents are reset because successive agents reuse the same GridNode instances.
+    /// </summary>
+    /// <returns>True for a reachable goal (including an empty route when already there).</returns>
     public bool TryFindPath(
         TankGrid grid,
         GridNode startNode,
@@ -109,11 +115,14 @@ public sealed class AStarPathfinder
         return bestNode;
     }
 
+    // h = (|dx| + |dz|) * 10. With the project's four-way, uniform-cost (10) graph this
+    // never overestimates the shortest route. Diagonal moves would require another heuristic.
     private static int CalculateManhattanDistance(GridNode a, GridNode b)
     {
         return (System.Math.Abs(a.X - b.X) + System.Math.Abs(a.Z - b.Z)) * 10;
     }
 
+    // Parent links point backward; reverse once so movement consumes start-to-goal waypoints.
     private static List<GridNode> ReconstructPath(GridNode startNode, GridNode destinationNode, bool includeStartNode)
     {
         List<GridNode> path = new();

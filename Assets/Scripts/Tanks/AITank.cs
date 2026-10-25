@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// Aims and fires the enemy weapon; state choice and hull navigation live in separate components.
+/// A shot requires Attack, current perception/range, a reachable low ballistic arc, aim alignment,
+/// a clear trajectory and an elapsed cooldown. Animation is cosmetic, never the fire-rate clock.
+/// </summary>
 public class AITank : MonoBehaviour
 {
     public GameObject bulletPrefab;
@@ -133,6 +138,13 @@ public class AITank : MonoBehaviour
         return canFire && Quaternion.Angle(cannon.rotation, targetRotation) <= AimToleranceDegrees;
     }
 
+    /// <summary>
+    /// Solves a fixed-speed, gravity-only low arc toward the target collider center.
+    /// With horizontal distance d, height difference h, speed v and downward gravity g:
+    /// D = v^4 - g(g*d^2 + 2*h*v^2); theta = atan2(v^2 - sqrt(D), g*d).
+    /// Negative D, non-downward gravity or negligible distance reject the shot instead of
+    /// creating an invalid direction; flight time is d / (v*cos(theta)).
+    /// </summary>
     private bool TryGetLaunchDirection(Vector3 origin, out Vector3 launchDirection, out float flightTime)
     {
         Vector3 targetPosition = targetCollider != null && targetCollider.enabled
@@ -165,6 +177,10 @@ public class AITank : MonoBehaviour
         return canFire;
     }
 
+    /// <summary>
+    /// Predicts the muzzle pose for a candidate hull position and sphere-casts the sampled arc.
+    /// A visible player is not enough if a branch intersects the projectile trajectory.
+    /// </summary>
     public bool HasClearShotFrom(Vector3 position)
     {
         if (enemy == null || cannon == null || bulletSpawn == null || bulletPrefab == null) return false;
@@ -188,6 +204,7 @@ public class AITank : MonoBehaviour
         return ProjectileObstacleCheck.IsTrajectoryClear(origin, launch * projectileSpeed, duration, radius + 0.2f);
     }
 
+    // Pooling reuses this weapon: an old projectile must not reposition a newly spawned life.
     public void NotifyBlockedShot(int generation)
     {
         if (generation == WeaponGeneration && isActiveAndEnabled && stateMachine != null)

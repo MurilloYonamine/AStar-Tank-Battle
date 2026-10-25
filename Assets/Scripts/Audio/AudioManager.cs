@@ -4,6 +4,11 @@
 using UnityEngine;
 using UnityEngine.Audio;
 
+/// <summary>
+/// Murillo's persistent audio service: one music source, one-shot SFX and mixer volume controls.
+/// Linear slider values are converted with 20*log10(value), with -80 dB used near zero, and
+/// retained in PlayerPrefs. BattleAudioController selects game cues through this existing API.
+/// </summary>
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }

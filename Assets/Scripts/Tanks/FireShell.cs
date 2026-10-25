@@ -1,6 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Retained interception experiment from the original project, with Input System fire input.
+/// It is not attached in UmaTank.unity: current player shots use Drive/Shell and enemy
+/// ballistic aim/cadence use AITank/AIShell. Do not confuse this legacy solver with the active AI.
+/// </summary>
 public class FireShell : MonoBehaviour
 {
     public GameObject bullet;

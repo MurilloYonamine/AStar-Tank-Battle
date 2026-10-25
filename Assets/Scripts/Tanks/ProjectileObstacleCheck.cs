@@ -3,6 +3,9 @@ using UnityEngine;
 /// <summary>
 /// Stops shells at authored foliage cover, including when they start inside it.
 /// Cover is query-only so large tree canopies do not obstruct hull navigation.
+/// Obstacle and VegetationCover layers are queried with triggers included, while hull movement
+/// uses its narrower physical blockers. Thus canopy/bush cover can hide a player and stop a
+/// shell without requiring the entire visual canopy to become an oversized solid hull obstacle.
 /// </summary>
 public static class ProjectileObstacleCheck
 {
@@ -13,6 +16,10 @@ public static class ProjectileObstacleCheck
         return collider != null && (ObstacleMask & (1 << collider.gameObject.layer)) != 0;
     }
 
+    /// <summary>
+    /// Samples p(t) = origin + velocity*t + gravity*t^2/2 with bounded sphere-cast segments.
+    /// Used for enemy tactical arc prediction; actual shells also sweep their next physics step.
+    /// </summary>
     public static bool IsTrajectoryClear(Vector3 origin, Vector3 velocity, float duration, float radius)
     {
         if (Physics.CheckSphere(origin, radius, ObstacleMask, QueryTriggerInteraction.Collide)) return false;

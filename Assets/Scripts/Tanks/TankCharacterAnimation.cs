@@ -1,6 +1,12 @@
 using UnityEngine;
 
-/// <summary>Cosmetic animation only: the tank hull and A* own all gameplay movement.</summary>
+/// <summary>
+/// Cosmetic Idle/Attack/Hit/Death/Dance adapter shared by the imported models.
+/// Root motion is disabled and the model root is anchored after animation so it cannot walk
+/// out of the tank; bone animation remains free. The hull and Drive/A* own gameplay motion.
+/// Unscaled animation permits result/death presentation; battle pause freezes animator speed
+/// explicitly. Result previews are separate objects and cannot revive a dead gameplay actor.
+/// </summary>
 public sealed class TankCharacterAnimation : MonoBehaviour
 {
     [SerializeField] private Animator characterAnimator;

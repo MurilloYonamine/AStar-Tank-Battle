@@ -3,6 +3,9 @@ using UnityEngine;
 /// <summary>
 /// Per-player charge and effect lifetime. The battle supplies combat-only time and kill events;
 /// this object never reads input, advances in menus, or writes to a shared class asset.
+/// Charge is clamped to 0..100 from active seconds and credited eliminations, and does not grow
+/// during an effect. Activation consumes the full meter; a new match resets charge and duration.
+/// "Ultimate" remains an internal compatibility name; the presented feature is Unique Skill.
 /// </summary>
 public sealed class TankUltimateState
 {
@@ -65,6 +68,10 @@ public sealed class TankUltimateState
             Charge = Mathf.Clamp(Charge + Definition.ChargePerElimination, 0f, 100f);
     }
 
+    /// <summary>
+    /// Starts the configured timed effect only from a ready, enabled profile. The battle owns
+    /// input and applies healing/speed/weapon modifiers; this class owns charge and lifetime only.
+    /// </summary>
     public bool TryActivate()
     {
         if (!IsReady) return false;

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Reuses the scene's enemy actors for survival rounds. Spawn poses are saved scene markers,
+/// Reuses the scene's enemy actors for timed elimination rounds. Spawn poses are saved scene markers,
 /// checked against the group's own grid/A*, physical hulls and the gameplay camera.
 /// No navigation package, runtime enemy prefab copies or score/backend changes are needed.
 /// </summary>
@@ -103,6 +103,10 @@ public sealed class EnemyTankSpawner : MonoBehaviour
         foreach (EnemySlot slot in slots) slot.Health.Died += OnEnemyDied;
     }
 
+    /// <summary>
+    /// Clears the previous pool lifecycle while combat is paused. Starting the population is
+    /// deferred until StartSpawning, after the camera transition and countdown.
+    /// </summary>
     public void PrepareForRound()
     {
         StopSpawning(true);
@@ -199,6 +203,11 @@ public sealed class EnemyTankSpawner : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Tries a bounded randomized pass over authored markers. A pose must be inside the grid,
+    /// walkable, distant from the player, outside the padded view, physically free and connected
+    /// to the player's region by A*. Failure delays another attempt, never forces an unsafe spawn.
+    /// </summary>
     private bool TryFindSpawnPose(EnemySlot slot, out Vector3 position, out Quaternion rotation)
     {
         position = default;
@@ -246,6 +255,8 @@ public sealed class EnemyTankSpawner : MonoBehaviour
         return true;
     }
 
+    // Project all eight corners of a conservative tank/character volume. Checking only the
+    // hull pivot could spawn a visible character at the edge of an orthographic camera.
     private bool IsVisiblePose(BoxCollider hull, Vector3 position)
     {
         Vector3 size = Vector3.Scale(hull.size, hull.transform.lossyScale);

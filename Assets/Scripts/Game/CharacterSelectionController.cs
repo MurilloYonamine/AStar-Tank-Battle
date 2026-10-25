@@ -7,6 +7,10 @@ using UnityEngine.UIElements;
 /// <summary>
 /// Shows character families, skins and class availability in an isolated rotating 3D preview.
 /// The existing name/menu/backend flow is retained by BattleSessionController.
+/// CharacterId is the stable gameplay family, separate from display name and prefab nickname;
+/// skins share a class and the enemy roster excludes the whole selected family.
+/// UI structure/styles are authored in UXML/USS; disposable model/RenderTexture previews are
+/// created at runtime without colliders. VoiceClip supplies selection and optional kill feedback.
 /// </summary>
 public sealed class CharacterSelectionController : MonoBehaviour
 {
@@ -97,6 +101,10 @@ public sealed class CharacterSelectionController : MonoBehaviour
         return roster;
     }
 
+    /// <summary>
+    /// Opens the authored pre-game rules/data notice first; only ContinueToSelection exposes
+    /// the carousel. No attempt, timer or save begins until the session's combat boundary.
+    /// </summary>
     public void Open()
     {
         EnsureUI();
@@ -136,6 +144,10 @@ public sealed class CharacterSelectionController : MonoBehaviour
         if (previewModel != null) previewModel.SetActive(false);
     }
 
+    /// <summary>
+    /// Shows a character-only preview: victory dances, loss uses Death, draw uses Idle.
+    /// It shares appearance configuration, not the battle actor's HP, collisions or lifecycle.
+    /// </summary>
     public void ShowResultPreview(int index, VisualElement resultImage, string outcome = "vitoria")
     {
         if (resultImage == null || CharacterCount == 0) return;

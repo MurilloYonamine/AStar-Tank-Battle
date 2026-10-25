@@ -4,6 +4,10 @@ using UnityEngine;
 /// Shared, read-only class design data, independent of models and per-tank state.
 /// Profiles are UmaTank-specific designs; skins share one profile per character identity.
 /// Never store current HP, ultimate charge or cooldown on this shared asset.
+/// These are adaptations for tank gameplay, not reproductions of the original game's mechanics.
+/// Player and enemies receive base attributes/passives; only the player activates Unique Skills.
+/// Inspector labels say Unique Skill while serialized "ultimate" field names are retained to
+/// preserve existing asset references. Art is optional and independent of the effect implementation.
 /// </summary>
 [CreateAssetMenu(fileName = "CharacterClass", menuName = "UmaTank/Character Class")]
 public sealed class CharacterClassDefinition : ScriptableObject

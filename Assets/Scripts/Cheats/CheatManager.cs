@@ -5,6 +5,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Editor-only legacy F1 account-points test. Excluded from player builds by UNITY_EDITOR;
+/// changing pontos does not award eliminations or improve the time-based match ranking.
+/// </summary>
 public class CheatManager : MonoBehaviour
 {
     private void Update()

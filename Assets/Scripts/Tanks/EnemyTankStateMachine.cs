@@ -10,7 +10,12 @@ public enum EnemyTankState
 }
 
 /// <summary>
-/// Coordinates patrol, pursuit and attack without recalculating A* every frame.
+/// Coordinates Patrol, Chase, Attack and Reposition without recalculating A* every frame.
+/// Patrol visits authored waypoints; Chase requests the player's cell on a throttled interval
+/// when its planned cell changes. Temporary awareness also follows that cell through cover;
+/// it is bounded pursuit memory, not permission to detect/fire through an obstructed ray.
+/// A player hit refreshes awareness. Expiry returns the agent to the nearest patrol waypoint.
+/// Reposition seeks a reachable clear firing cell separately from ordinary player-cell pursuit.
 /// </summary>
 public sealed class EnemyTankStateMachine : MonoBehaviour
 {
@@ -139,6 +144,11 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         EnterPatrol();
     }
 
+    /// <summary>
+    /// Searches nearby graph nodes for free hull space, range, line of sight, a clear ballistic
+    /// arc and an A* route. Failed firing cells are avoided temporarily. No valid tactical
+    /// cell falls back to ordinary pursuit; this method never moves the hull directly.
+    /// </summary>
     public void NotifyBlockedShot()
     {
         if (!isActiveAndEnabled || health == null || health.IsDead || target == null ||
@@ -355,6 +365,8 @@ public sealed class EnemyTankStateMachine : MonoBehaviour
         return firingPathClear;
     }
 
+    // Both the time gate and target-node comparison are intentional: a moving target inside
+    // one cell does not require rebuilding the same A* route every rendered frame.
     private void RepathToTrackedCell()
     {
         if (grid == null || !grid.IsBuilt || repathCooldownRemaining > 0f)

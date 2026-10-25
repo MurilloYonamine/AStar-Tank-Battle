@@ -1,6 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Player tank controller using the Input System while preserving drive/turn, Q/E elevation
+/// and fire controls from the original project. Update reads input; FixedUpdate applies hull
+/// motion guarded against obstacles/other tanks. Pause gates both without changing timeScale.
+/// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public class Drive : MonoBehaviour
 {
@@ -157,6 +162,8 @@ public class Drive : MonoBehaviour
         ApplyAimPose();
     }
 
+    // Derive pitch from one stable neutral pose, not accumulated Transform.Rotate calls.
+    // Reapplying after cosmetic animation prevents movement/attack from drifting the cannon down.
     private void ApplyAimPose()
     {
         if (cannon != null)

@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// Player projectile with the original custom drag/downward-acceleration model. Unity gravity
+/// is disabled to avoid applying gravity twice. Continuous collision plus a cover sweep stops
+/// fast shells at foliage; one explosion inherits owner and snapshotted class/skill modifiers.
+/// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class Shell : MonoBehaviour
 {

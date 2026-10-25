@@ -3,6 +3,8 @@ using UnityEngine;
 /// <summary>
 /// Checks whether a target is inside the tank's field of view and unobstructed.
 /// Navigation decisions remain in the AI controller.
+/// Detection requires distance, horizontal half-FOV and an obstacle-free ray to the target.
+/// Trees/bushes must retain their blocking colliders and configured obstacle/foliage layers.
 /// </summary>
 public sealed class EnemyTankPerception : MonoBehaviour
 {
@@ -43,6 +45,10 @@ public sealed class EnemyTankPerception : MonoBehaviour
         return HasLineOfSightFrom(transform.position, target, targetCollider);
     }
 
+    /// <summary>
+    /// Tests cover from a hypothetical hull position, without a facing/FOV requirement.
+    /// Tactical repositioning uses this; live detection still goes through CanSeeTarget.
+    /// </summary>
     public bool HasLineOfSightFrom(Vector3 position, Transform target, Collider targetCollider)
     {
         if (target == null) return false;

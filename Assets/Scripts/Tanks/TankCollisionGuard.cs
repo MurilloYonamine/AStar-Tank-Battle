@@ -3,6 +3,10 @@ using UnityEngine;
 
 /// <summary>
 /// Checks a proposed tank pose before kinematic movement or player input can overlap another hull.
+/// Physics.ComputePenetration tests proposed/current depth so an already touching actor may
+/// escape without increasing overlap. Per-fixed-step reservations also test poses queued by
+/// other tanks before physics applies their MovePosition; they expire on the next physics tick.
+/// This safety layer may veto motion, but never selects an autonomous destination or replaces A*.
 /// </summary>
 public static class TankCollisionGuard
 {

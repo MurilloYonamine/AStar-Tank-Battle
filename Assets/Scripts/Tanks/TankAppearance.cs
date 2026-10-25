@@ -2,7 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// Replaces only the tank's visual model. Its hull, HP, input, score identity and A* stay unchanged.
-/// The model prefabs belong to the group; no gameplay components are copied from the preview.
+/// The group maintains the prefab setup; original character/art rights remain with their owners.
+/// No gameplay components are copied from the preview. Rebinding uses the TankTurret marker and
+/// a muzzle offset instead of retaining destroyed model transforms or a previous character's Animator.
 /// </summary>
 public sealed class TankAppearance : MonoBehaviour
 {
@@ -14,6 +16,10 @@ public sealed class TankAppearance : MonoBehaviour
     // Visual replacement only stores the profile; the battle explicitly applies supported stats.
     public CharacterClassDefinition ClassDefinition { get; private set; }
 
+    /// <summary>
+    /// Replaces cosmetic children and rebinds the weapon without replacing the actor's physics,
+    /// event subscriptions or account identity. The battle applies the stored class separately.
+    /// </summary>
     public void ApplyCharacter(GameObject modelPrefab, string characterName,
         CharacterClassDefinition classDefinition = null)
     {

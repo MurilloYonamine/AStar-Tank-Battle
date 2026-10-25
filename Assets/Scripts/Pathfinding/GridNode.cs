@@ -16,7 +16,8 @@ public sealed class GridNode
     public int MovementCost { get; }
     public IReadOnlyList<GridNode> Neighbours => neighbours;
 
-    // Values used by A*. They are reset before every search.
+    // g is accumulated travel cost, h estimates the remaining cost and f = g + h.
+    // Parent reconstructs the chosen route. Search data is reset before every A* request.
     public int GCost { get; set; }
     public int HCost { get; set; }
     public int FCost => GCost + HCost;

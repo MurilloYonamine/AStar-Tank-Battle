@@ -3,6 +3,11 @@ using UnityEngine;
 /// <summary>
 /// Applies the existing audio API after scene initialization, when the mixer is ready.
 /// Music and SFX sources, mixer routing and menu clips are authored in the scene.
+/// Menu/gameplay music loop; the optional defeat track plays ONCE. Victory/draw use the result
+/// cue. Clip gains stay separate from Murillo's Master/Music/SFX mixer sliders/preferences.
+/// Character voices use a dedicated source and bounded random kill feedback, never one source
+/// per enemy or a new audio framework. Audio provenance is in Assets/Audio/*/Credits.txt and
+/// BattleSessionController's project header; assigning a clip does not establish usage rights.
 /// </summary>
 public sealed class BattleAudioController : MonoBehaviour
 {
@@ -148,7 +153,11 @@ public sealed class BattleAudioController : MonoBehaviour
     {
         if (instance != null) PlayCue(instance.matchStartClip, instance.countdownVolume);
     }
-    /// <summary>Defeat uses the existing music bus; victory/draw retain the authored result cue.</summary>
+    /// <summary>
+    /// Defeat plays its optional music once on the existing bus (no loop); an absent clip stops
+    /// music. Victory/draw retain the authored one-shot result cue. Returning to menu/replaying
+    /// selects the corresponding music through the existing service.
+    /// </summary>
     public static void PlayResult(string outcome = "vitoria")
     {
         if (outcome == "derrota")

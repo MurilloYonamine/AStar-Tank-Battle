@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// Gravity-driven enemy shell launched by AITank's ballistic solution. Cover hits notify the
+/// firing weapon so it can seek another firing cell. The captured weapon generation rejects
+/// callbacks from a previous pooled life; damage multipliers remain a projectile-owned snapshot.
+/// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class AIShell : MonoBehaviour
 {

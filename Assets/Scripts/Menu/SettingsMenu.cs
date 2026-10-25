@@ -4,6 +4,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Original main-menu audio sliders, delegated to AudioManager's mixer/PlayerPrefs service.
+/// PauseAudioSettings synchronizes the authored pause view with these same saved channels;
+/// volume settings are local preferences, not match statistics submitted to PHP.
+/// </summary>
 public class SettingsMenu : IMenu
 {
     private VisualElement _settingsScreen;

@@ -5,6 +5,9 @@ using UnityEngine;
 
 /// <summary>
 /// Stores one tank's HP and creates a damaging explosion when it is destroyed.
+/// Class limits/passives and temporary skill modifiers are composed per actor; shared assets
+/// are never runtime health storage. Death is reported once immediately, while cosmetic death
+/// may finish before the pooled actor deactivates. Damaged reports surviving hits to enemy AI.
 /// </summary>
 public sealed class TankHealth : MonoBehaviour
 {
@@ -67,6 +70,10 @@ public sealed class TankHealth : MonoBehaviour
         RestoreFullHealth();
     }
 
+    /// <summary>
+    /// Resets a new attempt/pooled life, including stopped components, death animation and
+    /// fractional healing. Only this explicit lifecycle reset can revive the actor.
+    /// </summary>
     public void RestoreFullHealth()
     {
         StopDeathRoutine();
@@ -84,6 +91,11 @@ public sealed class TankHealth : MonoBehaviour
         GetComponent<TankAppearance>()?.CharacterAnimation?.PlayIdle();
     }
 
+    /// <summary>
+    /// Applies ceil(incoming * (1 - skill reduction)), with at least one damage for a valid hit.
+    /// Source is the firing actor, not the projectile, so elimination attribution survives impact.
+    /// IsDead is set before events/explosions can reenter and report a second death.
+    /// </summary>
     public void ApplyDamage(int amount, GameObject source)
     {
         if (IsDead || amount <= 0)

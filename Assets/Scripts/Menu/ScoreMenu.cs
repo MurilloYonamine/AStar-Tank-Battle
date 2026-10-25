@@ -4,6 +4,11 @@
 using System;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Keeps the original menu class name while presenting the authenticated best-victory TIME
+/// ranking, not legacy player points or a public player list. Server positions preserve ties.
+/// Request versions prevent a late response from repopulating a closed/reopened menu.
+/// </summary>
 public class ScoreMenu : IMenu
 {
     private VisualElement _scoreScreen;

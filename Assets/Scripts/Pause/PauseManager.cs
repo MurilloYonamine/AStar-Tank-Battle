@@ -3,6 +3,11 @@
 
 using UnityEngine;
 
+/// <summary>
+/// Persistent logical gameplay gate used by menu, selection and the battle controllers.
+/// It does not change Unity's timeScale or freeze physics by itself; BattleSessionController
+/// owns reversible battle-body/animation suspension and pause-adjusted match timing.
+/// </summary>
 public class PauseManager : MonoBehaviour
 {
     public static PauseManager Instance { get; private set; }

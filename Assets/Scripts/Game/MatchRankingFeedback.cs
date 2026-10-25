@@ -1,6 +1,11 @@
 using System;
 
-/// <summary>Pure presentation rules. A ranked account does not imply its latest run set that mark.</summary>
+/// <summary>
+/// Pure presentation rules: an account's ranked best does not imply its latest attempt set it.
+/// Current/best times are compared at stored millisecond precision. A record announcement
+/// additionally requires server comparison excluding the current UUID; ties do not break records.
+/// This class neither assigns ranking positions nor mutates saved performance/history.
+/// </summary>
 public static class MatchRankingFeedback
 {
     public enum Kind { Saved, PreviousBest, TopTen, FirstPlace, TiedFirst, NewRecord, FirstRecord }

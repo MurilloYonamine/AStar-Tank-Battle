@@ -3,6 +3,11 @@ using UnityEngine;
 
 /// <summary>
 /// Applies one radial damage pulse to each tank except the tank that fired it.
+/// Damage = ceil(maximumDamage * shotMultiplier * (1 - distance / effectiveRadius)).
+/// Distance uses the impacted collider's closest point, not just the tank pivot. A HashSet
+/// prevents multiple child colliders/trigger callbacks from damaging the same tank twice.
+/// Initial OverlapSphere includes tanks already inside when the trigger is created.
+/// Owner immunity is per actor; another enemy's explosion still deals ordinary damage.
 /// </summary>
 [RequireComponent(typeof(SphereCollider))]
 public sealed class ExplosionDamage : MonoBehaviour

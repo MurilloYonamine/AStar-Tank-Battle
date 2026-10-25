@@ -6,6 +6,11 @@ PlayerData.cs) devem ter o [System.Serializable], ou não poderão ser
 convertidos em JSON para envio dos dados depois.
 */
 
+/// <summary>
+/// Serializable account DTO matching the existing PHP field names, not per-match history.
+/// Authenticated login responses create it without a password; the legacy password/points
+/// fields remain for original registration/API compatibility. Times/outcomes live in partidas.
+/// </summary>
 [System.Serializable]
 public class PlayerData
 {
@@ -47,6 +52,7 @@ public class PlayerData
     }
 }
 
+/// <summary>Legacy wrapper for consumers that explicitly provide a JSON object with a players array.</summary>
 [System.Serializable]
 public class PlayerRootObject
 {

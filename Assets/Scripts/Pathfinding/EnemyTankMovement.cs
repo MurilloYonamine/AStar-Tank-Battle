@@ -4,6 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Rotates and moves an enemy tank through the sequence of nodes returned by A*.
 /// The state machine chooses destinations; this component retries paths when physical travel is blocked.
+/// Recovery also requests A* routes to real nodes, then resumes the original destination.
+/// Physics sweeps/reservations may shorten a step but never authorize an off-route sidestep.
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(BoxCollider))]
 public sealed class EnemyTankMovement : MonoBehaviour
@@ -113,6 +115,10 @@ public sealed class EnemyTankMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Replaces the logical goal and requests its node route. A temporarily unavailable path
+    /// remains pending for bounded retries instead of permanently cancelling pursuit.
+    /// </summary>
     public bool SetDestination(Vector3 destination)
     {
         this.destination = destination;
@@ -185,6 +191,11 @@ public sealed class EnemyTankMovement : MonoBehaviour
         shouldFaceTarget = true;
     }
 
+    /// <summary>
+    /// Selects a reachable neighboring node as a temporary retreat and follows its A* route.
+    /// An onward route is preferred, but if every candidate fails the tank waits and retries;
+    /// it never translates directly to a guessed world-space escape offset.
+    /// </summary>
     private bool TryBeginRecovery()
     {
         if (grid == null || !grid.IsBuilt) return false;
