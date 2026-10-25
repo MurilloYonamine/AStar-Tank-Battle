@@ -12,21 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: CafeClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Persistência"
-  description: "Classe de persistência para o UmaTank. Mais vida máxima, com dano e velocidade um pouco menores."
+  className: "Persist\xEAncia"
+  description: "Classe de persist\xEAncia para o UmaTank. Mais vida m\xE1xima, com
+    dano e velocidade um pouco menores."
   gameplayEnabled: 1
   healthMultiplier: 1.1
   movementSpeedMultiplier: 0.95
   shotDamageMultiplier: 0.95
   shotIntervalMultiplier: 1
-  passiveName: "Passos constantes"
-  passiveDescription: "Mais vida máxima, com dano e velocidade um pouco menores."
+  passiveName: Passos constantes
+  passiveDescription: "Mais vida m\xE1xima, com dano e velocidade um pouco menores."
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Passos na névoa"
-  ultimateDescription: "Recupera 30% da vida ao longo de 8 segundos, ganha 15% de velocidade. Efeito temporário de 8 segundos."
+  ultimateName: "Passos na n\xE9voa"
+  ultimateDescription: "Recupera 30% da vida ao longo de 8 segundos, ganha 15% de
+    velocidade. Efeito tempor\xE1rio de 8 segundos."
   ultimateEffect: 1
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.15
   ultimateHealFraction: 0.3

@@ -12,21 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: OguriClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Fôlego"
-  description: "Classe de fôlego para o UmaTank. Mais vida máxima, com velocidade e cadência reduzidas."
+  className: "F\xF4lego"
+  description: "Classe de f\xF4lego para o UmaTank. Mais vida m\xE1xima, com velocidade
+    e cad\xEAncia reduzidas."
   gameplayEnabled: 1
   healthMultiplier: 1.15
   movementSpeedMultiplier: 0.95
   shotDamageMultiplier: 1
   shotIntervalMultiplier: 1.1
-  passiveName: "Reserva de energia"
-  passiveDescription: "Mais vida máxima, com velocidade e cadência reduzidas."
+  passiveName: Reserva de energia
+  passiveDescription: "Mais vida m\xE1xima, com velocidade e cad\xEAncia reduzidas."
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Última porção"
-  ultimateDescription: "Recupera 25% da vida ao ativar, ganha 15% de velocidade. Efeito temporário de 8 segundos."
+  ultimateName: "\xDAltima por\xE7\xE3o"
+  ultimateDescription: "Recupera 25% da vida ao ativar, ganha 15% de velocidade.
+    Efeito tempor\xE1rio de 8 segundos."
   ultimateEffect: 3
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.15
   ultimateHealFraction: 0.25

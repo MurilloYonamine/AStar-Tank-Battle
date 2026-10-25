@@ -12,21 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: BourbonClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Precisão"
-  description: "Classe de precisão para o UmaTank. Mais vida e dano, com velocidade ligeiramente reduzida."
+  className: "Precis\xE3o"
+  description: "Classe de precis\xE3o para o UmaTank. Mais vida e dano, com velocidade
+    ligeiramente reduzida."
   gameplayEnabled: 1
   healthMultiplier: 1.05
   movementSpeedMultiplier: 0.95
   shotDamageMultiplier: 1.05
   shotIntervalMultiplier: 1
-  passiveName: "Rotina de precisão"
-  passiveDescription: "Mais vida e dano, com velocidade ligeiramente reduzida."
+  passiveName: "Rotina de precis\xE3o"
+  passiveDescription: Mais vida e dano, com velocidade ligeiramente reduzida.
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Protocolo de avanço"
-  ultimateDescription: "ganha 15% de velocidade, recebe 15% menos dano, reduz em 35% o intervalo de tiro. Efeito temporário de 8 segundos."
+  ultimateName: "Protocolo de avan\xE7o"
+  ultimateDescription: "ganha 15% de velocidade, recebe 15% menos dano, reduz em
+    35% o intervalo de tiro. Efeito tempor\xE1rio de 8 segundos."
   ultimateEffect: 2
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.15
   ultimateHealFraction: 0

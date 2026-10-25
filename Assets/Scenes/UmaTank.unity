@@ -25038,21 +25038,21 @@ MonoBehaviour:
     ModelPrefab: {fileID: 3097888121602204344, guid: 27733ca1fbf029149890502156a4591c,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 4739b5a22d5b904e06d1633b5634c6f6, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 134fe182141512048962a99dd0c0acbf, type: 3}
   - DisplayName: Agnes Tachyon
     CharacterId: agnes-tachyon
     AppearanceName: 
     ModelPrefab: {fileID: 8081286497218204957, guid: de6ed436fbcbae64b9c9641785017704,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: c509260d3cdf1c50a6091a522e2a0f5a, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: f58112fc0b8050b4386392b3d71483fc, type: 3}
   - DisplayName: Mihono Bourbon
     CharacterId: mihono-bourbon
     AppearanceName: 
     ModelPrefab: {fileID: 3973664798045723056, guid: e32368eb7b60cdd408c4860a5f23a04f,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: f138a1649e1fe1765b260821398dd156, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: a2210b5acd05d934eabfcedf602e63e0, type: 3}
   - DisplayName: Super Creek
     CharacterId: super-creek
     AppearanceName: Shinobi
@@ -25066,14 +25066,14 @@ MonoBehaviour:
     ModelPrefab: {fileID: 1878853220203916390, guid: 35e46b8d495ac724a8c57a3348f548f5,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 25a5a8d6e9fead0aa209b79365ec340c, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 5ccd0f9bab8bb3f4fb5ed1b26e7cefd9, type: 3}
   - DisplayName: Daiwa Scarlet
     CharacterId: daiwa-scarlet
     AppearanceName: 
     ModelPrefab: {fileID: 2936163323007611840, guid: 44e7ec34fc3a0eb468d3d9a704ec62d1,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 5673f82f59865f77f2fc7afe53c8a07a, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 17e957a5a3ffcf04d85b7be0e1fbef72, type: 3}
   - DisplayName: Meisho Doto
     CharacterId: meisho-doto
     AppearanceName: Halloween
@@ -25087,91 +25087,91 @@ MonoBehaviour:
     ModelPrefab: {fileID: 4215146397453932353, guid: cd4dbe72e844d1e47800e50668e5305f,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 62280bea99de6533d1129d213fc17181, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: d3efad7de8871ca49b56bb176f359b03, type: 3}
   - DisplayName: Yaeno Muteki
     CharacterId: yaeno-muteki
     AppearanceName: 
     ModelPrefab: {fileID: 3671126154024635928, guid: 449d711f692d0964c8b49cc612d34262,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 798ee8ea2dd6dc688e2950236582dbe2, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: f9ed1ed29c5e220458cf103c7fea44cb, type: 3}
   - DisplayName: Oguri Cap
     CharacterId: oguri-cap
     AppearanceName: Natal
     ModelPrefab: {fileID: 6869817442786054886, guid: 904d1b47e00fb9949a3bb3d559348df3,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 6a7e3af4eba1db3e2010049a355c9ceb, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 1b7d639cec13eb24c9f1777ee84be06e, type: 3}
   - DisplayName: T.M. Opera O
     CharacterId: tm-opera-o
     AppearanceName: 
     ModelPrefab: {fileID: 7043905366006555078, guid: b273e83fa605bb442a7fc20b4a499061,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 96829d04b4b8b142d4179ec702c55c4b, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 067c7dd3045cb0a4f9a5978f2bccd68e, type: 3}
   - DisplayName: Sakura Chiyono O
     CharacterId: sakura-chiyono-o
     AppearanceName: 
     ModelPrefab: {fileID: 500057644304070192, guid: 828308dc8e25c1d429d75695c24df06b,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: e753ed3449d0217c68e36f37287cc533, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 6b917b2e2d94793489e3feed0c7d39c1, type: 3}
   - DisplayName: Tamamo Cross
     CharacterId: tamamo-cross
     AppearanceName: 
     ModelPrefab: {fileID: 4111524923173423666, guid: a00ed4cd53c0e7e459e11e6d41493c4d,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: f3522653f44efb5fb7d9d84a56da7d31, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: be9b3f00e0b4d70498b778db954ab15c, type: 3}
   - DisplayName: Tokai Teio
     CharacterId: tokai-teio
     AppearanceName: 
     ModelPrefab: {fileID: 1659283777834196039, guid: 4387c28275a6296409680be7e21e2dc4,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 92fc4f6777e200fe7be0c80a57e775f3, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 25820166241bd96479be5adf2e9e5f5b, type: 3}
   - DisplayName: Sweep Tosho
     CharacterId: sweep-tosho
     AppearanceName: 
     ModelPrefab: {fileID: 8622476531507434479, guid: 44b52c92b32a3cd4586e9787a826d2a6,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 928edb270e2b464c54a0b5047d0b1dce, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 90318a3b415130040b2ee6c3c17b133c, type: 3}
   - DisplayName: Vodka
     CharacterId: vodka
     AppearanceName: 
     ModelPrefab: {fileID: 980334741786948687, guid: 81e50576b9167db419c9b587685edc03,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 25d907e9ce34bf1a98e704faf555cba8, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 0244aaebe08242341a4f634b6d2df74a, type: 3}
   - DisplayName: Manhattan Cafe
     CharacterId: manhattan-cafe
     AppearanceName: 
     ModelPrefab: {fileID: 3056736648317201363, guid: c8a86c6bd6583034c87ef538d070165c,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 31671df929692fd50cf2c23ed18854f3, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: 900e71d5b683f7749b2f4691d0f6258c, type: 3}
   - DisplayName: Hishi Akebono
     CharacterId: hishi-akebono
     AppearanceName: 
     ModelPrefab: {fileID: 1441822565134976600, guid: af0c266b109f6de4ea7c0375e2e73d38,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 7bef462489a40548a90c1f38cdbed733, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: e7e4e81ce52a65b45a0dc2f7bf5816b3, type: 3}
   - DisplayName: Gold Ship
     CharacterId: gold-ship
     AppearanceName: Bazuca
     ModelPrefab: {fileID: 6586737852537089965, guid: 5b5bc9b0c5fa2fd4e905577aaeb19f7f,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: eab9386c86117a14befba9efe359058e, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: e026cde66c7faa94aa0b02d4d9c3af3f, type: 3}
   - DisplayName: Yaeno Muteki
     CharacterId: yaeno-muteki
     AppearanceName: Xen
     ModelPrefab: {fileID: 1965166538356402677, guid: b1807e9b7fcc22c448fcd08a48fc3fef,
       type: 3}
     ClassDefinition: {fileID: 11400000, guid: 798ee8ea2dd6dc688e2950236582dbe2, type: 2}
-    VoiceClip: {fileID: 0}
+    VoiceClip: {fileID: 8300000, guid: f9ed1ed29c5e220458cf103c7fea44cb, type: 3}
   previewRoot: {fileID: 1697967075}
   previewCamera: {fileID: 1704461938}
   rotationSpeed: 15
