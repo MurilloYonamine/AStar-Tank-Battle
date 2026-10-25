@@ -26,7 +26,7 @@ MonoBehaviour:
   ultimateName: "Milagre da noite santa"
   ultimateDescription: "Recupera 25% da vida máxima ao ativar, ganha 20% de velocidade e reduz em 10% o intervalo de tiro por 8 segundos."
   ultimateEffect: 3
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.2
   ultimateHealFraction: 0.25

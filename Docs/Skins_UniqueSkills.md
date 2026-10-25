@@ -37,3 +37,9 @@ Modelos, nomes de prefabs, mapa, grid, pontuação por tempo e API PHP não fora
 Não houve exceções de gameplay nos cenários da cena integrada. O log ainda registra uma ocorrência de indexação interna do `UnityEditor.Search` na inicialização do Editor, anterior ao gameplay; não foi tratada como falha de habilidade nem corrigida nesta etapa.
 
 O servidor de testes simula respostas e não acessa o MySQL real; nenhum resultado de teste foi inserido no banco do grupo. Não foi gerada nem validada uma nova build nesta etapa. Os testes automatizados não substituem uma rodada manual para avaliar o balanceamento e a sensação de cada habilidade.
+
+## Integração visual e sonora de 25/10/2026
+
+Os ícones e as vozes adicionados pelo JP foram integrados sem mudar os números ou efeitos das habilidades. Os 25 perfis têm arte configurada, incluindo `DotoHalloweenClass`, `CreekShinobiClass` e `YaenoXenClass`. As vozes continuam no campo **Voice Clip** de cada entrada da seleção. Os prefabs da Special Week e Akebono agora usam os nomes corrigidos pelo JP, preservando seus GUIDs.
+
+A validação posterior também cobriu login e gravação pela Unity através do middleware real em um MySQL restaurado e isolado, além dos testes simulados descritos na seção de 24/10. Ver [Entrega_e_Documentacao.md](Entrega_e_Documentacao.md) para os resultados atuais, os arquivos da entrega e os créditos.

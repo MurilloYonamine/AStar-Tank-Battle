@@ -26,7 +26,7 @@ MonoBehaviour:
   ultimateName: "Voo da bruxinha"
   ultimateDescription: "Ganha 40% de velocidade e reduz em 20% o intervalo de tiro por 7 segundos. Não voa sobre obstáculos e não recupera vida."
   ultimateEffect: 0
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 7
   ultimateSpeedMultiplier: 1.4
   ultimateHealFraction: 0

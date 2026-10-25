@@ -26,7 +26,7 @@ MonoBehaviour:
   ultimateName: "Impacto Xen"
   ultimateDescription: "O próximo tiro em até 8 segundos causa 60% mais dano e tem 50% mais raio de explosão. É consumido mesmo se errar ou atingir um obstáculo."
   ultimateEffect: 4
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: 9e352ea641469314490bca119f5dab07, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1
   ultimateHealFraction: 0

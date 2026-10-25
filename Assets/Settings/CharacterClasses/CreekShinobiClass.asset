@@ -26,7 +26,7 @@ MonoBehaviour:
   ultimateName: "Caminho da sombra"
   ultimateDescription: "Ganha 60% de velocidade e reduz em 15% o intervalo de tiro por 7 segundos. Colisões continuam normais."
   ultimateEffect: 0
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: fc2cb9e0cd6993848b9afd0ae5024635, type: 3}
   ultimateDurationSeconds: 7
   ultimateSpeedMultiplier: 1.6
   ultimateHealFraction: 0

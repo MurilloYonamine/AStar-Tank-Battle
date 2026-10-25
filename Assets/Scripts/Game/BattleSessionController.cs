@@ -132,7 +132,8 @@
  * Murillo: original menu, authentication/backend/persistence and audio infrastructure,
  * developed without generative-AI assistance, as reported by the group. Subsequent
  * AI-assisted integrations/adaptations are credited separately below.
- * João Pedro: imported character/environment assets, map and animation preparation.
+ * João Pedro: imported character/environment assets, map and animation preparation;
+ * supplied skill icons, additional character voices and the defeat music track.
  * OpenAI ChatGPT/Codex assisted development/documentation: planning and stuck points,
  * Input System migration, rotating character previews, fade/countdown/audio sync,
  * collision/replanning and blocked-shot recovery, spawn planning, class/Unique Skill
@@ -144,8 +145,20 @@
  * image assets were requested for this project; supplied art is used instead.
  *
  * THIRD-PARTY ASSET PROVENANCE (NOT A BLANKET LICENSE GRANT)
- * Characters: Umamusume: Pretty Derby, owned by Cygames. Fan-model authors and
- * download sources must also be credited independently of the original IP owner.
+ * Characters and original 3D models: Umamusume: Pretty Derby, owned by Cygames.
+ * According to the group, these models were extracted from the original game and
+ * made available by fans on Sketchfab for fan use, not originally modeled by those
+ * uploaders. Credit Cygames for the originals and identify extractors/uploaders
+ * separately where supplied. Five Sketchfab pages are listed below; individual
+ * pages/uploader details for later imports still need to be supplied. Availability
+ * for fan use is recorded as group-provided information, not a verified blanket
+ * license, public-domain dedication or permission covering every possible use.
+ * Character voice audio, character images and skill icons are identified by the
+ * group as material taken from Umamusume: Pretty Derby. Copyright Cygames, Inc.;
+ * all rights reserved to Cygames. The team does not claim authorship of these
+ * original materials. Official game source: https://umamusume.jp/
+ * See Assets/Audio/Voices/Credits.txt and Assets/Skills/Credits.txt. This credits
+ * ownership/origin; it does not assert a license or permission that was not confirmed.
  * Five model sources supplied by the group:
  * Super Creek: https://sketchfab.com/3d-models/super-creek-mummy-chibi-35e8ec62805e4639971e16fe0d1c5486
  * Fenomeno: https://sketchfab.com/3d-models/fenomeno-chibi-4d70e9d3e9f84fcea59cea4c36a42fbb
@@ -155,6 +168,11 @@
  * Additional models/animations, trees, bushes and font were imported by group
  * members; their individual authors/source/license details still need to be supplied
  * by the importer where absent. Do not infer a license from a download or credit.
+ * JP's later additions: Assets/Skills (59 supplied PNG icons), 18 additional clips
+ * in Assets/Audio/Voices and Assets/Audio/Music/sad_game_over.wav. Character media
+ * origin/ownership is credited above as confirmed by the group. The separate defeat
+ * track's original source/author/license are still pending; do not assume that this
+ * music belongs to Cygames merely because it accompanies the characters.
  * Kenney UI Pack stars (CC0): https://kenney.nl/assets/ui-pack
  * Fantasy Skybox FREE / Render Knight:
  * https://assetstore.unity.com/packages/package/18353 (local Readme retained).

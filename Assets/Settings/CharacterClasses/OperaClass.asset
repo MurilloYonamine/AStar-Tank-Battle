@@ -12,21 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: OperaClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Presença"
-  description: "Classe de presença para o UmaTank. Mais vida e dano, com velocidade um pouco menor."
+  className: "Presen\xE7a"
+  description: "Classe de presen\xE7a para o UmaTank. Mais vida e dano, com velocidade
+    um pouco menor."
   gameplayEnabled: 1
   healthMultiplier: 1.1
   movementSpeedMultiplier: 0.95
   shotDamageMultiplier: 1.05
   shotIntervalMultiplier: 1
-  passiveName: "Entrada em cena"
-  passiveDescription: "Mais vida e dano, com velocidade um pouco menor."
+  passiveName: Entrada em cena
+  passiveDescription: Mais vida e dano, com velocidade um pouco menor.
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Grande final"
-  ultimateDescription: "recebe 30% menos dano, causa 20% mais dano. Efeito temporário de 8 segundos."
+  ultimateName: Grande final
+  ultimateDescription: "recebe 30% menos dano, causa 20% mais dano. Efeito tempor\xE1rio
+    de 8 segundos."
   ultimateEffect: 2
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1
   ultimateHealFraction: 0

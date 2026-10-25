@@ -21,3 +21,10 @@ Permission to incorporate this excerpt into a game has NOT been confirmed.
 Both local audio files are copied unchanged from the team's extracted audio.
 The team requested these menu/gameplay assignments after the licensing uncertainty was explained.
 These source notes are attribution records, not proof of permission or a license.
+
+DEFEAT MUSIC ADDED BY JOAO PEDRO
+Local file: sad_game_over.wav
+Imported in commits a85d5f2/dde65bd and assigned to Battle Audio > Defeat Music Clip.
+Plays once on the defeat screen; menu/replay replace it through the existing audio API.
+Original source, composer and usage license: not yet provided by the group.
+Do not attribute this separate music track to Cygames without confirmation.

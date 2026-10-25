@@ -12,21 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: AkebonoClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Fortaleza"
-  description: "Classe de fortaleza para o UmaTank. Muito mais vida e mais dano, com menor velocidade e cadência."
+  className: Fortaleza
+  description: "Classe de fortaleza para o UmaTank. Muito mais vida e mais dano,
+    com menor velocidade e cad\xEAncia."
   gameplayEnabled: 1
   healthMultiplier: 1.35
   movementSpeedMultiplier: 0.75
   shotDamageMultiplier: 1.1
   shotIntervalMultiplier: 1.2
-  passiveName: "Grande estrutura"
-  passiveDescription: "Muito mais vida e mais dano, com menor velocidade e cadência."
+  passiveName: Grande estrutura
+  passiveDescription: "Muito mais vida e mais dano, com menor velocidade e cad\xEAncia."
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Grande proteção"
-  ultimateDescription: "ganha 10% de velocidade, recebe 50% menos dano. Efeito temporário de 8 segundos."
+  ultimateName: "Grande prote\xE7\xE3o"
+  ultimateDescription: "ganha 10% de velocidade, recebe 50% menos dano. Efeito tempor\xE1rio
+    de 8 segundos."
   ultimateEffect: 2
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.1
   ultimateHealFraction: 0

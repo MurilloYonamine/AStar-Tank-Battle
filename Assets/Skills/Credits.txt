@@ -1,0 +1,21 @@
+IMAGENS DAS PERSONAGENS E ICONES DE HABILIDADES - UMATANK
+
+As imagens das personagens e os ícones de habilidades foram retirados do jogo
+Umamusume: Pretty Derby e pertencem à Cygames, conforme informado pelo grupo.
+
+Copyright Cygames, Inc. Todos os direitos pertencem à Cygames.
+Fonte original declarada: Umamusume: Pretty Derby.
+Site oficial: https://umamusume.jp/
+
+Os 59 PNGs desta pasta foram importados por João Pedro. O grupo não reivindica
+autoria dos desenhos originais. Os nomes e efeitos das habilidades adaptadas
+para o UmaTank não são uma reprodução literal das mecânicas do jogo original.
+
+Esta atribuição não constitui uma licença nem comprova uma autorização de uso.
+Sobre os modelos 3D: conforme o grupo, são extrações do jogo original,
+disponibilizadas por fãs no Sketchfab para uso de fãs, e não modelagens originais
+dos disponibilizadores. Os modelos originais e as personagens pertencem à Cygames.
+Os extratores/disponibilizadores também devem ser identificados onde conhecidos.
+Os cinco links já fornecidos estão em BattleSessionController.cs; os links e
+disponibilizadores dos modelos posteriores ainda precisam ser informados.
+Não foi confirmada uma licença específica nem uma autorização irrestrita de uso.

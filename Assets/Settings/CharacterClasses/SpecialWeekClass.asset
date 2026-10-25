@@ -12,21 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e7e93955b0430d677533358cad9a99c, type: 3}
   m_Name: SpecialWeekClass
   m_EditorClassIdentifier: Assembly-CSharp::CharacterClassDefinition
-  className: "Versatilidade"
-  description: "Classe de versatilidade para o UmaTank. Mais vida, mantendo os demais atributos próximos do padrão."
+  className: Versatilidade
+  description: "Classe de versatilidade para o UmaTank. Mais vida, mantendo os demais
+    atributos pr\xF3ximos do padr\xE3o."
   gameplayEnabled: 1
   healthMultiplier: 1.05
   movementSpeedMultiplier: 1
   shotDamageMultiplier: 1
   shotIntervalMultiplier: 1.05
-  passiveName: "Primeiro passo"
-  passiveDescription: "Mais vida, mantendo os demais atributos próximos do padrão."
+  passiveName: Primeiro passo
+  passiveDescription: "Mais vida, mantendo os demais atributos pr\xF3ximos do padr\xE3o."
   lowHealthThreshold: 0
   lowHealthShotIntervalMultiplier: 1
-  ultimateName: "Um sonho para alcançar"
-  ultimateDescription: "Recupera 15% da vida ao ativar, ganha 20% de velocidade. Efeito temporário de 8 segundos."
+  ultimateName: "Um sonho para alcan\xE7ar"
+  ultimateDescription: "Recupera 15% da vida ao ativar, ganha 20% de velocidade.
+    Efeito tempor\xE1rio de 8 segundos."
   ultimateEffect: 3
-  ultimateIcon: {fileID: 0}
+  ultimateIcon: {fileID: 2800000, guid: be299de70e60d9646bc4aed84843fd1f, type: 3}
   ultimateDurationSeconds: 8
   ultimateSpeedMultiplier: 1.2
   ultimateHealFraction: 0.15
