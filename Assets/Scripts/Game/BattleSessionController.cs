@@ -1,206 +1,164 @@
 /*
- * UMATANK - MAIN PROJECT DOCUMENTATION
- * Activity 2: Unity / PHP / MySQL. Entry scene: Assets/Scenes/UmaTank.unity.
+ * UMATANK - PROJECT DOCUMENTATION
+ * Activity 2: Unity / PHP / MySQL. Main scene: Assets/Scenes/UmaTank.unity.
  * Group: Hugo Marcos Santos dos Reis; João Pedro Ribeiro Vivas;
  *        Murillo Gomes Yonamine.
  *
- * PROJECT ORIGIN AND THE USE OF MODELS INSTEAD OF PRIMITIVES
- * The group confirmed an in-class agreement with Professor Eduardo to reuse the
- * tank game made for the Intelligent Agents A* activity in this second activity.
- * We therefore retained that game's imported character/tank visuals instead of
- * rebuilding its main presentation with primitives, and extended the existing
- * game with the required Unity-PHP-MySQL integration and additional features.
- * This records the classroom authorization reported by the group; it is not a
- * waiver written in the activity PDF, nor permission to use third-party assets.
- * The earlier A* implementation was also reused with the professor's approval.
- * AStarPathfinder.cs identifies the original exercise file and adapted lines.
+ * PROJECT ORIGIN
+ * We discussed reusing our Intelligent Agents tank game with Professor Eduardo
+ * in class, and he approved. We kept its character and tank models instead of
+ * replacing them with primitives. We also reused the A* exercise with his approval.
+ * AStarPathfinder.cs lists the original file and the lines we adapted.
  *
- * GAME IDEA, CONTROLS AND MATCH RULES
- * A single-arena tank battle with characters from Umamusume: Pretty Derby.
- * Authenticate, read the pre-game information, choose a character, then start.
- * WASD/arrows drive/turn; Q/E change cannon elevation; Space/left mouse fire;
- * Shift activates the selected character's ready Unique Skill; Escape pauses.
- * The authored scene sets a target of 10 player-attributed eliminations within
- * 180 active seconds. The spawner reuses four enemy actors during the match.
- * Win: reach the elimination target before the deadline. Loss: player HP reaches
- * zero. Draw: the player survives until the deadline without reaching the target.
- * There is one level, not a sequence of stages; Inspector objectives are captured
- * for each attempt. The first resolved terminal condition freezes that attempt.
- * Results offer replay, return to menu/login and a retry if saving fails.
+ * GAME IDEA AND CONTROLS
+ * UmaTank is a tank battle with characters from Umamusume: Pretty Derby.
+ * Log in, read the instructions, choose a character and start the match.
+ * WASD/arrows move and turn; Q/E adjust the cannon; Space/left mouse fire;
+ * Shift activates a ready Unique Skill; Escape opens the pause menu.
+ * The goal is to eliminate 10 enemies within 180 seconds of active play.
+ * Reaching the goal wins the match; losing all HP ends in defeat; surviving
+ * until time runs out without reaching the goal ends in a draw.
+ * Four enemies stay active and are replaced during the match.
+ * After the result, the player can play again or return to the menu.
  *
- * TIME AND PERFORMANCE CRITERION
- * Lower completion time is better, and ONLY victories qualify for the ranking.
- * The PHP Model selects each player's MIN(duracao_segundos), orders ascending
- * and returns the top 10. Equal stored milliseconds share competition ranks
- * (1, 1, 3); player ID only stabilizes display order, not a performance tie-break.
- * Defeats/draws remain in match history for analysis; they are not zero-time wins.
- * Duration = monotonic realtime - start realtime - accumulated battle pauses.
- * Selection, fade, countdown, result animation and the results screen are outside
- * the timed interval. UTC start/end are separate audit timestamps: their wall
- * interval can include pauses and is not the performance value.
- * Save/display use three decimal places. Legacy pontuacao is sent as zero only
- * to preserve the existing schema/API; neither kills nor converted points rank.
- * PauseManager gates gameplay; this controller freezes/restores bodies, projectiles,
- * animation and particles WITHOUT assigning Time.timeScale = 0. Pause does not save.
+ * TIME AND RANKING
+ * The ranking uses each player's fastest victory and shows the top 10.
+ * Lower time is better. Equal times share a position, for example 1, 1, 3.
+ * Defeats and draws stay in the history but do not enter the ranking.
+ * We count active play time in seconds, with three decimal places.
+ * Selection, countdown, pauses and the result screen do not count.
+ * Start and end dates use UTC and can include pauses; duration stores only
+ * active play time. The old pontuacao field stays at zero for compatibility.
+ * PauseManager stops gameplay without setting Time.timeScale to zero.
  *
- * ORGANIZATION AND MAIN DECISIONS
- * BattleSessionController: intro, active clock, objectives, HUD, pause and result.
- * CharacterSelectionController / TankAppearance: authored UI and replaceable visual
- * models on stable gameplay actors; costumes may bind distinct class/skill profiles,
- * while a stable character-family ID still excludes all player skins from enemy selection.
- * CharacterClassDefinition: shared read-only design assets. TankHealth and
- * TankUltimateState: per-actor HP, buffs and per-match skill charge, not asset state.
- * TankGrid / GridNode / AStarPathfinder: our orthogonal navigation graph and A*.
- * EnemyTankStateMachine: Patrol, Chase, Attack and a separate Reposition state.
- * EnemyTankMovement: follows A* nodes, including recovery; no direct escape slide.
- * EnemyTankPerception / AITank: FOV, cover raycasts, ballistic aim and shot cadence.
- * TankCollisionGuard: hull clearance/reservations, not an alternative pathfinder.
- * EnemyTankSpawner: bounded actor pool, free/reachable spawn markers outside view.
- * Shell / AIShell / ExplosionDamage: projectile motion and radial falloff; only
- * the firing actor is exempt from its own explosion, not all friendly actors.
- * BattleAudioController / PauseAudioSettings reuse Murillo's AudioManager/mixer.
- * DataManager is the sole Unity HTTP adapter; Unity never connects to MySQL.
- * Existing menu/login APIs remain in place. GameManager's legacy points/end-game
- * loop is disabled for this scene so it cannot submit a second, incompatible result.
+ * HOW THE CODE IS ORGANIZED
+ * BattleSessionController handles the match, timer, objectives, HUD and result.
+ * CharacterSelectionController and TankAppearance handle selection and models.
+ * CharacterClassDefinition stores class attributes and Unique Skill settings;
+ * TankHealth and TankUltimateState keep each tank's health and active effects.
+ * Different costumes can have their own skills. Other costumes of the chosen
+ * character are excluded from the enemy selection.
+ * TankGrid, GridNode and AStarPathfinder provide the grid and navigation.
+ * EnemyTankStateMachine separates patrol, chase, attack and repositioning.
+ * EnemyTankMovement follows A* nodes, including when recovering from a blockage.
+ * EnemyTankPerception and AITank handle detection, aiming and firing.
+ * TankCollisionGuard helps tanks avoid overlapping. EnemyTankSpawner chooses
+ * free, reachable spawn points outside the camera view.
+ * Shell, AIShell and ExplosionDamage handle projectiles and area damage.
+ * A tank is immune to its own shot, but can take damage from another tank.
+ * BattleAudioController and PauseAudioSettings use Murillo's audio system.
+ * DataManager sends requests to PHP, which accesses MySQL.
  *
- * DATA COLLECTION, PURPOSE AND RETENTION
- * Before selection, CharacterSelection.uxml explains controls, rules and data use.
- * Account name/email identify the player; the password is checked/hashed by PHP,
- * is not part of a match payload and is never included in ranking responses.
- * jogador_id links the attempt to its authenticated player; partida_uuid identifies
- * one attempt and makes retries idempotent. A new attempt receives a fresh UUID.
- * inicio_utc / fim_utc establish when the attempt occurred; duracao_segundos stores
- * active play time; resultado distinguishes victory/loss/draw; inimigos_eliminados
- * records objective progress. These support history and gameplay analysis; victory
- * duration additionally supports ranking. pontuacao remains compatibility-only.
- * A token authenticates protected requests for the matching player; the client
- * keeps it in memory, while PHP persists its association with a one-day expiry.
- * Records are stored in the configured MySQL through PHP, locally in XAMPP in this
- * setup, for an indefinite period. There is no automatic match-retention purge.
- * Token expiration is NOT deletion of account or history. The pre-game notice
- * describes this behavior; it is not a claim of legal/privacy certification.
+ * DATA WE SAVE AND WHY
+ * Before character selection, we explain the rules and data use.
+ * Account name and email identify the player. PHP checks the password and
+ * stores its hash; passwords are not sent with match results or rankings.
+ * Each match saves jogador_id, partida_uuid, inicio_utc, fim_utc,
+ * duracao_segundos, resultado and inimigos_eliminados. These identify the
+ * player and attempt, record when it happened, and support history and analysis.
+ * Victory duration also determines the ranking.
+ * A token links requests to the logged-in player. It expires after one day;
+ * the Unity client keeps it in memory. Expiration does not delete match history.
+ * Accounts and matches stay in MySQL, locally through XAMPP in our setup.
+ * There is no automatic deletion of those records.
  *
- * HOW TO CONFIGURE AND RUN THE DELIVERED PROJECT
- * 1. Open the project in Unity 6000.3.5f2 and the UmaTank scene, already in build settings.
- * 2. Copy Assets/Backend/gsd to the XAMPP htdocs/gsd directory; start Apache and MySQL.
- * 3. In phpMyAdmin, create/select an EMPTY tank_gamers database and import
- *    Assets/Backend/tank_gamers.sql (NOT tank_gamers.sql.meta). Back up an existing
- *    database before replacing it. This source update never imports the live DB.
- * 4. Configure gsd/model/DB.php for that installation's host, database and DB user.
- *    The dump supplies tables/data, not a MySQL login or its grants. Grant the
- *    configured user the project's required CRUD access; do not publish passwords.
- * 5. Set DataManager.URL_BASE to the reachable PHP address (default localhost/gsd).
- *    localhost always means the machine running Unity/the build, not the author PC.
- *    The local HTTP classroom setup is not a production HTTPS deployment.
- * 6. Register a test account or use an account whose credentials the group supplied,
- *    log in, read the information, select a character and play a complete attempt.
- *    The web history/analysis is at /gsd/?action=partidas and uses its web login.
- * Required tables: jogadores (accounts), partidas (per-attempt history), tokens
- * (authentication). partidas has a player FK and UNIQUE(jogador_id, partida_uuid).
- * All three tables, structure AND sample data, are in the delivered SQL.
+ * SETUP
+ * 1. Open the project in Unity 6000.3.5f2 and Assets/Scenes/UmaTank.unity.
+ * 2. Copy Assets/Backend/gsd to XAMPP's htdocs/gsd; start Apache and MySQL.
+ * 3. Create an empty tank_gamers database and import Assets/Backend/tank_gamers.sql.
+ *    Import the .sql file, not its .meta. Back up an existing database first.
+ * 4. Set the database host, name, user and password in gsd/model/DB.php.
+ *    The SQL includes tables and data; the MySQL user and permissions are set
+ *    separately. The configured user needs read/write access to this database.
+ * 5. Check DataManager.URL_BASE. We use http://localhost/gsd on the same computer.
+ *    For another computer, use the address of the machine running PHP.
+ * 6. Register an account, log in and play. The web history and analysis are at
+ *    /gsd/?action=partidas, after logging in on the website.
+ * Tables: jogadores stores accounts; partidas stores each attempt and its player;
+ * tokens stores login tokens. The SQL includes the structure and sample data.
  *
- * TRANSPORT, SAVE ACKNOWLEDGMENT AND REPLAY
- * UnityWebRequest POST -> PHP index.php action -> Controller -> Model -> PDO/MySQL.
- * DataManager.cs documents each route, form field and JSON response. Tokens and
- * player association are checked by PHP for protected operations, not trusted UI.
- * StartCombat assigns the UUID/timestamps only after the intro. FinishRound takes
- * one immutable snapshot; RetrySaveMatch reuses it instead of generating a new row.
- * Only successful HTTP + valid JSON + success + a positive partida_id confirm save.
- * Errors/timeouts keep retry available and never show a false save confirmation.
- * Rankings load AFTER acknowledgment; previous-best comparison excludes this UUID
- * when the server supports it. Missing comparison data never proves a new record.
- * Replay resets gameplay but retains the authenticated account; returning to login
- * clears the client's token and invalidates any pending login response.
+ * SAVING AND PLAYING AGAIN
+ * Unity sends requests to PHP controllers, which use models to access MySQL.
+ * DataManager.cs describes the routes, fields and responses.
+ * PHP checks the player's token before accepting a result.
+ * Each attempt has a new partida_uuid. A failed save can be retried with the
+ * same ID and result, so sending it again does not create another match.
+ * We only show that a match was saved after the server confirms it.
+ * Ranking loads after that confirmation. A new record is announced only when
+ * the server provides the comparison with earlier victories.
+ * Playing again keeps the login; returning to login clears the local token.
  *
- * OBSERVATION FROM THE DELIVERED TEST DATA (24 OCT 2026, LOCAL REVIEW)
- * The updated SQL contains 3 players and 15 attempts: 3 victories, 12 defeats and
- * no draws. Defeats are 80% of this small sample. Mean duration across ALL attempts
- * is 64.900 seconds; this is not the mean victory completion time. Victorious
- * attempts range from 90.527 to 120.719 seconds. Two players have victories; one
- * has only defeats. Keeping history exposes failed attempts instead of replacing
- * them with a best score. This sample suggests checking difficulty/readability
- * with more players; it does not establish imbalance or explain the cause of loss.
- * Basic delivery checks: valid/invalid login, distinct saved outcomes, repeated
- * attempts for multiple players, web aggregates, time ranking, and failed network
- * responses that must not confirm a save. Do not add artificial matches to live data.
+ * TESTS AND OBSERVATIONS
+ * We checked valid/invalid login, selection, movement, shooting, skills, pause,
+ * victory, defeat, draw, saving, ranking, history and returning to the menu.
+ * Tests also covered repeated save requests and failed connections.
+ * We restored the delivered SQL in a separate database and checked results
+ * saved by Unity through PHP. These tests did not change the group's database.
+ * This review covered the Unity project, not a newly built executable.
+ * The delivered sample has 3 players and 15 matches: 3 wins and 12 losses.
+ * Its average duration across all outcomes is 64.900 seconds; winning times
+ * range from 90.527 to 120.719 seconds. Two players have wins and one only losses.
+ * The history lets us see failed attempts as well as best times. With 80% losses
+ * in this small sample, we would check difficulty with more players before
+ * drawing conclusions about balance.
  *
- * CONTRIBUTIONS, REUSE AND GENERATIVE-AI ASSISTANCE
- * Hugo: original basic enemy behavior/state organization, earlier A* reuse and
- * gameplay integration; manual HUD/ranking work connected to Murillo's existing
- * backend APIs; sound-clip integration. Classes/Unique Skills and aiming/firing
- * refinements were developed with generative-AI assistance.
- * Murillo: original menu, authentication/backend/persistence and audio infrastructure,
- * developed without generative-AI assistance, as reported by the group. Subsequent
- * AI-assisted integrations/adaptations are credited separately below.
- * João Pedro: imported character/environment assets, map and animation preparation;
- * supplied skill icons, additional character voices and the defeat music track.
- * OpenAI ChatGPT/Codex assisted development/documentation: planning and stuck points,
- * Input System migration, rotating character previews, fade/countdown/audio sync,
- * collision/replanning and blocked-shot recovery, spawn planning, class/Unique Skill
- * and aiming/firing extensions, documentation and validation support. AI also assisted
- * later HUD/results/time-ranking adjustments; this is separate from the original
- * manual implementation and does not replace the group's authorship of that work.
- * Generative coding assistance is distinct from the game's enemy AI; the group's
- * responsibility is to review, understand and test the delivered code. No generated
- * image assets were requested for this project; supplied art is used instead.
+ * CONTRIBUTIONS AND GENERATIVE-AI ASSISTANCE
+ * Hugo developed the basic enemy behavior and state organization, reused the
+ * earlier A*, implemented the original HUD/ranking work by hand, connected it
+ * to Murillo's functions, and added the sound clips.
+ * Classes/Unique Skills and aiming/firing improvements used AI assistance.
+ * Murillo developed the original menu, login, backend, saving and audio system
+ * without AI assistance.
+ * João Pedro worked on model/environment setup, the map, animations and
+ * character audio setup.
+ * We used ChatGPT/Codex for planning, questions when stuck and some extra features:
+ * Input System changes, rotating previews, countdown/audio timing, collision
+ * recovery, A* route recalculation, spawn planning, classes and firing.
+ * Later HUD/results/time-ranking adjustments, documentation and automated checks
+ * also used AI assistance. The original manual work remains credited above.
+ * We reviewed the assisted work as part of the project. We did not use
+ * AI-generated images; the visual assets came from the sources listed below.
  *
- * THIRD-PARTY ASSET PROVENANCE (NOT A BLANKET LICENSE GRANT)
- * Characters and original 3D models: Umamusume: Pretty Derby, owned by Cygames.
- * According to the group, these models were extracted from the original game and
- * made available by fans on Sketchfab for fan use, not originally modeled by those
- * uploaders. Credit Cygames for the originals and identify extractors/uploaders
- * separately where supplied. Five Sketchfab pages are listed below; individual
- * pages/uploader details for later imports still need to be supplied. Availability
- * for fan use is recorded as group-provided information, not a verified blanket
- * license, public-domain dedication or permission covering every possible use.
- * Character voice audio, character images and skill icons are identified by the
- * group as material taken from Umamusume: Pretty Derby. Copyright Cygames, Inc.;
- * all rights reserved to Cygames. The team does not claim authorship of these
- * original materials. Official game source: https://umamusume.jp/
- * See Assets/Audio/Voices/Credits.txt and Assets/Skills/Credits.txt. This credits
- * ownership/origin; it does not assert a license or permission that was not confirmed.
- * Five model sources supplied by the group:
+ * CREDITS AND REFERENCES
+ * Characters, original models, voices and images: Umamusume: Pretty Derby,
+ * by Cygames. All rights to these original materials belong to Cygames.
+ * Official game: https://umamusume.jp/
+ * We used models extracted from the game and shared by fans on Sketchfab.
+ * Model sources:
  * Super Creek: https://sketchfab.com/3d-models/super-creek-mummy-chibi-35e8ec62805e4639971e16fe0d1c5486
  * Fenomeno: https://sketchfab.com/3d-models/fenomeno-chibi-4d70e9d3e9f84fcea59cea4c36a42fbb
  * Silence Suzuka: https://sketchfab.com/3d-models/silence-suzuka-chibi-7bbcd93026544ab185da740c7bf11444
  * Meisho Doto: https://sketchfab.com/3d-models/doto-chibi-6bcf14470d404d749124a395badcbf62
  * Matikanetannhauser: https://sketchfab.com/3d-models/mambo-8802ef2239ea4ef196f4239bfb6d4280
- * Additional models/animations, trees, bushes and font were imported by group
- * members; their individual authors/source/license details still need to be supplied
- * by the importer where absent. Do not infer a license from a download or credit.
- * JP's later additions: Assets/Skills (59 supplied PNG icons), 18 additional clips
- * in Assets/Audio/Voices and Assets/Audio/Music/sad_game_over.wav. Character media
- * origin/ownership is credited above as confirmed by the group. The separate defeat
- * track was modified/edited by João Pedro Ribeiro Vivas (JP), as the group confirmed.
- * This credits the modification, not an underlying original composition. Any underlying
- * source/composer/license still needs confirmation; do not attribute the track to Cygames
- * merely because it accompanies the characters.
+ * Some sources for the other models, animations, scenery and font still need
+ * to be added. Known audio sources and licenses are in the Credits.txt files
+ * under Assets/Audio.
+ * Character image credits are in Assets/Skills/Credits.txt.
  * Kenney UI Pack stars (CC0): https://kenney.nl/assets/ui-pack
  * Fantasy Skybox FREE / Render Knight:
- * https://assetstore.unity.com/packages/package/18353 (local Readme retained).
+ * https://assetstore.unity.com/packages/package/18353
  * Free Stylized Smoke Effects Pack / Maiami Studio:
  * https://assetstore.unity.com/packages/vfx/particles/fire-explosions/free-stylized-smoke-effects-pack-226406
- * Combat VFX: Gabriel Aguiar Productions Free Quick Effects Vol. 1 (documentation
- * retained in Assets/GabrielAguiarProductions); Suzuka wind: Vefects/Wind VFX URP.
- * Exact audio sources/attribution and known license limitations are preserved in
- * Assets/Audio/{Shots,Results/JonKFite,Music,Countdown,Death/Hosch}/Credits.txt.
- * Shots: Michel Baradari / apollo-music.de, CC BY 3.0, original info.txt retained.
- * Death: hosch, CC BY-SA 4.0, https://hosch.itch.io
- * Result fanfare: "Victory!", composed by Jon K. Fite, CC BY 3.0,
+ * Combat effects: Gabriel Aguiar Productions Free Quick Effects Vol. 1.
+ * Suzuka wind effect: Vefects/Wind VFX URP. Local package documentation is retained.
+ * Shot sounds: Michel Baradari / apollo-music.de, CC BY 3.0 (original info.txt retained).
+ * Death sound: hosch, CC BY-SA 4.0, https://hosch.itch.io
+ * Result music: "Victory!", composed by Jon K. Fite, CC BY 3.0:
  * https://opengameart.org/content/victory-2
+ * Defeat music: "Sad game over", by Emma_MA, CC0 1.0:
+ * https://opengameart.org/content/sad-game-over
  * Tank movement: https://pixabay.com/sound-effects/technology-driving-tank-engine-88503/
  * Countdown: https://www.youtube.com/watch?v=q_jtMhL-rm8
- * Menu excerpt: https://www.youtube.com/shorts/p6sZEQbwN4E
+ * Menu music excerpt: https://www.youtube.com/shorts/p6sZEQbwN4E
  * Full-track reference: https://www.youtube.com/watch?v=au2BMwKcJTw
- * Gameplay excerpt: https://www.youtube.com/shorts/dlwTd7LPBT8
- * Voice sources provided by the group:
+ * Gameplay music excerpt: https://www.youtube.com/shorts/dlwTd7LPBT8
+ * Voice download sources:
  * Suzuka: https://sounds.spriters-resource.com/pc_computer/granbluefantasyversusrising/asset/445151/
  * Fenomeno: https://www.myinstants.com/en/instant/wowok-fenomeno-84122/
  * Creek: https://www.myinstants.com/en/instant/isshou-ni-ganbarimashou-ne-super-creek-8137/
  * Doto: https://www.zedge.net/notification-sounds/b8a7a6ea-9b80-453d-b4dd-6aa53c294719
  * Matikanetannhauser: https://www.myinstants.com/en/instant/matikanetannhauser-uma-musume-pretty-derby-13882/
- * Music excerpts, countdown and character voices are provenance records, not proof
- * of permission. Unconfirmed permissions must not be represented as cleared licenses.
+ * Licenses not yet confirmed remain marked as such in the audio credits.
  */
 
 using System;

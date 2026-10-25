@@ -1,8 +1,8 @@
 # Unique Skills das aparências
 
-Cada opção da seleção referencia seu próprio `CharacterClassDefinition`. São 25 aparências e 22 famílias de personagens. A identidade da personagem não muda: escolher a Doto normal ou Halloween exclui as duas do conjunto de inimigas.
+Cada aparência tem seus próprios atributos e sua Unique Skill. São 25 opções e 22 personagens diferentes. Ao escolher uma personagem, suas outras aparências também ficam fora da seleção de inimigas. Por exemplo, escolher a Doto normal ou Halloween impede que qualquer uma das duas apareça como inimiga.
 
-Os efeitos abaixo são adaptações próprias para o UmaTank. Os nomes, números e condições não reproduzem literalmente as cartas do jogo original. “Bazuca” e “Xen” identificam os modelos disponíveis neste projeto, sem afirmar que sejam nomes de versões oficiais.
+Adaptamos as habilidades para combinar com o combate do UmaTank. Os efeitos não são iguais aos do jogo original. “Bazuca” e “Xen” são nomes que usamos para identificar essas aparências no projeto.
 
 | Aparência | Unique Skill | Efeito no UmaTank |
 | --- | --- | --- |
@@ -14,32 +14,18 @@ Os efeitos abaixo são adaptações próprias para o UmaTank. Os nomes, números
 | Gold Ship — Bazuca | Surpresa de bazuca | Próximo tiro em até 10 s: +70% de dano e +100% de raio da explosão. |
 | Yaeno Muteki — Xen | Impacto Xen | Próximo tiro em até 8 s: +60% de dano e +50% de raio da explosão. |
 
-Os bônus temporários multiplicam os atributos da classe. A carga continua sendo 2 pontos por segundo de combate e 15 por eliminação, até 100. SHIFT ativa a habilidade. Não há carga durante o efeito. A pausa congela carga, duração e cura sem mudar `Time.timeScale`.
+A habilidade carrega com o tempo e ao eliminar inimigas: são 2 pontos por segundo e 15 por eliminação, até completar 100. Quando estiver pronta, SHIFT ativa a Unique Skill. Ela não recarrega enquanto está ativa. Ao pausar, a carga, a duração e a cura também ficam paradas.
 
-O tiro fortalecido é consumido ao disparar, mesmo que erre ou atinja um obstáculo. O projétil guarda os bônus daquele disparo; encerrar a habilidade não remove os bônus de um projétil já lançado. A imunidade ao próprio tiro foi mantida. Inimigas recebem atributos e passivas da aparência, mas não ativam Unique Skills.
+Nas habilidades que fortalecem um disparo, o bônus vale para o próximo tiro, mesmo que ele erre ou bata em um obstáculo. O tanque não recebe dano do próprio tiro. As inimigas usam os atributos e as vantagens passivas de suas aparências, mas não ativam Unique Skills.
 
 ## Onde ajustar
 
-Os assets estão em `Assets/Settings/CharacterClasses`. Os novos são `DotoHalloweenClass`, `CreekShinobiClass` e `YaenoXenClass`. Na cena `Assets/Scenes/UmaTank.unity`, cada entrada de `CharacterSelectionController > Characters` aponta para seu perfil em **Class Definition**. As imagens continuam opcionais no campo **Unique Skill Icon** de cada perfil; as vozes permanecem nos campos já existentes da seleção.
+As configurações ficam em `Assets/Settings/CharacterClasses`. Na cena `Assets/Scenes/UmaTank.unity`, cada personagem da lista **Characters**, no `CharacterSelectionController`, usa a configuração escolhida no campo **Class Definition**.
 
-Modelos, nomes de prefabs, mapa, grid, pontuação por tempo e API PHP não foram alterados. As referências das personagens incluem os perfis oficiais de [Meisho Doto](https://umamusume.jp/character/meishodoto/), [Super Creek](https://umamusume.jp/character/supercreek) e [Mayano Top Gun](https://umamusume.jp/character/mayanotopgun). Esses perfis não são documentação das habilidades de tanque descritas aqui.
+Usamos como referência as personagens de Umamusume: Pretty Derby, incluindo os perfis de [Meisho Doto](https://umamusume.jp/character/meishodoto/), [Super Creek](https://umamusume.jp/character/supercreek) e [Mayano Top Gun](https://umamusume.jp/character/mayanotopgun). Os efeitos de tanque descritos aqui foram criados para o nosso jogo.
 
-## Validação de 24/10/2026
+## Testes
 
-- Compilação dos scripts atuais: passou, incluindo a verificação dos comentários XML.
-- Perfis: 25 classes/habilidades nomeadas e habilitadas, mantendo 22 famílias e as sete aparências com traje. Cada entrada aponta para seu próprio perfil.
-- Cena: apenas três referências de classe foram trocadas; a comparação confirmou que geometria, modelos e vozes permaneceram iguais. As 103 verificações de referências passaram, cobrindo 670 dependências.
-- Lógica, combate, classes e resultados: 559 verificações automatizadas passaram, incluindo carga, limites, duração, passivas, cura, dano e composição dos modificadores.
-- Cópia isolada da cena integrada: 4.701 verificações passaram. Esse número inclui verificações por objeto/osso e não representa 4.701 partidas.
-- Nas sete aparências: ativação por SHIFT, nome correto na HUD, velocidade e dano efetivos, cura limitada, pausa de carga/duração/cura, término sem acúmulo de bônus e exclusão da própria família do conjunto de inimigas. Gold Ship e Yaeno Xen também tiveram o disparo único e seus bônus no projétil verificados.
-- Regressão do ciclo: seleção, contagem, câmera, quatro inimigas, movimento, Q/E, disparo, pausa sem `Time.timeScale = 0`, vitória/derrota/empate, confirmação do envio ao PHP isolado e volta ao menu.
+Conferimos a ativação por SHIFT, a carga, a duração e os efeitos das sete aparências da tabela. Também verificamos os limites de cura, os tiros fortalecidos, o funcionamento da pausa e o fim dos bônus. A escolha de uma personagem exclui suas outras aparências das inimigas.
 
-Não houve exceções de gameplay nos cenários da cena integrada. O log ainda registra uma ocorrência de indexação interna do `UnityEditor.Search` na inicialização do Editor, anterior ao gameplay; não foi tratada como falha de habilidade nem corrigida nesta etapa.
-
-O servidor de testes simula respostas e não acessa o MySQL real; nenhum resultado de teste foi inserido no banco do grupo. Não foi gerada nem validada uma nova build nesta etapa. Os testes automatizados não substituem uma rodada manual para avaliar o balanceamento e a sensação de cada habilidade.
-
-## Integração visual e sonora de 25/10/2026
-
-Os ícones e as vozes adicionados pelo JP foram integrados sem mudar os números ou efeitos das habilidades. Os 25 perfis têm arte configurada, incluindo `DotoHalloweenClass`, `CreekShinobiClass` e `YaenoXenClass`. As vozes continuam no campo **Voice Clip** de cada entrada da seleção. Os prefabs da Special Week e Akebono agora usam os nomes corrigidos pelo JP, preservando seus GUIDs.
-
-A validação posterior também cobriu login e gravação pela Unity através do middleware real em um MySQL restaurado e isolado, além dos testes simulados descritos na seção de 24/10. Ver [Entrega_e_Documentacao.md](Entrega_e_Documentacao.md) para os resultados atuais, os arquivos da entrega e os créditos.
+Os testes incluíram o restante da partida: seleção, contagem, movimento, tiro, vitória, derrota, empate, salvamento e volta ao menu. A avaliação do equilíbrio e da sensação de cada habilidade também depende de jogar com elas.

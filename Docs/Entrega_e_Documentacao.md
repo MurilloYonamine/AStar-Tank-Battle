@@ -1,57 +1,41 @@
-# UmaTank - integração e documentação da entrega
+# UmaTank - documentação do projeto
 
-## Onde está a documentação obrigatória
+Desenvolvemos o UmaTank a partir do jogo de tanques da atividade de Agentes Inteligentes. Conversamos em sala com o professor Eduardo sobre reaproveitar o projeto e seus modelos, e ele autorizou. Mantivemos a movimentação com A* e acrescentamos a escolha de personagens, as habilidades, o limite de tempo e o registro das partidas.
 
-A documentação exigida na Atividade 2 está dentro dos scripts da Unity, não depende de um relatório separado. Este arquivo é apenas um guia de localização.
+O objetivo é eliminar dez inimigas em até três minutos. Se o jogador alcançar a meta, vence; se perder toda a vida, perde; se o tempo acabar antes da meta, empata. O ranking considera o menor tempo de vitória de cada jogador.
+
+## Onde encontrar as explicações
 
 | Assunto | Arquivo |
 | --- | --- |
-| Nome do jogo e integrantes, reaproveitamento autorizado, objetivo, controles, regras, tempo/ranking, coleta e retenção de dados, configuração, SQL, observação dos testes, autoria/IA e créditos | [Comentário inicial de BattleSessionController.cs](../Assets/Scripts/Game/BattleSessionController.cs) |
-| Rotas PHP, campos enviados, JSON esperado, token e tratamento de falhas | [DataManager.cs](../Assets/Scripts/Backend/DataManager.cs) |
-| Referência ao A* reaproveitado, arquivo/linhas de origem e adaptações | [AStarPathfinder.cs](../Assets/Scripts/Pathfinding/AStarPathfinder.cs) |
-| Organização e funcionamento da IA, combate e movimento | Comentários das classes em `Assets/Scripts/Pathfinding` e `Assets/Scripts/Tanks` |
-| Habilidades das aparências e parâmetros | [Skins_UniqueSkills.md](Skins_UniqueSkills.md) e perfis em `Assets/Settings/CharacterClasses` |
-| Prints para configurar música de derrota, imagem e voz pelo Inspector | [Guia_JP_Imagens_e_Vozes.pdf](Guia_JP_Imagens_e_Vozes.pdf) |
-| Créditos das falas e imagens do jogo original | `Assets/Audio/Voices/Credits.txt`, `Assets/Skills/Credits.txt` e comentário principal |
+| Regras, controles, organização, dados salvos, configuração, testes, autoria e uso de IA | [Comentário inicial de BattleSessionController.cs](../Assets/Scripts/Game/BattleSessionController.cs) |
+| Comunicação com o PHP e salvamento das partidas | [DataManager.cs](../Assets/Scripts/Backend/DataManager.cs) |
+| A* reaproveitado e adaptações | [AStarPathfinder.cs](../Assets/Scripts/Pathfinding/AStarPathfinder.cs) |
+| Comportamento das inimigas, movimento e combate | Comentários em `Assets/Scripts/Pathfinding` e `Assets/Scripts/Tanks` |
+| Habilidades das aparências | [Skins_UniqueSkills.md](Skins_UniqueSkills.md) |
+| Como colocar as imagens das habilidades e os áudios | [Guia_JP_Imagens_e_Vozes.pdf](Guia_JP_Imagens_e_Vozes.pdf) |
 
-## O que foi integrado do JP em 25/10/2026
+## Como abrir e configurar
 
-- Commits `a85d5f2` e `dde65bd`: 18 arquivos adicionais de voz, 59 ícones PNG e a música `sad_game_over.wav`.
-- As vozes já escolhidas pelo JP foram mantidas nas 25 entradas da seleção; os arquivos alternativos também foram preservados.
-- A música de derrota foi modificada/editada pelo João Pedro (JP), conforme confirmado pelo grupo, e ligada ao campo existente, mantendo reprodução única, volumes e mixer do Murillo.
-- Os ícones escolhidos pelo JP foram mantidos nos 22 perfis anteriores. As três variantes novas também receberam arte: Doto Halloween, Creek Shinobi e Yaeno Xen.
-- Os prefabs `AgemasenTank` e `BonoTank` passaram a `SpecialWeekTank` e `AkebonoTank`, como renomeados pelo JP, sem mudar seus GUIDs ou perder referências.
-- Os conflitos foram resolvidos mantendo as habilidades e os números das skins. Continuam 25 opções, 25 perfis e 22 famílias; outra skin da personagem escolhida não vira inimiga.
-- Mapa, árvores, obstáculos, patrulha, spawn, lógica de combate, sistema PHP e SQL do grupo foram preservados. A integração foi preparada e validada em `feat/murilotanquefeliz2` para envio à `main`; a `modelsPlus` não é alterada.
+1. Abra o projeto na Unity 6000.3.5f2 e a cena `Assets/Scenes/UmaTank.unity`.
+2. Copie `Assets/Backend/gsd` para a pasta `htdocs/gsd` do XAMPP e ligue o Apache e o MySQL.
+3. No phpMyAdmin, crie um banco vazio chamado `tank_gamers` e importe `Assets/Backend/tank_gamers.sql`. Esse arquivo inclui as tabelas e os dados de teste.
+4. Ajuste a conexão em `gsd/model/DB.php` com o usuário e a senha do MySQL. O SQL não cria esse usuário.
+5. Confira o endereço em `DataManager.URL_BASE`. Para jogar no mesmo computador do XAMPP, usamos `http://localhost/gsd`.
+6. Cadastre uma conta, faça login, escolha uma personagem e inicie a partida. O histórico e a análise ficam em `/gsd/?action=partidas`, após o login da página web.
 
-## Arquivos que compõem a entrega
+A entrega inclui as pastas `Assets`, `Packages` e `ProjectSettings` do projeto, o PHP e o arquivo SQL.
 
-1. Projeto Unity: `Assets`, `Packages` e `ProjectSettings`, usando a cena `Assets/Scenes/UmaTank.unity`.
-2. Middleware completo: pasta `Assets/Backend/gsd`. Na máquina de demonstração, copiar para o `htdocs/gsd` do XAMPP e configurar `model/DB.php`.
-3. Banco: `Assets/Backend/tank_gamers.sql`, com estrutura e dados de teste. Importar o `.sql`, nunca o `.meta`, em um banco vazio.
+## Testes
 
-A URL da Unity é configurada em `DataManager.URL_BASE`. As instruções completas de configuração e as tabelas estão no comentário inicial do script principal. O dump não cria automaticamente o usuário MySQL nem suas permissões.
+Conferimos a seleção, as habilidades, os tiros, a movimentação, a pausa e o retorno ao menu. Também testamos login válido e inválido, o salvamento de vitória, derrota e empate, o histórico e o ranking por tempo. Repetir o envio de uma mesma partida não deve criar outro registro.
 
-## Créditos e cuidados restantes
+Restauramos o SQL em um banco separado e verificamos os dados salvos pela Unity através do PHP. Esses testes não alteraram o banco usado pelo grupo. A conferência foi feita no projeto da Unity; não geramos uma nova build executável nessa revisão.
 
-Conforme informado pelo grupo, as falas, imagens das personagens e ícones de habilidades vieram de **Umamusume: Pretty Derby**, da **Cygames**. Todos os direitos dos materiais originais são atribuídos à Cygames; o grupo não reivindica autoria deles. Essa origem está registrada nos comentários e nos arquivos de créditos.
+## Créditos
 
-Isso não substitui as condições de uso dos titulares nem a identificação dos extratores/disponibilizadores dos modelos 3D. A música `sad_game_over.wav` é um material separado: a modificação/edição é creditada ao **João Pedro Ribeiro Vivas (JP)**, conforme informado pelo grupo. Esse crédito não atribui automaticamente a ele a composição original; a fonte/compositor de uma obra anterior e suas condições de uso, se aplicáveis, continuam a confirmar. Também permanecem as incertezas de uso já registradas para músicas recortadas de vídeos e outros áudios, além das fontes de modelos/animações/cenário/fonte onde ainda não fornecidas.
+As personagens, os modelos originais, as falas e as imagens são de **Umamusume: Pretty Derby**, da **Cygames**. Todos os direitos desses materiais pertencem à Cygames. Usamos modelos extraídos do jogo e disponibilizados por fãs no Sketchfab.
 
-Conforme esclarecido pelo grupo, os modelos 3D foram **extraídos do jogo original Umamusume: Pretty Derby**, da **Cygames**, e disponibilizados por fãs no **Sketchfab para uso de fãs**. Portanto, não são apresentados como modelagens originais feitas pelos disponibilizadores: os direitos dos modelos originais são atribuídos à Cygames. Os cinco links já fornecidos estão no comentário principal; as páginas e os extratores/disponibilizadores dos modelos posteriores ainda precisam ser informados. A disponibilidade para fãs é registrada como informação do grupo, sem afirmar que uma licença específica ou uma autorização irrestrita de uso tenha sido verificada.
+A música da tela de derrota é **[Sad game over](https://opengameart.org/content/sad-game-over)**, de **Emma_MA**, disponibilizada em **CC0**.
 
-## Validação técnica da integração
-
-- Os scripts de produção compilam, inclusive com validação dos comentários XML.
-- Passaram 3.031 verificações estáticas de integração: mapa/componentes preservados, valores das 25 habilidades mantidos, vozes escolhidas pelo JP, ícones válidos e GUIDs dos prefabs renomeados.
-- Passaram 103 verificações de referências, cobrindo 692 dependências da cena.
-- A regressão de lógica/combate/classes/resultados passou em 559 verificações.
-- A cena integrada passou em 4.835 verificações, incluindo verificações por objeto/osso — não são 4.835 partidas. Todas as 25 opções tiveram voz decodificada, arte válida e placeholder oculto na HUD. As sete aparências especiais mantiveram habilidades próprias; a música de derrota tocou uma vez e foi substituída pelo loop do menu ao retornar.
-- O SQL foi restaurado de fato em um MySQL temporário vazio e separado, recuperando os três jogadores, 15 partidas e três tokens do arquivo entregue. Dez verificações de restauração e 23 de API real passaram, cobrindo login válido/inválido, dois jogadores adicionais de teste, novas partidas, histórico, ranking, empates, validação de campos, token de outro jogador e análise web autenticada.
-- A Unity autenticou pela cópia real do middleware e gravou vitória, derrota e empate nesse MySQL temporário. Cinco verificações adicionais confirmaram diretamente os registros persistidos. O arquivo SQL entregue não recebeu essas partidas artificiais; elas existem apenas na instância de validação.
-
-Os testes não modificaram o banco original do grupo. A conexão configurada no XAMPP principal não estava acessível na conferência desta sessão; conferir Apache/MySQL e as credenciais locais antes da demonstração. As alterações de configuração e arquivos gerados pela Unity que já estavam locais não fazem parte da integração.
-
-Não houve exceções de gameplay nos cenários da cena integrada. O Editor ainda pode registrar o erro interno de indexação de `UnityEditor.Search` já observado anteriormente. Não foi gerada nem testada uma nova build executável nesta etapa.
-
-Uma nova build executável não é exigida pelo PDF da Atividade 2. Não usar as builds antigas como se contivessem esta integração; gerar e testar outra se o grupo decidir entregar um executável. O nome de um commit não altera o cumprimento dos requisitos da atividade.
+Os links das músicas, dos sons, dos modelos e dos demais assets estão no comentário principal e nos arquivos `Credits.txt` das pastas correspondentes. Algumas fontes de outros materiais ainda precisam ser completadas; as licenças já identificadas estão registradas nesses arquivos.

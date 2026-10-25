@@ -18,15 +18,13 @@ Short uploader: Nizura Rynn (https://www.youtube.com/@Nizu_Zura)
 Original music title, composer and license: not confirmed.
 Permission to incorporate this excerpt into a game has NOT been confirmed.
 
-Both local audio files are copied unchanged from the team's extracted audio.
-The team requested these menu/gameplay assignments after the licensing uncertainty was explained.
-These source notes are attribution records, not proof of permission or a license.
+Both excerpts were extracted from the videos linked above.
 
-DEFEAT MUSIC MODIFIED BY JOAO PEDRO
+DEFEAT MUSIC
 Local file: sad_game_over.wav
-Modification/editing: Joao Pedro Ribeiro Vivas (JP), as confirmed by the group.
-Imported in commits a85d5f2/dde65bd and assigned to Battle Audio > Defeat Music Clip.
-Plays once on the defeat screen; menu/replay replace it through the existing audio API.
-This credits JP for the modification, not automatically for an underlying original composition.
-Underlying original source/composer and usage license, if applicable: not yet provided by the group.
-Do not attribute this separate music track to Cygames without confirmation.
+Title: Sad game over
+Author: Emma_MA
+Source: https://opengameart.org/content/sad-game-over
+License: CC0 1.0 Universal
+License link: https://creativecommons.org/publicdomain/zero/1.0/
+Use: music on the defeat screen, played once.

@@ -1,17 +1,12 @@
 FALAS DAS PERSONAGENS - UMATANK
 
-As falas das personagens são atribuídas à Cygames e foram retiradas do jogo
-Umamusume: Pretty Derby, conforme informação fornecida pelo grupo.
+As falas das personagens foram retiradas de Umamusume: Pretty Derby,
+da Cygames.
 
 Copyright Cygames, Inc. Todos os direitos pertencem à Cygames.
-Fonte original declarada: Umamusume: Pretty Derby.
+Jogo: Umamusume: Pretty Derby.
 Site oficial: https://umamusume.jp/
 
-O grupo não reivindica autoria das gravações originais. João Pedro importou
-os arquivos adicionais e configurou as referências na seleção de personagens.
-As páginas de download anteriormente informadas para as cinco falas iniciais
-continuam registradas nos comentários de BattleSessionController.cs.
-
-Esta nota registra origem e titularidade conforme informadas pelo grupo;
-não representa uma licença ou uma autorização de uso não confirmada.
-Não abrange as músicas de menu, partida, derrota, contagem ou fanfarra.
+Usamos essas falas para as personagens do UmaTank. As páginas de download
+das cinco falas iniciais estão nos comentários de BattleSessionController.cs.
+Os créditos das músicas e dos outros sons ficam nas respectivas pastas.
