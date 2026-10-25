@@ -1,7 +1,7 @@
 Sounds by Michel Baradari (apollo-music.de).
 License: Creative Commons Attribution 3.0 Unported (CC BY 3.0)
 License link: https://creativecommons.org/licenses/by/3.0/
-Distribution site cited by the supplied info.txt: https://opengameart.org
+Source: https://opengameart.org/content/2-high-quality-explosions
 Original attribution is preserved in info.txt alongside the audio.
 
 Audio files extracted unchanged from the team's supplied explosions.7z:

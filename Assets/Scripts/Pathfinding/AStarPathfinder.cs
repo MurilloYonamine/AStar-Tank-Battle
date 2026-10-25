@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// A* implementation adapted from the group's AStar-Pathfinding-3D project.
+/// The original exercise was made for Agentes Inteligentes in the previous semester.
 /// It uses g, h and f costs, an open list, a closed set and parent references.
 /// Reference: AStar-Pathfinding-3D/Assets/Scripts/Pathfinding/AStar.cs,
 /// lines 30-106 (Run: open/closed lists, costs and predecessors), 108-117 (path reconstruction).

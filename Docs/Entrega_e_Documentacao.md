@@ -1,6 +1,8 @@
 # UmaTank - documentação do projeto
 
-Desenvolvemos o UmaTank a partir do jogo de tanques da atividade de Agentes Inteligentes. Conversamos em sala com o professor Eduardo sobre reaproveitar o projeto e seus modelos, e ele autorizou. Mantivemos a movimentação com A* e acrescentamos a escolha de personagens, as habilidades, o limite de tempo e o registro das partidas.
+Esta atividade é da disciplina de **Games em Sistemas Distribuídos**. Reaproveitamos o jogo de tanques que desenvolvemos em **Inteligência Artificial para Jogos**, com autorização do professor Eduardo, mantendo seus modelos e a movimentação com A*. O código original do pathfinding veio de uma atividade de **Agentes Inteligentes** do semestre anterior, cujo reaproveitamento também foi autorizado.
+
+Ao longo do desenvolvimento, acrescentamos a escolha de personagens, as habilidades, o limite de tempo e o registro das partidas.
 
 O objetivo é eliminar dez inimigas em até três minutos. Se o jogador alcançar a meta, vence; se perder toda a vida, perde; se o tempo acabar antes da meta, empata. O ranking considera o menor tempo de vitória de cada jogador.
 
@@ -38,4 +40,15 @@ As personagens, os modelos originais, as falas e as imagens são de **Umamusume:
 
 A música da tela de derrota é **[Sad game over](https://opengameart.org/content/sad-game-over)**, de **Emma_MA**, disponibilizada em **CC0**.
 
-Os links das músicas, dos sons, dos modelos e dos demais assets estão no comentário principal e nos arquivos `Credits.txt` das pastas correspondentes. Algumas fontes de outros materiais ainda precisam ser completadas; as licenças já identificadas estão registradas nesses arquivos.
+Outras fontes usadas no projeto:
+
+| Asset | Fonte | Onde foi usado |
+| --- | --- | --- |
+| Low poly tree, de kiprus | [Free3D](https://free3d.com/3d-model/low_poly_tree-816203.html) | Árvores do cenário. |
+| Stylized bush | [Sketchfab](https://sketchfab.com/3d-models/stylized-bush-9d9ce79d3ae040619e96d5b22c7de1a6) | Arbustos do cenário. |
+| Animações de dano, ataque, dança/vitória e morte | [Adobe Mixamo](https://www.mixamo.com/) | Animações das personagens. |
+| Ultimate UI SFX Pack, de JDSherbert | [itch.io](https://jdsherbert.itch.io/ultimate-ui-sfx-pack) | Sons do menu. |
+| 2 High Quality Explosions, de Michel Baradari | [OpenGameArt](https://opengameart.org/content/2-high-quality-explosions) | Sons dos tiros. |
+| Roboto Regular, de Christian Robertson / The Roboto Project Authors | [Repositório da fonte](https://github.com/googlefonts/roboto-3-classic) | Textos do menu. Licença SIL OFL 1.1 incluída em `Assets/Fonts/Roboto-OFL.txt`. |
+
+Os demais links estão no comentário principal e nos arquivos `Credits.txt` das pastas correspondentes. Ainda faltam os links individuais de alguns modelos adicionados depois e a identificação da música original do trecho chamado de “WAN WAN”.

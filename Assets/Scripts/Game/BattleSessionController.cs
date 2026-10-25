@@ -1,13 +1,16 @@
 /*
  * UMATANK - PROJECT DOCUMENTATION
+ * Course: Games em Sistemas Distribuídos.
  * Activity 2: Unity / PHP / MySQL. Main scene: Assets/Scenes/UmaTank.unity.
  * Group: Hugo Marcos Santos dos Reis; João Pedro Ribeiro Vivas;
  *        Murillo Gomes Yonamine.
  *
  * PROJECT ORIGIN
- * We discussed reusing our Intelligent Agents tank game with Professor Eduardo
- * in class, and he approved. We kept its character and tank models instead of
- * replacing them with primitives. We also reused the A* exercise with his approval.
+ * We developed the tank game for Inteligência Artificial para Jogos.
+ * With Professor Eduardo's approval in class, we reused it for this activity
+ * in Games em Sistemas Distribuídos, keeping its character and tank models.
+ * The original A* exercise came from Agentes Inteligentes in the previous
+ * semester and was also reused with the professor's approval.
  * AStarPathfinder.cs lists the original file and the lines we adapted.
  *
  * GAME IDEA AND CONTROLS
@@ -130,10 +133,19 @@
  * Silence Suzuka: https://sketchfab.com/3d-models/silence-suzuka-chibi-7bbcd93026544ab185da740c7bf11444
  * Meisho Doto: https://sketchfab.com/3d-models/doto-chibi-6bcf14470d404d749124a395badcbf62
  * Matikanetannhauser: https://sketchfab.com/3d-models/mambo-8802ef2239ea4ef196f4239bfb6d4280
- * Some sources for the other models, animations, scenery and font still need
+ * Some individual download pages for the other character models still need
  * to be added. Known audio sources and licenses are in the Credits.txt files
  * under Assets/Audio.
  * Character image credits are in Assets/Skills/Credits.txt.
+ * Tree: "Low poly tree", by kiprus (Free3D):
+ * https://free3d.com/3d-model/low_poly_tree-816203.html
+ * Bush: "Stylized bush" (Sketchfab):
+ * https://sketchfab.com/3d-models/stylized-bush-9d9ce79d3ae040619e96d5b22c7de1a6
+ * Hit, attack, celebration/dance and death animations: Adobe Mixamo:
+ * https://www.mixamo.com/
+ * Roboto Regular: Christian Robertson / The Roboto Project Authors, SIL OFL 1.1:
+ * https://github.com/googlefonts/roboto-3-classic
+ * The font license is included in Assets/Fonts/Roboto-OFL.txt.
  * Kenney UI Pack stars (CC0): https://kenney.nl/assets/ui-pack
  * Fantasy Skybox FREE / Render Knight:
  * https://assetstore.unity.com/packages/package/18353
@@ -142,6 +154,9 @@
  * Combat effects: Gabriel Aguiar Productions Free Quick Effects Vol. 1.
  * Suzuka wind effect: Vefects/Wind VFX URP. Local package documentation is retained.
  * Shot sounds: Michel Baradari / apollo-music.de, CC BY 3.0 (original info.txt retained).
+ * https://opengameart.org/content/2-high-quality-explosions
+ * Menu sounds: Ultimate UI SFX Pack, by JDSherbert:
+ * https://jdsherbert.itch.io/ultimate-ui-sfx-pack
  * Death sound: hosch, CC BY-SA 4.0, https://hosch.itch.io
  * Result music: "Victory!", composed by Jon K. Fite, CC BY 3.0:
  * https://opengameart.org/content/victory-2
