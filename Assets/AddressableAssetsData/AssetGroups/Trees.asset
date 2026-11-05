@@ -10,14 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Umas
+  m_Name: Trees
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
-  m_GroupName: Umas
-  m_GUID: 89bb2f2422dd589449dfc98eddb90c66
-  m_SerializeEntries: []
+  m_GroupName: Trees
+  m_GUID: 6cd220dcd7865204fbee53ec9ee3503a
+  m_SerializeEntries:
+  - m_GUID: 9b6a82cbb36bb7847bfa8fe1f3704af9
+    m_Address: Assets/Prefabs/Environment/Tree.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 2699833deda68714883c5f60bbd1923b, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: fbe620da982faa044b58ef3c68aaeb21, type: 2}
-    - {fileID: 11400000, guid: 8e45adf883736e544b978a18acb5eeaf, type: 2}
+    - {fileID: 11400000, guid: 01e525ac72121ea4d88ef1885a0a2c51, type: 2}
+    - {fileID: 11400000, guid: 40fcff4543f96c5458e03cc9f9e2145d, type: 2}

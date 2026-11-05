@@ -1,0 +1,138 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Characters_Voices
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Characters_Voices
+  m_GUID: 3bc01e8e5ecb803449028581f1d02cdb
+  m_SerializeEntries:
+  - m_GUID: 0244aaebe08242341a4f634b6d2df74a
+    m_Address: Assets/Audio/Voices/Vodkavoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 067c7dd3045cb0a4f9a5978f2bccd68e
+    m_Address: Assets/Audio/Voices/TM Opera Ovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 134fe182141512048962a99dd0c0acbf
+    m_Address: Assets/Audio/Voices/Special Weekvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 17e957a5a3ffcf04d85b7be0e1fbef72
+    m_Address: Assets/Audio/Voices/Daiwa Scarletvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1b7d639cec13eb24c9f1777ee84be06e
+    m_Address: Assets/Audio/Voices/Oguri Capvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 25820166241bd96479be5adf2e9e5f5b
+    m_Address: Assets/Audio/Voices/Tokai Teiovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ccd0f9bab8bb3f4fb5ed1b26e7cefd9
+    m_Address: Assets/Audio/Voices/Heliosvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65238ec9f322411292bf01f8946f73b1
+    m_Address: Assets/Audio/Voices/DotoVoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65238ec9f322411292bf01f8946f73b2
+    m_Address: Assets/Audio/Voices/CreekVoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65238ec9f322411292bf01f8946f73b3
+    m_Address: Assets/Audio/Voices/FenomenoVoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65238ec9f322411292bf01f8946f73b4
+    m_Address: Assets/Audio/Voices/MatikanetannhauserVoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65238ec9f322411292bf01f8946f73b5
+    m_Address: Assets/Audio/Voices/SuzukaVoice.wav
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b917b2e2d94793489e3feed0c7d39c1
+    m_Address: Assets/Audio/Voices/SakuraChiyono Ovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 900e71d5b683f7749b2f4691d0f6258c
+    m_Address: Assets/Audio/Voices/Cafevoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90318a3b415130040b2ee6c3c17b133c
+    m_Address: Assets/Audio/Voices/Sweep Toshovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a2210b5acd05d934eabfcedf602e63e0
+    m_Address: Assets/Audio/Voices/Bourbonvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be9b3f00e0b4d70498b778db954ab15c
+    m_Address: Assets/Audio/Voices/Tamamo Crossvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ca75da6fcf180fa4eb0882024d06f173
+    m_Address: Assets/Audio/Voices/Super Creekvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d3efad7de8871ca49b56bb176f359b03
+    m_Address: Assets/Audio/Voices/Mayanovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e026cde66c7faa94aa0b02d4d9c3af3f
+    m_Address: Assets/Audio/Voices/Goldshipvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e7e4e81ce52a65b45a0dc2f7bf5816b3
+    m_Address: Assets/Audio/Voices/Akebonovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f58112fc0b8050b4386392b3d71483fc
+    m_Address: Assets/Audio/Voices/Agnesvoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9ed1ed29c5e220458cf103c7fea44cb
+    m_Address: Assets/Audio/Voices/Yaenovoice.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 2699833deda68714883c5f60bbd1923b, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2caaa6a4fa0caf4439fb71941997befe, type: 2}
+    - {fileID: 11400000, guid: 9faf6e75ec7d9f54aaaacfce69e6fa7f, type: 2}
