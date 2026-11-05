@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
@@ -26,6 +27,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         public CharacterClassDefinition ClassDefinition;
         [Tooltip("Spoken cue played when this character is shown in selection, not during combat or results.")]
         public AudioClip VoiceClip;
+        public AssetReferenceGameObject ModelRef;
+        public AssetReferenceT<AudioClip> VoiceRef;
     }
 
     [SerializeField] private UIDocument document;
