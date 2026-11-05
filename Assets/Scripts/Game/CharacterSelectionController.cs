@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets; // [NOVO] Traz os tipos AssetReferenceGameObject e AssetReferenceT<T> usados nos campos novos.
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
@@ -23,12 +23,14 @@ public sealed class CharacterSelectionController : MonoBehaviour
         public string CharacterId;
         public string AppearanceName;
         public GameObject ModelPrefab;
+        [Tooltip("Referência Addressable do modelo 3D. Preenchida pela ferramenta UmaTank/Addressables/1; substituirá ModelPrefab.")] // [NOVO] Dica exibida no Inspector.
+        public AssetReferenceGameObject ModelRef; // [NOVO] Referência por GUID ao prefab; não carrega o asset na memória até ser pedido por código.
         [Tooltip("Independent class design asset. Does not belong inside the visual prefab.")]
         public CharacterClassDefinition ClassDefinition;
         [Tooltip("Spoken cue played when this character is shown in selection, not during combat or results.")]
         public AudioClip VoiceClip;
-        public AssetReferenceGameObject ModelRef;
-        public AssetReferenceT<AudioClip> VoiceRef;
+        [Tooltip("Referência Addressable da voz. Preenchida pela ferramenta UmaTank/Addressables/1; substituirá VoiceClip.")] // [NOVO] Dica exibida no Inspector.
+        public AssetReferenceT<AudioClip> VoiceRef; // [NOVO] Referência por GUID ao clipe de áudio; carregada sob demanda por código.
     }
 
     [SerializeField] private UIDocument document;
