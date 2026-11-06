@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Triggers
+  m_Name: Vegetacao
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
-  m_GroupName: Triggers
+  m_GroupName: Vegetacao
   m_GUID: ee497e1f4552d664986cee179c339c76
   m_SerializeEntries:
   - m_GUID: 2df990670ee4aea43894211deaaa09c1
-    m_Address: Assets/Prefabs/AddressableOBJ1.prefab
+    m_Address: Assets/Prefabs/Vegetacao_01.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d9eac2117c3eb62418d230f83d21b249
-    m_Address: Assets/Prefabs/AddressableOBJ2.prefab
+    m_Address: Assets/Prefabs/Vegetacao_02.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
