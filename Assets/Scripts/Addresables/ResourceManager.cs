@@ -107,4 +107,15 @@ public class ResourceManager : MonoBehaviour{
         Gizmos.DrawWireCube(box.center, box.size); // desenha a borda do volume
         Gizmos.matrix = Matrix4x4.identity; // restaura a matriz padrão
     } // fecha DesenharZona
+    void Awake() // roda quando o objeto é criado ao dar Play
+    { // abre o método
+        if (logar) Debug.Log($"[{name}] ResourceManager ativo, Logar ligado.", this); // confirma que a caixa Logar chegou ligada ao jogo
+    } // fecha o Awake
+
+    [ContextMenu("Testar log")] // cria um item no menu "..." do componente no Inspector
+    void TestarLog() // método chamado pelo item do menu
+    { // abre o método
+        Debug.Log($"[{name}] teste de log OK (logar = {logar})", this); // imprime sempre, mesmo com Logar desligado
+    } // fecha o TestarLog
+
 } // fecha a classe
