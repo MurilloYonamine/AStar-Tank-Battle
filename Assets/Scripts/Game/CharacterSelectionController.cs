@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets; // [NOVO] Traz os tipos AssetReferenceGameObject e AssetReferenceT<T> usados nos campos novos.
+using UnityEngine.ResourceManagement.AsyncOperations; // [NOVO] Necessário para lidar com operações assíncronas de carregamento de assets Addressable.
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
+using System.Collections;
 
 /// <summary>
 /// Shows character families, skins and class availability in an isolated rotating 3D preview.
@@ -68,6 +70,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
     private CameraClearFlags previewClearFlags;
     private int selectedIndex;
     private bool showingResult;
+    private int previewVersion; // número de versão: respostas atrasadas com versão antiga são descartadas
 
     public bool IsOpen { get; private set; }
     public int CharacterCount => characters == null ? 0 : characters.Length;
@@ -80,7 +83,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
     {
         CharacterOption option = characters[index];
         return !string.IsNullOrEmpty(option.CharacterId) ? option.CharacterId :
-            option.ModelPrefab != null ? option.ModelPrefab.GetInstanceID().ToString() : index.ToString();
+            option.ModelRef != null && option.ModelRef.RuntimeKeyIsValid() ? option.ModelRef.AssetGUID : index.ToString();
     }
 
     /// <summary>Distinct character families, not just distinct skins; never the player's family.</summary>
@@ -90,7 +93,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
         List<int> candidates = new();
         string playerIdentity = GetCharacterIdentity(playerIndex);
         for (int i = 0; i < CharacterCount; i++)
-            if (characters[i].ModelPrefab != null &&
+            if (characters[i].ModelRef != null && characters[i].ModelRef.RuntimeKeyIsValid() &&
                 !string.Equals(GetCharacterIdentity(i), playerIdentity, StringComparison.OrdinalIgnoreCase))
                 candidates.Add(i);
         for (int i = candidates.Count - 1; i > 0; i--)
@@ -132,7 +135,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         screen.style.display = DisplayStyle.Flex;
         previewCamera.enabled = true;
         ShowCharacter(selectedIndex);
-        BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceClip);
+        //BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceClip);
+        BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceRef); // [ALTERADO] carrega a voz sob demanda pelo Addressables
         confirmButton.Focus();
     }
 
@@ -146,7 +150,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         if (screen != null) screen.style.display = DisplayStyle.None;
         if (document != null) document.rootVisualElement.pickingMode = PickingMode.Ignore;
         if (previewCamera != null) previewCamera.enabled = false;
-        if (previewModel != null) previewModel.SetActive(false);
+        previewVersion++;   // [NOVO] invalida qualquer carregamento de preview ainda pendente
+        ReleasePreview();   // [NOVO] libera o modelo do preview (ReleaseInstance) ao fechar a seleção, antes de carregar os 5 da batalha
     }
 
     /// <summary>
@@ -159,8 +164,8 @@ public sealed class CharacterSelectionController : MonoBehaviour
         EnsureUI();
         Close();
         // A separate, collision-free preview reacts. The battle actor is never revived.
-        ShowCharacter(Mathf.Clamp(index, 0, CharacterCount - 1), true);
-        previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.PlayResult(outcome);
+        ShowCharacter(Mathf.Clamp(index, 0, CharacterCount - 1), true, outcome); // [ALTERADO] o PlayResult passa a ser feito dentro do LoadPreview
+        //previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.PlayResult(outcome);
         showingResult = true;
         resultImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(previewTexture));
         previewCamera.enabled = true;
@@ -172,7 +177,9 @@ public sealed class CharacterSelectionController : MonoBehaviour
         selectedIndex = (selectedIndex + direction % CharacterCount + CharacterCount) % CharacterCount;
         ShowCharacter(selectedIndex);
         BattleAudioController.PlaySelectionChange();
-        BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceClip);
+        //BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceClip);
+        BattleAudioController.PlayCharacterVoice(characters[selectedIndex].VoiceRef); // [ALTERADO] carrega a voz sob demanda pelo Addressables
+
     }
 
     public void ConfirmSelection()
@@ -270,17 +277,54 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
     private void PreviousCharacter() => StepSelection(-1);
     private void NextCharacter() => StepSelection(1);
+    private void ShowCharacter(int index, bool characterOnly = false, string outcome = null) { // [NOVO] 3º parâmetro: resultado (vitoria/derrota/empate) ou null na seleção normal
+        previewVersion++;                         // nova requisição: invalida qualquer carregamento anterior ainda pendente
+        int version = previewVersion;             // guarda a versão desta requisição para comparar depois
+        ReleasePreview();                         // libera a instância anterior pelo Addressables
 
-    private void ShowCharacter(int index, bool characterOnly = false)
-    {
-        if (previewModel != null)
+        CharacterOption option = characters[index]; // personagem escolhido
+
+        // Textos não dependem do modelo, então aparecem imediatamente.
+        nameLabel.text = option.DisplayName.ToUpperInvariant() +
+            (string.IsNullOrEmpty(option.AppearanceName) ? "" : " — " + option.AppearanceName.ToUpperInvariant());
+        indexLabel.text = $"{index + 1} / {CharacterCount}";
+        UpdateClassDetails(option.ClassDefinition);
+
+        // Protege contra referência vazia (migração não rodou para este item).
+        if (option.ModelRef == null || !option.ModelRef.RuntimeKeyIsValid()) {
+            Debug.LogError($"[Addressables] ModelRef vazio no personagem {index} ({option.DisplayName}).");
+            return;
+        }
+        StartCoroutine(LoadPreview(option, characterOnly, version, outcome)); // [NOVO] repassa o resultado para ser aplicado quando o modelo existir
+    }
+
+    // Libera o modelo do preview: ReleaseInstance para Addressables, Destroy só como plano B.
+    private void ReleasePreview() {
+        if (previewModel == null) return;                          // nada para liberar
+        previewModel.SetActive(false);                             // some da tela imediatamente
+        if (!Addressables.ReleaseInstance(previewModel))           // retorna false se não veio do Addressables
+            Destroy(previewModel);                                 // plano B para objetos comuns
+        previewModel = null;                                       // evita usar referência velha
+    }
+
+    private IEnumerator LoadPreview(CharacterOption option, bool characterOnly, int version, string outcome) { // [NOVO] recebe o resultado
+        AsyncOperationHandle<GameObject> handle = option.ModelRef.InstantiateAsync(previewRoot); // cria como filho do previewRoot
+        yield return handle;                                       // espera terminar sem travar o frame
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)       // falha: loga e não trava o fluxo
         {
-            previewModel.SetActive(false);
-            Destroy(previewModel);
+            Debug.LogError($"[Addressables] Falha ao carregar {option.DisplayName}: {handle.OperationException}");
+            yield break;
         }
 
-        CharacterOption option = characters[index];
-        previewModel = Instantiate(option.ModelPrefab, previewRoot);
+        GameObject instance = handle.Result;                       // instância criada
+        if (version != previewVersion)                             // usuário já trocou de personagem
+        {
+            Addressables.ReleaseInstance(instance);                // descarta a resposta atrasada
+            yield break;
+        }
+
+        previewModel = instance;                                   // agora o preview atual é este
         previewModel.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         previewModel.transform.localScale = Vector3.one;
         TankCharacterAnimation previewAnimation = previewModel.GetComponentInChildren<TankCharacterAnimation>(true);
@@ -290,28 +334,19 @@ public sealed class CharacterSelectionController : MonoBehaviour
         foreach (Transform child in previewModel.GetComponentsInChildren<Transform>(true))
             child.gameObject.layer = layer;
 
-        // Preview models must not participate in navigation, collisions or damage.
         foreach (Collider collider in previewModel.GetComponentsInChildren<Collider>(true))
             collider.enabled = false;
 
-        if (characterOnly)
-        {
+        if (characterOnly) {
             Transform characterRoot = TankAppearance.FindCharacterRoot(previewModel.transform);
             if (characterRoot != null)
-            {
-                // Hide the tank only in this disposable preview; keep the original prefab and battle actor intact.
                 foreach (Renderer renderer in previewModel.GetComponentsInChildren<Renderer>(true))
                     if (!renderer.transform.IsChildOf(characterRoot)) renderer.enabled = false;
-            }
         }
-
-        FramePreview(characterOnly, false);
-        nameLabel.text = option.DisplayName.ToUpperInvariant() +
-            (string.IsNullOrEmpty(option.AppearanceName) ? "" : " — " + option.AppearanceName.ToUpperInvariant());
-        indexLabel.text = $"{index + 1} / {CharacterCount}";
-        UpdateClassDetails(option.ClassDefinition);
+        FramePreview(characterOnly, false);                                              // enquadra a câmera (já existe)
+        if (!string.IsNullOrEmpty(outcome))                                              // [NOVO] só na tela de resultado
+            previewModel.GetComponentInChildren<TankCharacterAnimation>(true)?.PlayResult(outcome); // [NOVO] dança/morte/idle agora que o modelo existe
     }
-
     private void LateUpdate()
     {
         if (showingResult && previewModel != null && previewCamera.enabled) FramePreview(true, true);
@@ -399,6 +434,7 @@ public sealed class CharacterSelectionController : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleasePreview(); // [NOVO] garante que o preview não vaze ao destruir o objeto.
         if (IsOpen) BattleAudioController.StopCharacterVoice();
         if (previousButton != null) previousButton.clicked -= PreviousCharacter;
         if (nextButton != null) nextButton.clicked -= NextCharacter;

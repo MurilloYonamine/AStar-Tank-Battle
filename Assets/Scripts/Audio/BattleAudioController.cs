@@ -1,4 +1,7 @@
 using UnityEngine;
+using System.Collections;                              // [NOVO] IEnumerator para a coroutine de voz
+using UnityEngine.AddressableAssets;                   // [NOVO] AssetReferenceT e Addressables
+using UnityEngine.ResourceManagement.AsyncOperations;  // [NOVO] AsyncOperationHandle
 
 /// <summary>
 /// Applies the existing audio API after scene initialization, when the mixer is ready.
@@ -33,6 +36,9 @@ public sealed class BattleAudioController : MonoBehaviour
     [SerializeField, Min(0f)] private float eliminationVoiceCooldown = 5f;
 
     private float nextEliminationVoiceTime;
+    private AsyncOperationHandle<AudioClip> voiceHandle; // [NOVO] handle da voz carregada no momento (um só por vez)
+    private int voiceVersion;                            // [NOVO] versão: pedidos antigos que chegam atrasados são descartados
+    private bool voiceLoading;                           // [NOVO] true enquanto uma voz está sendo carregada
 
     [Header("Combat effects")]
     [SerializeField] private AudioClip playerShotClip;
@@ -133,12 +139,65 @@ public sealed class BattleAudioController : MonoBehaviour
         return true;
     }
 
+    /// <summary>Carrega a voz sob demanda, toca e libera a anterior (padrão IsValid + Release da aula).</summary>
+    public static void PlayCharacterVoice(AssetReferenceT<AudioClip> voiceRef) {
+        StopCharacterVoice();                                                    // para a voz atual e libera o clipe anterior
+        if (instance == null || instance.characterVoiceSource == null ||
+            voiceRef == null || !voiceRef.RuntimeKeyIsValid()) return;           // sem fonte ou sem referência válida: nada a fazer
+        instance.StartCoroutine(instance.LoadAndPlayVoice(voiceRef, instance.voiceVersion)); // inicia o carregamento assíncrono
+    }
+
+    /// <summary>Mesma regra de chance/cooldown de antes, mas com a voz vinda do Addressables.</summary>
+    public static bool TryPlayEliminationVoice(AssetReferenceT<AudioClip> voiceRef) {
+        if (instance == null || instance.characterVoiceSource == null || voiceRef == null ||
+            !voiceRef.RuntimeKeyIsValid() || instance.voiceLoading ||            // não empilha com um carregamento em andamento
+            instance.characterVoiceSource.isPlaying || Time.unscaledTime < instance.nextEliminationVoiceTime ||
+            instance.eliminationVoiceChance <= 0f ||
+            (instance.eliminationVoiceChance < 1f && Random.value >= instance.eliminationVoiceChance)) return false;
+
+        PlayCharacterVoice(voiceRef);                                            // carrega e toca
+        instance.nextEliminationVoiceTime = Time.unscaledTime + instance.eliminationVoiceCooldown; // reinicia o cooldown
+        return true;
+    }
+
+    private IEnumerator LoadAndPlayVoice(AssetReferenceT<AudioClip> voiceRef, int version) {
+        voiceLoading = true;                                                     // marca carregamento em andamento
+        voiceHandle = Addressables.LoadAssetAsync<AudioClip>(voiceRef.RuntimeKey); // pede o clipe pelo Addressables (RuntimeKey evita o estado interno do AssetReference)
+        AsyncOperationHandle<AudioClip> handle = voiceHandle;                    // cópia local para comparar depois
+        yield return handle;                                                     // espera sem travar o jogo
+
+        if (version != voiceVersion)                                             // outro pedido ou Stop aconteceu enquanto carregava
+        {
+            if (handle.IsValid()) Addressables.Release(handle);                  // descarta o clipe atrasado
+            yield break;                                                         // sai sem tocar
+        }
+
+        voiceLoading = false;                                                    // este pedido terminou
+        if (handle.Status != AsyncOperationStatus.Succeeded)                     // falha: avisa e não trava o fluxo
+        {
+            Debug.LogError($"[Addressables] Falha ao carregar a voz: {handle.OperationException}");
+            if (handle.IsValid()) Addressables.Release(handle);                  // libera o handle com erro
+            yield break;
+        }
+
+        AudioSource source = characterVoiceSource;                               // fonte dedicada de voz
+        source.clip = handle.Result;                                             // usa o clipe carregado
+        source.loop = false;                                                     // voz não repete
+        source.volume = characterVoiceVolume;                                    // volume configurado
+        source.Play();                                                           // toca
+    }
+
     /// <summary>Stops dialogue before countdown, cancellation, player death or a result preview.</summary>
-    public static void StopCharacterVoice()
-    {
-        if (instance == null || instance.characterVoiceSource == null) return;
-        instance.characterVoiceSource.Stop();
-        instance.characterVoiceSource.clip = null;
+    public static void StopCharacterVoice() {
+        if (instance == null) return;                                // sem instância, nada a parar
+        instance.voiceVersion++;                                     // [NOVO] cancela carregamentos pendentes
+        instance.voiceLoading = false;                               // [NOVO] nada carregando
+        if (instance.characterVoiceSource != null)                   // existe fonte de voz
+        {
+            instance.characterVoiceSource.Stop();                    // para o áudio
+            instance.characterVoiceSource.clip = null;               // solta o clipe ANTES de liberar o handle
+        }
+        if (instance.voiceHandle.IsValid()) Addressables.Release(instance.voiceHandle); // [NOVO] libera o clipe da voz anterior
     }
 
     /// <summary>Plays the cue on the same frame as its countdown label, using the first cue as a fallback.</summary>

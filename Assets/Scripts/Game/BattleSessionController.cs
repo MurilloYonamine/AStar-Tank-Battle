@@ -423,6 +423,7 @@ public sealed class BattleSessionController : MonoBehaviour
             ClearBattlePause();
             StopRoundIntro();
             StopRoundResult();
+            ReleaseBattleCharacters();
             roundActive = false;
             enemySpawner?.StopSpawning(true);
             // AuthMenu may reuse a cached account. Keep it untouched and give this round
@@ -598,6 +599,7 @@ public sealed class BattleSessionController : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseBattleCharacters();
         resultRanking?.Dispose();
         pauseAudioSettings?.Dispose();
         if (ultimateWindInstance != null) Destroy(ultimateWindInstance);
@@ -641,6 +643,7 @@ public sealed class BattleSessionController : MonoBehaviour
         enemySpawner?.StopSpawning();
         StopRoundIntro();
         StopRoundResult();
+        ReleaseBattleCharacters();
     }
 
     private static TankSpawn CaptureSpawn(TankHealth health)
@@ -665,31 +668,40 @@ public sealed class BattleSessionController : MonoBehaviour
         }
 
         characterSelection.Close();
-        ApplySelectedCharacters(selectedIndex);
+        IsStartingRound = true;                                          // bloqueia clique duplo
+        roundIntro = StartCoroutine(ApplyThenBeginRound(selectedIndex)); // carrega e só então começa
         BeginRound();
     }
 
-    private void ApplySelectedCharacters(int selectedIndex)
-    {
-        // Keep stable gameplay actors: only their cosmetic model and weapon transforms change.
-        // This preserves Murilo's public score API and the existing HP/death event subscriptions.
-        CharacterSelectionController.CharacterOption selected = characterSelection.GetCharacter(selectedIndex);
-        playerAppearance.ApplyCharacter(selected.ModelPrefab, selected.DisplayName, selected.ClassDefinition);
+    private IEnumerator ApplySelectedCharactersAsync(int selectedIndex) {
+        CharacterSelectionController.CharacterOption selected = characterSelection.GetCharacter(selectedIndex); // jogador
+        List<int> candidates = characterSelection.CreateEnemyRoster(selectedIndex, enemyAppearances.Length);    // elenco inimigo
+        int pending = 0;                                    // quantos modelos ainda estão carregando
+        bool failed = false;                                // algum falhou?
+        void Done(bool ok) { pending--; if (!ok) failed = true; } // callback comum aos 5 carregamentos
 
-        List<int> candidates = characterSelection.CreateEnemyRoster(selectedIndex, enemyAppearances.Length);
-        if (candidates.Count < enemyAppearances.Length)
-        {
+        pending++;                                          // conta o jogador
+        playerAppearance.ApplyCharacterAsync(selected.ModelRef, selected.DisplayName, selected.ClassDefinition, Done); // dispara o jogador
+
+        if (candidates.Count < enemyAppearances.Length)     // mesma validação de antes
             Debug.LogError("Character selection needs four distinct enemy character families.", this);
-            return;
-        }
+        else
+            for (int i = 0; i < enemyAppearances.Length; i++) {
+                if (enemyAppearances[i] == null) continue;  // slot vazio
+                CharacterSelectionController.CharacterOption option = characterSelection.GetCharacter(candidates[i]);
+                pending++;                                  // conta o inimigo
+                enemyAppearances[i].ApplyCharacterAsync(option.ModelRef, option.DisplayName, option.ClassDefinition, Done); // dispara o inimigo
+            }
 
-        for (int enemyIndex = 0; enemyIndex < enemyAppearances.Length; enemyIndex++)
-        {
-            if (enemyAppearances[enemyIndex] == null) continue;
-            CharacterSelectionController.CharacterOption option =
-                characterSelection.GetCharacter(candidates[enemyIndex]);
-            enemyAppearances[enemyIndex].ApplyCharacter(option.ModelPrefab, option.DisplayName, option.ClassDefinition);
-        }
+        float deadline = Time.unscaledTime + 20f;           // limite de segurança para nunca travar a partida
+        while (pending > 0 && Time.unscaledTime < deadline) yield return null; // espera os 5 (funciona com timeScale 0)
+        if (failed || pending > 0) Debug.LogError("[Addressables] Nem todos os personagens carregaram.", this); // relata falhas
+    }
+    private IEnumerator ApplyThenBeginRound(int selectedIndex) {
+        yield return ApplySelectedCharactersAsync(selectedIndex); // espera os 5 modelos
+        roundIntro = null;                                        // coroutine concluída
+        IsStartingRound = false;                                  // libera o início
+        BeginRound();                                             // começa a rodada
     }
 
     private IEnumerator PlayRoundIntro(int selectedIndex)
@@ -705,7 +717,7 @@ public sealed class BattleSessionController : MonoBehaviour
         yield return FadeMatch(0f, 1f);
 
         characterSelection.Close();
-        ApplySelectedCharacters(selectedIndex);
+        yield return ApplySelectedCharactersAsync(selectedIndex); // [ALTERADO] carrega os 5 modelos atrás do fade e só continua quando terminarem
         PrepareRound();
         // Cinemachine can finish the overview -> player blend while the screen is black.
         yield return new WaitForSecondsRealtime(cameraSettleTime);
@@ -893,7 +905,7 @@ public sealed class BattleSessionController : MonoBehaviour
         }
         if (!playerHealth.IsDead && characterSelection != null &&
             selectedCharacterIndex >= 0 && selectedCharacterIndex < characterSelection.CharacterCount)
-            BattleAudioController.TryPlayEliminationVoice(characterSelection.GetCharacter(selectedCharacterIndex).VoiceClip);
+            BattleAudioController.TryPlayEliminationVoice(characterSelection.GetCharacter(selectedCharacterIndex).VoiceRef);
     }
 
     private void OnPlayerDied(TankHealth health, GameObject source)
@@ -1022,6 +1034,7 @@ public sealed class BattleSessionController : MonoBehaviour
         enemySpawner?.StopSpawning(true);
         StopRoundIntro();
         StopRoundResult();
+        ReleaseBattleCharacters();
         if (GameManager.Instance != null) GameManager.Instance.enabled = false;
         if (PauseManager.Instance != null) PauseManager.Instance.SetPause(true);
         if (battleCamera != null) battleCamera.ShowMenu();
@@ -1036,6 +1049,7 @@ public sealed class BattleSessionController : MonoBehaviour
         if (roundActive || IsStartingRound || saveInProgress || observedPlayerData == null) return;
         BattleAudioController.PlayButtonClick();
         StopRoundResult();
+        ReleaseBattleCharacters();
         defeatScreen.style.display = DisplayStyle.None;
         battleOverlay.style.display = DisplayStyle.None;
         PlayerData player = observedPlayerData;
@@ -1231,5 +1245,12 @@ public sealed class BattleSessionController : MonoBehaviour
             explosion.gameObject.SetActive(false);
             Destroy(explosion.gameObject);
         }
+    }
+    private void ReleaseBattleCharacters() {
+        if (playerAppearance != null) playerAppearance.ReleaseCharacter(); // libera o modelo do jogador
+        if (enemyAppearances != null)
+            foreach (TankAppearance appearance in enemyAppearances)
+                if (appearance != null) appearance.ReleaseCharacter();     // libera os modelos dos inimigos
+        BattleAudioController.StopCharacterVoice();                        // para e libera a voz
     }
 }
